@@ -43,6 +43,12 @@ jobs:
         run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> $GITHUB_ENV
       - run: npm install
       - run: npx tauri icon app-icon.png
+      - name: Compile check (reports errors as annotations)
+        shell: bash
+        run: |
+          report() { { grep -B2 -A14 -E "^(error|.*error TS|CMake Error)" "$1" || tail -80 "$1"; } | head -160 | awk '{printf "%s%%0A", $0}' | sed "s/^/::error title=$2::/"; echo; exit 1; }
+          npm run build > web.log 2>&1 || report web.log Frontend
+          cd src-tauri && cargo build --release > ../rust.log 2>&1 || report ../rust.log Rust
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
