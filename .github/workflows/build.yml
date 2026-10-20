@@ -49,12 +49,22 @@ jobs:
           report() { { grep -B2 -A14 -E "^(error|.*error TS|CMake Error)" "$1" || tail -80 "$1"; } | head -160 | awk '{printf "%s%%0A", $0}' | sed "s/^/::error title=$2::/"; echo; exit 1; }
           npm run build > web.log 2>&1 || report web.log Frontend
           cd src-tauri && cargo build --release > ../rust.log 2>&1 || report ../rust.log Rust
-      - uses: tauri-apps/tauri-action@v0
+      - name: Bundle installers
+        shell: bash
+        run: |
+          npx tauri build > tauri.log 2>&1 || { tail -70 tauri.log | awk '{printf "%s%%0A", $0}' | sed 's/^/::error title=Bundle::/'; echo; exit 1; }
+          tail -15 tauri.log
+      - name: Publish to release
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: app-v__VERSION__
-          releaseName: "AI Town Planner v__VERSION__"
-          releaseBody: "Desktop installers. Windows: .msi or -setup.exe. Mac: .dmg. Then import the latest data pack and download an AI model in Settings."
-          releaseDraft: false
-          prerelease: true
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          TAG="app-v$V"
+          gh release create "$TAG" --title "AI Town Planner v$V" --prerelease \
+            --notes "Desktop installers. Windows: .msi or -setup.exe. Mac: .dmg. Linux: .AppImage or .deb. Then in Settings import the latest data pack and download an AI model." 2>/dev/null || true
+          shopt -s nullglob
+          B=src-tauri/target/release/bundle
+          FILES=($B/msi/*.msi $B/nsis/*.exe $B/dmg/*.dmg $B/appimage/*.AppImage $B/deb/*.deb)
+          printf '%s\n' "${FILES[@]}"
+          gh release upload "$TAG" "${FILES[@]}" --clobber
