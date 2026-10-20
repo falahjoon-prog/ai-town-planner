@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Town Planner</title>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand"><span class="mark">◩</span> AI Town Planner <small>Brisbane</small></div>
+      <div class="pack" id="packInfo">No data pack</div>
+      <button class="ghost" id="settingsBtn">Settings</button>
+    </header>
+    <div class="layout">
+      <aside class="side">
+        <input id="q" type="search" placeholder="Address or lot/plan, e.g. 12 Smith Street Paddington" autocomplete="off" />
+        <ul id="results" class="results"></ul>
+        <p class="hint" id="hint">Search runs fully offline against the installed data pack.</p>
+      </aside>
+      <main class="main" id="main">
+        <section class="empty" id="empty">
+          <h1>Desktop planning assessment, offline</h1>
+          <p>Search for a Brisbane address or lot on plan to see its zoning and overlays, then generate an AI planner's report.</p>
+        </section>
+        <section id="site" hidden>
+          <div class="site-head">
+            <div>
+              <h2 id="siteAddr"></h2>
+              <div class="meta" id="siteMeta"></div>
+            </div>
+          </div>
+          <div class="grid">
+            <div id="map" class="map"></div>
+            <div class="facts">
+              <h3>Zoning</h3>
+              <div id="zones"></div>
+              <h3>Constraints</h3>
+              <div id="flags"></div>
+              <details>
+                <summary id="ovSummary">All mapped overlays</summary>
+                <ul id="overlays" class="ovlist"></ul>
+              </details>
+            </div>
+          </div>
+          <div class="report-box">
+            <div class="report-bar">
+              <input id="question" placeholder="Optional: describe the proposal, e.g. 'dual occupancy' or '6-unit townhouse development'" />
+              <button id="genBtn">Generate planner report</button>
+              <button class="ghost" id="stopBtn" hidden>Stop</button>
+              <button class="ghost" id="saveBtn" hidden>Save report</button>
+            </div>
+            <article id="report" class="report"></article>
+            <p class="disclaimer" id="disclaimer"></p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="settings">
+      <form method="dialog" class="dlg">
+        <h2>Settings</h2>
+        <h3>Data pack</h3>
+        <p id="packDetail" class="meta"></p>
+        <button type="button" id="importPack">Import data pack (.sqlite or .sqlite.gz)</button>
+        <h3>AI model (runs on this device)</h3>
+        <div id="models"></div>
+        <button type="button" class="ghost" id="importModel">Import a .gguf model file</button>
+        <p class="meta">Models are downloaded once, then everything runs offline.</p>
+        <div class="dlg-foot"><button>Close</button></div>
+      </form>
+    </dialog>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

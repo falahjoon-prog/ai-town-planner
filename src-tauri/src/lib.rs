@@ -1,0 +1,280 @@
+mod data;
+mod llm;
+mod rules;
+
+use data::e;
+use futures_util::StreamExt;
+use serde::Serialize;
+use std::collections::BTreeMap;
+use std::fs;
+use std::io::{BufReader, Write};
+use std::path::PathBuf;
+use std::sync::atomic::Ordering;
+use std::sync::{Arc, Mutex};
+use tauri::ipc::Channel;
+use tauri::{AppHandle, Manager, State};
+
+struct AppState {
+    db: Arc<Mutex<Option<rusqlite::Connection>>>,
+    llm: Arc<llm::Engine>,
+}
+
+fn dir(app: &AppHandle, sub: &str) -> Result<PathBuf, String> {
+    let d = app.path().app_data_dir().map_err(e)?.join(sub);
+    fs::create_dir_all(&d).map_err(e)?;
+    Ok(d)
+}
+
+fn datapack_path(app: &AppHandle) -> Result<PathBuf, String> {
+    Ok(dir(app, "data")?.join("datapack.sqlite"))
+}
+
+fn settings_path(app: &AppHandle) -> Result<PathBuf, String> {
+    Ok(dir(app, "")?.join("settings.json"))
+}
+
+fn active_model(app: &AppHandle) -> Result<Option<PathBuf>, String> {
+    let models = dir(app, "models")?;
+    let chosen = fs::read_to_string(settings_path(app)?)
+        .ok()
+        .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
+        .and_then(|v| v["model"].as_str().map(|s| models.join(s)))
+        .filter(|p| p.exists());
+    if chosen.is_some() {
+        return Ok(chosen);
+    }
+    // Fall back to the largest installed model.
+    let mut found: Vec<_> = fs::read_dir(&models)
+        .map_err(e)?
+        .filter_map(|x| x.ok())
+        .filter(|x| x.path().extension().map(|ext| ext == "gguf").unwrap_or(false))
+        .map(|x| (x.metadata().map(|m| m.len()).unwrap_or(0), x.path()))
+        .collect();
+    found.sort();
+    Ok(found.pop().map(|(_, p)| p))
+}
+
+fn with_db<T>(state: &AppState, f: impl FnOnce(&rusqlite::Connection) -> Result<T, String>) -> Result<T, String> {
+    let g = state.db.lock().map_err(e)?;
+    let c = g.as_ref().ok_or("No data pack loaded. Open Settings and import a data pack.")?;
+    f(c)
+}
+
+#[derive(Serialize)]
+struct ModelStatus {
+    id: String,
+    name: String,
+    file: String,
+    size_gb: f32,
+    min_ram_gb: u32,
+    note: String,
+    installed: bool,
+    active: bool,
+}
+
+#[derive(Serialize)]
+struct Status {
+    datapack: Option<BTreeMap<String, String>>,
+    models: Vec<ModelStatus>,
+    custom_models: Vec<String>,
+    active_model: Option<String>,
+    disclaimer: &'static str,
+}
+
+#[tauri::command]
+async fn status(app: AppHandle, state: State<'_, AppState>) -> Result<Status, String> {
+    let datapack = with_db(&state, data::manifest).ok();
+    let models_dir = dir(&app, "models")?;
+    let active = active_model(&app)?.and_then(|p| p.file_name().map(|f| f.to_string_lossy().to_string()));
+    let models = llm::CATALOG
+        .iter()
+        .map(|m| ModelStatus {
+            id: m.id.into(),
+            name: m.name.into(),
+            file: m.file.into(),
+            size_gb: m.size_gb,
+            min_ram_gb: m.min_ram_gb,
+            note: m.note.into(),
+            installed: models_dir.join(m.file).exists(),
+            active: active.as_deref() == Some(m.file),
+        })
+        .collect();
+    let custom_models = fs::read_dir(&models_dir)
+        .map_err(e)?
+        .filter_map(|x| x.ok())
+        .map(|x| x.file_name().to_string_lossy().to_string())
+        .filter(|f| f.ends_with(".gguf") && !llm::CATALOG.iter().any(|m| m.file == f))
+        .collect();
+    Ok(Status { datapack, models, custom_models, active_model: active, disclaimer: rules::DISCLAIMER })
+}
+
+#[tauri::command]
+async fn import_datapack(app: AppHandle, state: State<'_, AppState>, path: String) -> Result<BTreeMap<String, String>, String> {
+    let dest = datapack_path(&app)?;
+    let tmp = dest.with_extension("importing");
+    let db = state.db.clone();
+    tauri::async_runtime::spawn_blocking(move || -> Result<BTreeMap<String, String>, String> {
+        let src = fs::File::open(&path).map_err(e)?;
+        let mut out = fs::File::create(&tmp).map_err(e)?;
+        if path.ends_with(".gz") {
+            std::io::copy(&mut flate2::read::GzDecoder::new(BufReader::new(src)), &mut out).map_err(e)?;
+        } else {
+            std::io::copy(&mut BufReader::new(src), &mut out).map_err(e)?;
+        }
+        out.flush().map_err(e)?;
+        drop(out);
+        let manifest = data::manifest(&data::open(&tmp)?)?; // validate before replacing
+        let mut g = db.lock().map_err(e)?;
+        *g = None;
+        fs::rename(&tmp, &dest).map_err(e)?;
+        *g = Some(data::open(&dest)?);
+        Ok(manifest)
+    })
+    .await
+    .map_err(e)?
+}
+
+#[tauri::command]
+async fn search(state: State<'_, AppState>, q: String) -> Result<Vec<data::ParcelHit>, String> {
+    with_db(&state, |c| data::search(c, &q))
+}
+
+#[tauri::command]
+async fn assess(state: State<'_, AppState>, pid: i64) -> Result<rules::Assessment, String> {
+    let db = state.db.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let g = db.lock().map_err(e)?;
+        let c = g.as_ref().ok_or("No data pack loaded")?;
+        let p = data::parcel(c, pid)?;
+        let o = data::overlays(c, &p)?;
+        Ok(rules::assess(p, o, data::manifest(c)?))
+    })
+    .await
+    .map_err(e)?
+}
+
+#[tauri::command]
+async fn generate_report(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    pid: i64,
+    question: String,
+    on_token: Channel<String>,
+) -> Result<(), String> {
+    let model = active_model(&app)?.ok_or("No AI model installed. Open Settings to download one.")?;
+    let db = state.db.clone();
+    let engine = state.llm.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let a = {
+            let g = db.lock().map_err(e)?;
+            let c = g.as_ref().ok_or("No data pack loaded")?;
+            let p = data::parcel(c, pid)?;
+            let o = data::overlays(c, &p)?;
+            rules::assess(p, o, data::manifest(c)?)
+        };
+        let (sys, user) = rules::prompt(&a, &question);
+        engine.generate(&model, &sys, &user, |t| {
+            let _ = on_token.send(t.to_string());
+        })
+    })
+    .await
+    .map_err(e)?
+}
+
+#[tauri::command]
+fn cancel_report(state: State<'_, AppState>) {
+    state.llm.cancel.store(true, Ordering::SeqCst);
+}
+
+#[derive(Serialize, Clone)]
+struct Progress {
+    done: u64,
+    total: u64,
+}
+
+#[tauri::command]
+async fn download_model(app: AppHandle, id: String, on_progress: Channel<Progress>) -> Result<(), String> {
+    let spec = llm::CATALOG.iter().find(|m| m.id == id).ok_or("Unknown model")?;
+    let dest = dir(&app, "models")?.join(spec.file);
+    let part = dest.with_extension("part");
+    let resp = reqwest::get(spec.url).await.map_err(e)?.error_for_status().map_err(e)?;
+    let total = resp.content_length().unwrap_or(0);
+    let mut file = tokio::fs::File::create(&part).await.map_err(e)?;
+    let mut stream = resp.bytes_stream();
+    let (mut done, mut last) = (0u64, 0u64);
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.map_err(e)?;
+        tokio::io::AsyncWriteExt::write_all(&mut file, &chunk).await.map_err(e)?;
+        done += chunk.len() as u64;
+        if done - last > 8 << 20 {
+            last = done;
+            let _ = on_progress.send(Progress { done, total });
+        }
+    }
+    tokio::io::AsyncWriteExt::flush(&mut file).await.map_err(e)?;
+    drop(file);
+    fs::rename(&part, &dest).map_err(e)?;
+    let _ = on_progress.send(Progress { done, total });
+    set_model(app, spec.file.to_string())
+}
+
+#[tauri::command]
+async fn import_model(app: AppHandle, path: String) -> Result<String, String> {
+    let src = PathBuf::from(&path);
+    let name = src.file_name().ok_or("Invalid file")?.to_string_lossy().to_string();
+    if !name.ends_with(".gguf") {
+        return Err("Model must be a .gguf file".into());
+    }
+    let dest = dir(&app, "models")?.join(&name);
+    tauri::async_runtime::spawn_blocking(move || fs::copy(&src, &dest).map_err(e))
+        .await
+        .map_err(e)??;
+    set_model(app, name.clone())?;
+    Ok(name)
+}
+
+#[tauri::command]
+fn set_model(app: AppHandle, file: String) -> Result<(), String> {
+    fs::write(settings_path(&app)?, serde_json::json!({ "model": file }).to_string()).map_err(e)
+}
+
+#[tauri::command]
+fn delete_model(app: AppHandle, file: String) -> Result<(), String> {
+    let p = dir(&app, "models")?.join(&file);
+    if p.parent() != Some(dir(&app, "models")?.as_path()) {
+        return Err("Invalid file".into());
+    }
+    fs::remove_file(p).map_err(e)
+}
+
+#[tauri::command]
+fn save_text(path: String, content: String) -> Result<(), String> {
+    fs::write(path, content).map_err(e)
+}
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            let path = datapack_path(app.handle())?;
+            let conn = if path.exists() { data::open(&path).ok() } else { None };
+            app.manage(AppState { db: Arc::new(Mutex::new(conn)), llm: Arc::new(llm::Engine::new()) });
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            status,
+            import_datapack,
+            search,
+            assess,
+            generate_report,
+            cancel_report,
+            download_model,
+            import_model,
+            set_model,
+            delete_model,
+            save_text
+        ])
+        .run(tauri::generate_context!())
+        .expect("error while running AI Town Planner");
+}

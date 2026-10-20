@@ -1,0 +1,43 @@
+name: Build data pack
+
+on:
+  workflow_dispatch:
+    inputs:
+      test:
+        description: "Quick test build (2,000 parcels, 3 layers)"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "0 18 1 * *" # monthly
+
+permissions:
+  contents: write
+
+jobs:
+  datapack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ijson
+      - name: Build
+        run: |
+          if [ "${{ inputs.test }}" = "true" ]; then
+            python pipeline/build_datapack.py datapack.sqlite --limit-parcels 2000 --only cp14-zoning-overlay,cp14-flood-overlay-brisbane-river-flood-planning-area,cp14-heritage-overlay
+          else
+            python pipeline/build_datapack.py datapack.sqlite
+          fi
+          ls -lh datapack.sqlite
+          gzip -9 -k datapack.sqlite
+          ls -lh datapack.sqlite.gz
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="datapack-$(date -u +%Y%m%d-%H%M)"
+          gh release create "$TAG" datapack.sqlite.gz --title "Data pack $TAG" \
+            --notes "Brisbane City Plan 2014 + parcels. Contains data (c) Brisbane City Council, CC BY 4.0. Import this file in the app: Settings > Import data pack." \
+            --prerelease
