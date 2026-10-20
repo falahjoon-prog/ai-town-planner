@@ -3,7 +3,7 @@ use llama_cpp_2::context::params::LlamaContextParams;
 use llama_cpp_2::llama_backend::LlamaBackend;
 use llama_cpp_2::llama_batch::LlamaBatch;
 use llama_cpp_2::model::params::LlamaModelParams;
-use llama_cpp_2::model::{AddBos, LlamaModel, Special};
+use llama_cpp_2::model::LlamaModel;
 use llama_cpp_2::sampling::LlamaSampler;
 use serde::Serialize;
 use std::num::NonZeroU32;
@@ -89,7 +89,8 @@ impl Engine {
         );
         let ctx_params = LlamaContextParams::default().with_n_ctx(NonZeroU32::new(N_CTX));
         let mut ctx = model.new_context(backend, ctx_params).map_err(e)?;
-        let tokens = model.str_to_token(&prompt, AddBos::Never).map_err(e)?;
+        let vocab = model.vocab();
+        let tokens = vocab.tokenize(prompt.as_bytes(), false, true);
         if tokens.len() + 256 > N_CTX as usize {
             return Err(format!("Prompt too long ({} tokens)", tokens.len()));
         }
@@ -118,10 +119,10 @@ impl Engine {
                 break;
             }
             let token = sampler.sample(&ctx, batch.n_tokens() - 1);
-            if model.is_eog_token(token) {
+            if vocab.is_eog(token) {
                 break;
             }
-            pending.extend(model.token_to_bytes(token, Special::Tokenize).map_err(e)?);
+            pending.extend(vocab.token_to_piece(token, false, None));
             // Emit only complete UTF-8 sequences; keep partial bytes for the next token.
             let valid = match std::str::from_utf8(&pending) {
                 Ok(_) => pending.len(),
