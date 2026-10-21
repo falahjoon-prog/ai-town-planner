@@ -91,3 +91,15 @@ dialog::backdrop { background: rgba(0,0,0,.35); }
 .pcfg { display: flex; flex-direction: column; gap: 6px; padding: 8px 0 4px 24px; }
 .pcfg .row { display: flex; gap: 6px; }
 select { font: inherit; flex: 1; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
+
+/* PDF export via the print dialog */
+#printArea { display: none; }
+@media print {
+  @page { margin: 18mm; }
+  body { display: block; height: auto; background: #fff; }
+  body > *:not(#printArea) { display: none !important; }
+  #printArea { display: block; font: 12pt/1.5 Georgia, serif; color: #1f2937; }
+  #printArea h1 { font-size: 20pt; margin: 0 0 4px; }
+  #printArea h2 { font-size: 14pt; margin-top: 18pt; border-bottom: 1px solid #ccc; page-break-after: avoid; }
+  #printArea small, #printArea .d { color: #6b7280; font-size: 9pt; }
+}

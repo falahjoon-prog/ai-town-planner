@@ -47,7 +47,8 @@
               <input id="question" placeholder="Optional: describe the proposal, e.g. 'dual occupancy' or '6-unit townhouse development'" />
               <button id="genBtn">Generate planner report</button>
               <button class="ghost" id="stopBtn" hidden>Stop</button>
-              <button class="ghost" id="saveBtn" hidden>Save report</button>
+              <button class="ghost" id="pdfBtn" hidden>Save as PDF</button>
+              <button class="ghost" id="saveBtn" hidden>Save HTML</button>
             </div>
             <nav class="tabs" id="tabs"></nav>
             <article id="report" class="report"></article>
@@ -101,6 +102,7 @@
         <div class="dlg-foot"><button>Close</button></div>
       </form>
     </dialog>
+    <div id="printArea"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -267,6 +267,7 @@ async function loadSite(pid: number) {
   chatHistory = [];
   renderChat();
   $("saveBtn").hidden = true;
+  $("pdfBtn").hidden = true;
   drawMap(a);
 }
 
@@ -349,6 +350,7 @@ $("genBtn").addEventListener("click", async () => {
     if (sections.length) activeTab = sections[0].key;
     renderReport();
     $("saveBtn").hidden = !sections.length;
+    $("pdfBtn").hidden = !sections.length;
   } catch (e) {
     $("report").innerHTML = `<p class="err">${esc(e)}</p>`;
   }
@@ -398,19 +400,31 @@ $("chatForm").addEventListener("submit", async (ev) => {
 
 $("stopBtn").addEventListener("click", () => invoke("cancel_report"));
 
+function reportBody(a: Assessment): string {
+  return `<h1>Planning assessment: ${esc(a.parcel.address || a.parcel.lotplan)}</h1>
+<small>${esc(a.parcel.lotplan)}${a.parcel.area_m2 ? ` · ${Math.round(a.parcel.area_m2).toLocaleString()} m²` : ""} · Data pack ${esc(a.manifest.built_at)} · Generated ${new Date().toLocaleString("en-AU")}</small>
+${sections.map((x) => `<h2>${esc(x.title)}</h2>${marked.parse(x.text)}`).join("")}
+<p class="d">${esc($("disclaimer").textContent)}<br>${esc(a.manifest.attribution)}</p>`;
+}
+
+const REPORT_CSS = "font:14px/1.55 Georgia,serif;color:#1f2937";
+
 $("saveBtn").addEventListener("click", async () => {
   if (!current) return;
   const name = (current.parcel.address || current.parcel.lotplan).replace(/[^\w]+/g, "_").slice(0, 60);
   const path = await save({ defaultPath: `Planning_report_${name}.html`, filters: [{ name: "HTML report", extensions: ["html"] }] });
   if (!path) return;
-  const a = current;
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Planning report: ${esc(a.parcel.address)}</title>
-<style>body{font:15px/1.6 Georgia,serif;max-width:820px;margin:40px auto;padding:0 20px;color:#1f2937}h1{font-size:24px}h2{font-size:18px;margin-top:28px;border-bottom:1px solid #ddd}small,.d{color:#6b7280;font-size:12px}</style></head>
-<body><h1>Planning assessment: ${esc(a.parcel.address || a.parcel.lotplan)}</h1>
-<small>${esc(a.parcel.lotplan)} · Data pack ${esc(a.manifest.built_at)} · Generated ${new Date().toLocaleString("en-AU")}</small>
-${sections.map((x) => `<h2>${esc(x.title)}</h2>${marked.parse(x.text)}`).join("")}
-<p class="d">${esc($("disclaimer").textContent)}<br>${esc(a.manifest.attribution)}</p></body></html>`;
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>Planning report: ${esc(current.parcel.address)}</title>
+<style>body{${REPORT_CSS};max-width:820px;margin:40px auto;padding:0 20px}h1{font-size:24px}h2{font-size:18px;margin-top:28px;border-bottom:1px solid #ddd}small,.d{color:#6b7280;font-size:12px}</style></head>
+<body>${reportBody(current)}</body></html>`;
   await invoke("save_text", { path, content: html });
+});
+
+// PDF: print only the report; choose "Save as PDF" / "Microsoft Print to PDF" in the print dialog.
+$("pdfBtn").addEventListener("click", () => {
+  if (!current) return;
+  $("printArea").innerHTML = reportBody(current);
+  window.print();
 });
 
 refreshStatus().then((s) => {
