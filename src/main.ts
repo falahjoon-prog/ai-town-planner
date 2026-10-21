@@ -435,8 +435,8 @@ $("powerBtn").addEventListener("click", async () => {
     const feats = await invoke<any[]>("infra_map", { pid: current.parcel.pid });
     feats.forEach((f) => (f.properties.c = POWER_COLORS[f.properties.kind] ?? "#111827"));
     m.addSource("pw", { type: "geojson", data: { type: "FeatureCollection", features: feats } });
-    m.addLayer({ id: "pw-line", type: "line", source: "pw", filter: ["==", ["geometry-type"], "LineString"], paint: { "line-color": ["get", "c"], "line-width": 2.5 } });
-    m.addLayer({ id: "pw-pt", type: "circle", source: "pw", filter: ["!=", ["geometry-type"], "LineString"], paint: { "circle-color": ["get", "c"], "circle-radius": 6, "circle-stroke-color": "#fff", "circle-stroke-width": 1.5 } });
+    m.addLayer({ id: "pw-line", type: "line", source: "pw", filter: ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], paint: { "line-color": ["get", "c"], "line-width": 2.5 } });
+    m.addLayer({ id: "pw-pt", type: "circle", source: "pw", filter: ["match", ["geometry-type"], ["Point", "MultiPoint"], true, false], paint: { "circle-color": ["get", "c"], "circle-radius": 6, "circle-stroke-color": "#fff", "circle-stroke-width": 1.5 } });
     const kinds = [...new Set(feats.map((f) => f.properties.kind as string))];
     setFloodUi(floodOn, (kinds.length ? kinds.map((k) => `<div><i style="background:${POWER_COLORS[k] ?? "#111827"}"></i>${esc(k)}</div>`).join("") : "<b>No major power infrastructure within 5 km</b>")
       + `<div class="meta">Within 5 km · Geoscience Australia. Distribution (Energex) lines not shown.</div>`);
