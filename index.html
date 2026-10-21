@@ -108,7 +108,7 @@
 
     <dialog id="settings">
       <form method="dialog" class="dlg">
-        <h2>Settings</h2>
+        <div class="dlg-top"><h2>Settings</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
         <h3>Data pack</h3>
         <p id="packDetail" class="meta"></p>
         <button type="button" id="downloadPack">Download data pack (about 400 MB)</button>
@@ -143,20 +143,19 @@
         <div id="models"></div>
         <button type="button" class="ghost" id="importModel">Import a .gguf model file</button>
         <p class="meta">Models are downloaded once, then everything runs offline.</p>
-        <div class="dlg-foot"><button>Close</button></div>
       </form>
     </dialog>
     <dialog id="docDlg" class="wide">
       <form method="dialog" class="dlg">
-        <h2 id="docTitle">Draft</h2>
+        <div class="dlg-top"><h2 id="docTitle">Draft</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
         <div id="docBody" class="doc"></div>
-        <div class="dlg-foot"><button type="button" class="ghost" id="docCopy">Copy</button><button type="button" class="ghost" id="docPdf">Save as PDF</button><button>Close</button></div>
+        <div class="dlg-foot"><button type="button" class="ghost" id="docCopy">Copy</button><button type="button" class="ghost" id="docPdf">Save as PDF</button></div>
       </form>
     </dialog>
     <dialog id="mapsDlg" class="wide">
       <form method="dialog" class="dlg">
         <div class="dlg-top">
-          <h2>Queensland maps</h2>
+          <div class="dlg-row"><h2>Queensland maps</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
           <input id="mapsFilter" placeholder="Filter, e.g. Logan" autocomplete="off" />
         </div>
         <h3>State &amp; federal</h3>
@@ -164,7 +163,6 @@
         <h3>Councils</h3>
         <div id="councilMaps" class="maplist"></div>
         <p class="meta">Opens inside the app (needs internet). "Website" links go to the council's site where its planning scheme and mapping are listed.</p>
-        <div class="dlg-foot"><button>Close</button></div>
       </form>
     </dialog>
     <div id="printArea"></div>
