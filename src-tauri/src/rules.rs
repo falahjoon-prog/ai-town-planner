@@ -83,6 +83,8 @@ pub fn assess(parcel: Parcel, overlays: Vec<OverlayHit>, manifest: BTreeMap<Stri
             zones.push(ZoneMatch { zone: z.clone(), coverage_pct: h.coverage_pct, raw: h.props.clone() });
         }
     }
+    // A PDA overrides City Plan, so show it first.
+    zones.sort_by_key(|z| !z.zone.name.starts_with("Priority Development Area"));
     let mut flags: Vec<Flag> = Vec::new();
     for h in &overlays {
         let hay = norm(&format!("{} {}", h.dataset_id, h.title));
