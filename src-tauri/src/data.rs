@@ -59,21 +59,20 @@ fn abbr(t: &str) -> Option<&'static str> {
     })
 }
 
-pub fn search(c: &Connection, q: &str) -> Result<Vec<ParcelHit>, String> {
-    let toks: Vec<String> = q
-        .to_uppercase()
+fn tokens(q: &str) -> Vec<String> {
+    q.to_uppercase()
         .replace(',', " ")
         .split_whitespace()
         .map(|t| t.chars().filter(|ch| !"%_*?[]".contains(*ch)).collect::<String>())
         .filter(|t| !t.is_empty())
         .take(8)
-        .collect();
-    if toks.is_empty() {
-        return Ok(vec![]);
-    }
+        .collect()
+}
+
+fn run_search(c: &Connection, toks: &[String]) -> Result<Vec<ParcelHit>, String> {
     let mut sql = String::from("SELECT pid, address, lotplan, suburb FROM parcels WHERE 1=1");
     let mut ps: Vec<String> = Vec::new();
-    for t in &toks {
+    for t in toks {
         ps.push(format!("%{t}%"));
         match abbr(t) {
             Some(a) => {
@@ -91,6 +90,74 @@ pub fn search(c: &Connection, q: &str) -> Result<Vec<ParcelHit>, String> {
         })
         .map_err(e)?;
     rows.collect::<Result<_, _>>().map_err(e)
+}
+
+fn edit_distance(a: &str, b: &str) -> usize {
+    let (a, b): (Vec<char>, Vec<char>) = (a.chars().collect(), b.chars().collect());
+    let mut prev: Vec<usize> = (0..=b.len()).collect();
+    for i in 1..=a.len() {
+        let mut cur = vec![i; b.len() + 1];
+        for j in 1..=b.len() {
+            cur[j] = (prev[j] + 1).min(cur[j - 1] + 1).min(prev[j - 1] + usize::from(a[i - 1] != b[j - 1]));
+        }
+        prev = cur;
+    }
+    prev[b.len()]
+}
+
+/// Suburb and street-name words, built once, used to correct typos.
+fn vocab(c: &Connection) -> &'static Vec<String> {
+    static V: std::sync::OnceLock<Vec<String>> = std::sync::OnceLock::new();
+    V.get_or_init(|| {
+        let mut set = std::collections::BTreeSet::new();
+        if let Ok(mut st) = c.prepare("SELECT address, suburb FROM parcels") {
+            if let Ok(rows) = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))) {
+                let mut last = String::new();
+                for (addr, sub) in rows.flatten() {
+                    let key = format!("{addr}|{sub}");
+                    if key == last { continue; }
+                    last = key;
+                    for w in addr.split(|ch: char| !ch.is_alphabetic()).chain(sub.split(|ch: char| !ch.is_alphabetic())) {
+                        if w.len() >= 4 { set.insert(w.to_uppercase()); }
+                    }
+                }
+            }
+        }
+        set.into_iter().collect()
+    })
+}
+
+/// Replace words that look misspelled with the closest suburb or street word.
+fn correct(c: &Connection, toks: &[String]) -> Vec<String> {
+    let v = vocab(c);
+    toks.iter()
+        .map(|t| {
+            if t.len() < 4 || !t.chars().all(|ch| ch.is_alphabetic()) || v.binary_search(t).is_ok() {
+                return t.clone();
+            }
+            let max = if t.len() >= 7 { 2 } else { 1 };
+            v.iter()
+                .filter(|w| w.len().abs_diff(t.len()) <= max)
+                .map(|w| (edit_distance(t, w), w))
+                .filter(|(d, _)| *d <= max)
+                .min_by_key(|(d, _)| *d)
+                .map(|(_, w)| w.clone())
+                .unwrap_or_else(|| t.clone())
+        })
+        .collect()
+}
+
+pub fn search(c: &Connection, q: &str) -> Result<Vec<ParcelHit>, String> {
+    let toks = tokens(q);
+    if toks.is_empty() {
+        return Ok(vec![]);
+    }
+    let hits = run_search(c, &toks)?;
+    if !hits.is_empty() {
+        return Ok(hits);
+    }
+    let fixed = correct(c, &toks); // nothing matched: try again with typos corrected
+    if fixed == toks { Ok(hits) } else { run_search(c, &fixed) }
 }
 
 #[derive(Serialize, Clone)]
