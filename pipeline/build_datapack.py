@@ -42,6 +42,8 @@ STATE_LAYERS = [
     ("pda", f"{QLD}/PlanningCadastre/StatePlanning/MapServer", ["Priority development areas"]),
     ("state", f"{QLD}/PlanningCadastre/StatePlanning/MapServer", ["SEQ regional land use category"]),
     ("other", f"{QLD}/Biota/VegetationManagement/MapServer", ["Protected plants trigger map"]),
+    # Easement boundaries (Queensland cadastre); purpose and beneficiary are only on the title search
+    ("other", f"{QLD}/PlanningCadastre/QSCF_LandParcelPropertyFramework_TimeAware/FeatureServer", ["Easement parcels"]),
     # National electricity infrastructure (Geoscience Australia), wider SEQ window for "nearest" searches
     # GA has moved this service before: try each candidate; layers are matched by keyword ("~" prefix).
     ("infra", ["https://services.ga.gov.au/gis/rest/services/Foundation_Electricity_Infrastructure/MapServer",
