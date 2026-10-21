@@ -47,7 +47,7 @@ STATE_LAYERS = [
     ("infra", ["https://services.ga.gov.au/gis/rest/services/Foundation_Electricity_Infrastructure/MapServer",
                "https://services.ga.gov.au/gis/rest/services/National_Electricity_Infrastructure/MapServer",
                "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer"],
-     ["~transmission line", "~substation", "~power station", "~generation"]),
+     ["~line", "~substation", "~power station"]),
 ]
 SEQ_BBOX = "152.3,-28.1,153.6,-26.6"
 
@@ -272,7 +272,7 @@ def load_state_layers(db, start_lid):
 
         for w in wanted:
             if w.startswith("~"):  # keyword match, any position
-                match = [l for l in layers if w[1:] in l.get("name", "").lower() and l["id"] not in done_ids][:1]
+                match = [l for l in layers if w[1:] in l.get("name", "").lower().replace("_", " ") and l["id"] not in done_ids][:1]
             else:
                 exact = [l for l in layers if l.get("name", "").lower() == w.lower()]
                 match = exact or [l for l in layers if l.get("name", "").lower().startswith(w.lower())][:1]
