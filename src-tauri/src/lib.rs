@@ -91,6 +91,7 @@ struct Status {
     ai: ai::AiSettings,
     has_anthropic_key: bool,
     has_openai_key: bool,
+    has_google_key: bool,
     disclaimer: &'static str,
 }
 
@@ -126,6 +127,7 @@ async fn status(app: AppHandle, state: State<'_, AppState>) -> Result<Status, St
         ai: load_settings(&app),
         has_anthropic_key: ai::get_key("anthropic").is_some(),
         has_openai_key: ai::get_key("openai").is_some(),
+        has_google_key: ai::get_key("google").is_some(),
         disclaimer: rules::DISCLAIMER,
     })
 }
@@ -193,6 +195,68 @@ async fn download_datapack(app: AppHandle, state: State<'_, AppState>, on_progre
     let r = install_pack(&app, state.db.clone(), part.to_string_lossy().to_string()).await;
     let _ = fs::remove_file(&part);
     r
+}
+
+#[derive(Serialize)]
+struct Suggest {
+    place_id: String,
+    text: String,
+}
+
+/// Google Places address suggestions (needs the user's own Google API key).
+#[tauri::command]
+async fn google_suggest(q: String) -> Result<Vec<Suggest>, String> {
+    let key = ai::get_key("google").ok_or("No Google key")?;
+    let body = serde_json::json!({
+        "input": q,
+        "includedRegionCodes": ["au"],
+        "includedPrimaryTypes": ["street_address", "premise", "subpremise"],
+        "locationBias": {"circle": {"center": {"latitude": -27.47, "longitude": 153.03}, "radius": 50000.0}}
+    });
+    let v: serde_json::Value = reqwest::Client::new()
+        .post("https://places.googleapis.com/v1/places:autocomplete")
+        .header("X-Goog-Api-Key", key)
+        .json(&body)
+        .send()
+        .await
+        .map_err(|_| "Google address search needs internet.".to_string())?
+        .json()
+        .await
+        .map_err(e)?;
+    if let Some(m) = v["error"]["message"].as_str() {
+        return Err(format!("Google: {m}"));
+    }
+    Ok(v["suggestions"]
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .filter_map(|s| {
+                    let p = &s["placePrediction"];
+                    Some(Suggest { place_id: p["placeId"].as_str()?.into(), text: p["text"]["text"].as_str()?.into() })
+                })
+                .collect()
+        })
+        .unwrap_or_default())
+}
+
+/// Resolve a Google place to the lot that contains it in the data pack.
+#[tauri::command]
+async fn google_pick(state: State<'_, AppState>, place_id: String) -> Result<data::ParcelHit, String> {
+    let key = ai::get_key("google").ok_or("No Google key")?;
+    let v: serde_json::Value = reqwest::Client::new()
+        .get(format!("https://places.googleapis.com/v1/places/{place_id}"))
+        .header("X-Goog-Api-Key", key)
+        .header("X-Goog-FieldMask", "location")
+        .send()
+        .await
+        .map_err(|_| "Google address search needs internet.".to_string())?
+        .json()
+        .await
+        .map_err(e)?;
+    let (lat, lng) = (v["location"]["latitude"].as_f64(), v["location"]["longitude"].as_f64());
+    let (Some(lat), Some(lng)) = (lat, lng) else { return Err("Google could not locate that address.".into()) };
+    with_db(&state, |c| data::parcel_at(c, lng, lat))?
+        .ok_or_else(|| "That address is not inside the loaded data pack. Download the full data pack in Settings.".to_string())
 }
 
 #[tauri::command]
@@ -383,7 +447,7 @@ fn save_ai_settings(app: AppHandle, settings: ai::AiSettings) -> Result<(), Stri
 
 #[tauri::command]
 fn set_api_key(provider: String, key: String) -> Result<(), String> {
-    if provider != "anthropic" && provider != "openai" {
+    if !["anthropic", "openai", "google"].contains(&provider.as_str()) {
         return Err("Unknown provider".into());
     }
     ai::set_key(&provider, key.trim())
@@ -483,6 +547,8 @@ pub fn run() {
             import_datapack,
             download_datapack,
             search,
+            google_suggest,
+            google_pick,
             assess,
             flood_map,
             potential,

@@ -92,6 +92,28 @@ fn run_search(c: &Connection, toks: &[String]) -> Result<Vec<ParcelHit>, String>
     rows.collect::<Result<_, _>>().map_err(e)
 }
 
+/// The lot that contains a point (lng/lat), using the parcel spatial index.
+pub fn parcel_at(c: &Connection, lng: f64, lat: f64) -> Result<Option<ParcelHit>, String> {
+    let mut st = c
+        .prepare(
+            "SELECT p.pid, p.address, p.lotplan, p.suburb, p.geom FROM parcel_idx i JOIN parcels p ON p.pid = i.pid
+             WHERE i.minx <= ?1 AND i.maxx >= ?1 AND i.miny <= ?2 AND i.maxy >= ?2 LIMIT 20",
+        )
+        .map_err(e)?;
+    let rows = st
+        .query_map(rusqlite::params![lng, lat], |r| {
+            Ok((ParcelHit { pid: r.get(0)?, address: r.get(1)?, lotplan: r.get(2)?, suburb: r.get(3)? }, r.get::<_, String>(4)?))
+        })
+        .map_err(e)?;
+    let pt = geo::Point::new(lng, lat);
+    for (hit, g) in rows.flatten() {
+        if to_geo(&g).ok().and_then(|g| polys(&g)).is_some_and(|m| geo::Contains::contains(&m, &pt)) {
+            return Ok(Some(hit));
+        }
+    }
+    Ok(None)
+}
+
 fn edit_distance(a: &str, b: &str) -> usize {
     let (a, b): (Vec<char>, Vec<char>) = (a.chars().collect(), b.chars().collect());
     let mut prev: Vec<usize> = (0..=b.len()).collect();

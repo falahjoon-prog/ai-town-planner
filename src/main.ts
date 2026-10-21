@@ -20,7 +20,7 @@ type ModelStatus = { id: string; name: string; file: string; size_gb: number; mi
 type AiSettings = { provider: string; model: string | null; ollama_url: string; ollama_model: string; anthropic_model: string; openai_base: string; openai_model: string };
 type Status = {
   datapack: Record<string, string> | null; models: ModelStatus[]; custom_models: string[]; active_model: string | null;
-  ai: AiSettings; has_anthropic_key: boolean; has_openai_key: boolean; disclaimer: string;
+  ai: AiSettings; has_anthropic_key: boolean; has_openai_key: boolean; has_google_key: boolean; disclaimer: string;
 };
 const AUTH: Record<string, string> = { council: "Council", sara: "SARA", pda: "EDQ (PDA)", state: "State", other: "Other" };
 const val = (id: string) => ($(id) as HTMLInputElement).value.trim();
@@ -58,6 +58,8 @@ function renderAi(s: Status) {
   setVal("openaiBase", ai.openai_base);
   setVal("openaiModel", ai.openai_model);
   ($("anthropicKey") as HTMLInputElement).placeholder = s.has_anthropic_key ? "Key saved. Type to replace (or clear by saving blank spaces)" : "Claude API key (sk-ant-…)";
+  hasGoogle = s.has_google_key;
+  ($("googleKey") as HTMLInputElement).placeholder = s.has_google_key ? "Google key saved. Type to replace" : "Google Places API key (optional – better address search)";
   ($("openaiKey") as HTMLInputElement).placeholder = s.has_openai_key ? "Key saved. Type to replace" : "API key";
   const sel = $("ollamaModel") as HTMLSelectElement;
   if (ai.ollama_model && ![...sel.options].some((o) => o.value === ai.ollama_model)) sel.add(new Option(ai.ollama_model, ai.ollama_model));
@@ -102,6 +104,9 @@ $("saveAi").addEventListener("click", async () => {
     const ok = ($("openaiKey") as HTMLInputElement).value;
     if (ak) await invoke("set_api_key", { provider: "anthropic", key: ak });
     if (ok) await invoke("set_api_key", { provider: "openai", key: ok });
+    const gk = ($("googleKey") as HTMLInputElement).value;
+    if (gk) await invoke("set_api_key", { provider: "google", key: gk });
+    setVal("googleKey", "");
     setVal("anthropicKey", "");
     setVal("openaiKey", "");
     await invoke("save_ai_settings", { settings });
@@ -218,6 +223,8 @@ $("q").addEventListener("input", () => {
   timer = window.setTimeout(runSearch, 220);
 });
 
+let hasGoogle = false;
+
 async function runSearch() {
   const q = ($("q") as HTMLInputElement).value.trim();
   const list = $("results");
@@ -225,6 +232,18 @@ async function runSearch() {
   if (q.length < 3) {
     list.innerHTML = "";
     return;
+  }
+  if (hasGoogle) {
+    try {
+      const sg = await invoke<{ place_id: string; text: string }[]>("google_suggest", { q });
+      if (sg.length) {
+        list.innerHTML = sg.map((x) => `<li data-place="${esc(x.place_id)}"><b>${esc(x.text)}</b><span>Google</span></li>`).join("");
+        $("hint").textContent = `${sg.length} suggestion${sg.length > 1 ? "s" : ""}`;
+        return;
+      }
+    } catch (e) {
+      $("hint").textContent = String(e); // fall back to the offline search below
+    }
   }
   try {
     const hits = await invoke<Hit[]>("search", { q });
@@ -241,7 +260,9 @@ $("results").addEventListener("click", (ev) => {
   const li = (ev.target as HTMLElement).closest("li");
   if (!li) return;
   document.querySelectorAll("#results li").forEach((x) => x.classList.toggle("sel", x === li));
-  loadSite(Number(li.dataset.pid));
+  if (li.dataset.place) {
+    invoke<Hit>("google_pick", { placeId: li.dataset.place }).then((h) => loadSite(h.pid), alertMsg);
+  } else loadSite(Number(li.dataset.pid));
 });
 
 // ---- Site ----
