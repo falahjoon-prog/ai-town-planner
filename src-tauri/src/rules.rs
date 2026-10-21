@@ -272,6 +272,17 @@ Use only the facts. For anything not known (applicant, owner, plans, values), wr
     (PERSONA.to_string(), user)
 }
 
+/// Prompt for summarising a purchased Queensland title search.
+pub fn title_prompt(text: &str) -> (String, String) {
+    let user = format!(
+        "Below is the text of a Queensland title search. Summarise it for a town planner in Markdown with these headings: \
+**Title** (title reference, lot on plan, registered owner type only if shown, tenure), **Easements** (each one: type, purpose, in favour of, and which part of the lot it affects if stated), \
+**Covenants and restrictions**, **Mortgages, leases and other interests**, **Planning implications** (how the easements and restrictions could limit building, subdivision or access; say 'check the plan' where the text does not give the location). \
+Use ONLY the text; write 'none shown' where there are none; do not guess.\n\nTITLE SEARCH TEXT:\n{text}"
+    );
+    (PERSONA.to_string(), user)
+}
+
 pub struct ChatMsg {
     pub role: String,
     pub content: String,

@@ -225,18 +225,29 @@ $("q").addEventListener("input", () => {
 
 let hasGoogle = false;
 
-type Recent = { pid: number; address: string; lotplan: string };
-function recents(): Recent[] {
-  try { return JSON.parse(localStorage.getItem("recent") ?? "[]"); } catch { return []; }
+type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string };
+function sites(): Record<string, Site> {
+  try { return JSON.parse(localStorage.getItem("sites") ?? "{}"); } catch { return {}; }
 }
-function addRecent(p: { pid: number; address: string; lotplan: string }) {
-  const r = [{ pid: p.pid, address: p.address, lotplan: p.lotplan }, ...recents().filter((x) => x.lotplan !== p.lotplan)].slice(0, 20);
-  try { localStorage.setItem("recent", JSON.stringify(r)); } catch { /* storage unavailable */ }
+function saveSites(m: Record<string, Site>) {
+  // keep every starred lot plus the 20 most recent others
+  const all = Object.values(m).sort((x, y) => y.ts - x.ts);
+  let n = 0;
+  const keep: Record<string, Site> = {};
+  for (const x of all) if (x.star || x.note || x.title || n++ < 20) keep[x.lotplan] = x;
+  try { localStorage.setItem("sites", JSON.stringify(keep)); } catch { /* storage unavailable */ }
+}
+function touchSite(p: { pid: number; address: string; lotplan: string }, patch: Partial<Site> = {}) {
+  const m = sites();
+  m[p.lotplan] = { ...m[p.lotplan], pid: p.pid, address: p.address, lotplan: p.lotplan, ts: Date.now(), ...patch };
+  saveSites(m);
 }
 function showRecents() {
-  const r = recents();
-  $("results").innerHTML = r.map((h) => `<li data-pid="${h.pid}" data-lp="${esc(h.lotplan)}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></li>`).join("");
-  $("hint").textContent = r.length ? "Recent addresses" : "";
+  const r = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts);
+  $("results").innerHTML = r
+    .map((h) => `<li data-pid="${h.pid}" data-lp="${esc(h.lotplan)}"><b>${h.star ? "★ " : ""}${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}${h.note ? " · note" : ""}${h.title ? " · title" : ""}</span></li>`)
+    .join("");
+  $("hint").textContent = r.length ? "Saved and recent addresses" : "";
 }
 
 async function runSearch() {
@@ -301,7 +312,8 @@ async function loadSite(pid: number) {
     return alertMsg(e);
   }
   const a = current;
-  addRecent(a.parcel);
+  touchSite(a.parcel);
+  renderSiteTools();
   $("empty").hidden = true;
   $("site").hidden = false;
   $("siteAddr").textContent = a.parcel.address || a.parcel.lotplan;
@@ -830,3 +842,54 @@ function setTheme(t: "light" | "dark") {
   setTheme(t === "light" || t === "dark" ? t : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 }
 $("themeBtn").addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+
+// ---- Star, notes and title search for the open lot ----
+const TITLE_LINKS = [
+  ["Title search by address (Info Broker)", "https://ib.com.au/buy/445/qld-title-search-by-address"],
+  ["Title search by lot/plan (Info Broker)", "https://ib.com.au/buy/425/qld-title-search"],
+  ["Order via Landchecker", "https://app.landchecker.com.au/documents/certificates/title"],
+];
+
+function renderSiteTools() {
+  if (!current) return;
+  const s = sites()[current.parcel.lotplan];
+  $("starBtn").textContent = s?.star ? "★ Saved" : "☆ Save";
+  ($("siteNote") as HTMLTextAreaElement).value = s?.note ?? "";
+  $("titleLinks").innerHTML = TITLE_LINKS.map(([t, u]) => `<a href="${u}" data-url="${u}" data-title="${esc(t)}" class="ext">${esc(t)}</a>`).join(" · ");
+  $("titleOut").innerHTML = s?.title ? (marked.parse(s.title) as string) : "";
+}
+$("starBtn").addEventListener("click", () => {
+  if (!current) return;
+  const s = sites()[current.parcel.lotplan];
+  touchSite(current.parcel, { star: !s?.star });
+  renderSiteTools();
+});
+$("siteNote").addEventListener("input", () => {
+  if (current) touchSite(current.parcel, { note: ($("siteNote") as HTMLTextAreaElement).value });
+});
+$("titleLinks").addEventListener("click", (ev) => {
+  const a = (ev.target as HTMLElement).closest("a");
+  if (!a) return;
+  ev.preventDefault();
+  if (current) navigator.clipboard.writeText(current.parcel.lotplan).catch(() => {});
+  new WebviewWindow(`ext-${Date.now()}`, { url: a.dataset.url!, title: a.dataset.title ?? "Title search", width: 1100, height: 800 });
+});
+$("titleBtn").addEventListener("click", async () => {
+  if (!current) return;
+  const path = await open({ multiple: false, filters: [{ name: "Title search PDF", extensions: ["pdf"] }] });
+  if (!path) return;
+  const b = $("titleBtn") as HTMLButtonElement;
+  b.disabled = true;
+  b.textContent = "Reading title…";
+  let text = "";
+  const ch = new Channel<string>();
+  ch.onmessage = (t) => { text += t; $("titleOut").innerHTML = marked.parse(text) as string; };
+  try {
+    await invoke("summarise_title", { path, onToken: ch });
+    touchSite(current.parcel, { title: text });
+  } catch (e) {
+    $("titleOut").innerHTML = `<p class="err">${esc(e)}</p>`;
+  }
+  b.disabled = false;
+  b.textContent = "Attach title search PDF";
+});

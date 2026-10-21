@@ -147,3 +147,7 @@ dialog.wide { width: min(820px, 94vw); }
 .fans { padding: 6px 0; }
 .letter { background: #fff; color: #1f2937; font: 14px/1.7 Georgia, "Times New Roman", serif; padding: 36px 44px; border-radius: 4px; min-height: 380px; box-shadow: 0 1px 8px rgba(0,0,0,.3); }
 @media print { #printArea .frow { display: block; page-break-inside: avoid; } #printArea .frow label { display: block; font-weight: 600; font-size: 10pt; } #printArea .fpart { font-size: 11pt; color: #111; } #printArea .letter { box-shadow: none; padding: 0; } }
+
+#siteNote { width: 100%; margin-top: 8px; font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; resize: vertical; }
+#starBtn { margin-top: 6px; padding: 4px 10px; font-size: 12.5px; }
+a.ext { color: var(--accent); }

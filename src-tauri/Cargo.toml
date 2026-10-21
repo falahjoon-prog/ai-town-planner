@@ -1,6 +1,6 @@
 [package]
 name = "ai-town-planner"
-version = "0.3.7"
+version = "0.3.8"
 description = "Offline AI town planner for Brisbane"
 edition = "2021"
 
@@ -20,6 +20,7 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 geo = "0.29"
 geojson = "0.24"
 flate2 = "1"
+pdf-extract = "0.7"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
 futures-util = "0.3"
 tokio = { version = "1", features = ["fs", "io-util"] }

@@ -259,6 +259,25 @@ async fn google_pick(state: State<'_, AppState>, place_id: String) -> Result<dat
         .ok_or_else(|| "That address is not inside the loaded data pack. Download the full data pack in Settings.".to_string())
 }
 
+/// Read a purchased title search PDF and have the AI summarise easements, covenants and interests.
+#[tauri::command]
+async fn summarise_title(app: AppHandle, state: State<'_, AppState>, path: String, on_token: Channel<String>) -> Result<(), String> {
+    let text = tauri::async_runtime::spawn_blocking(move || pdf_extract::extract_text(&path).map_err(e))
+        .await
+        .map_err(e)??;
+    if text.trim().len() < 80 {
+        return Err("Could not read text from this PDF. Use the PDF downloaded from the title search (not a scan or photo).".into());
+    }
+    let text: String = text.chars().take(14000).collect();
+    let cfg = load_settings(&app);
+    let model = active_model(&app)?;
+    let (sys, user) = rules::title_prompt(&text);
+    let sink: ai::Sink = Arc::new(move |t: &str| {
+        let _ = on_token.send(t.to_string());
+    });
+    ai::generate(&cfg, model, state.llm.clone(), vec![("system".into(), sys), ("user".into(), user)], 1200, sink).await
+}
+
 #[tauri::command]
 async fn search(state: State<'_, AppState>, q: String) -> Result<Vec<data::ParcelHit>, String> {
     with_db(&state, |c| data::search(c, &q))
@@ -547,6 +566,7 @@ pub fn run() {
             import_datapack,
             download_datapack,
             search,
+            summarise_title,
             google_suggest,
             google_pick,
             assess,
