@@ -769,3 +769,16 @@ $("mapsDlg").addEventListener("click", (ev) => {
 refreshStatus().then((s) => {
   if (!s.datapack) ($("settings") as HTMLDialogElement).showModal();
 });
+
+// Light / dark theme (follows the system until the user picks one)
+function setTheme(t: "light" | "dark") {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("theme", t); } catch { /* storage unavailable */ }
+  $("themeBtn").textContent = t === "dark" ? "☀" : "☾";
+}
+{
+  let t: string | null = null;
+  try { t = localStorage.getItem("theme"); } catch { /* storage unavailable */ }
+  setTheme(t === "light" || t === "dark" ? t : matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+}
+$("themeBtn").addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));

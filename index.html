@@ -9,6 +9,7 @@
     <header class="top">
       <div class="brand"><span class="mark">◩</span> AI Town Planner <small>Brisbane</small></div>
       <div class="pack" id="packInfo">No data pack</div>
+      <button class="ghost" id="themeBtn" title="Switch light / dark">◐</button>
       <button class="ghost" id="mapsBtn">Maps</button>
       <button class="ghost" id="settingsBtn">Settings</button>
     </header>
@@ -142,7 +143,7 @@
         <div class="dlg-foot"><button type="button" class="ghost" id="docCopy">Copy</button><button type="button" class="ghost" id="docPdf">Save as PDF</button><button>Close</button></div>
       </form>
     </dialog>
-    <dialog id="mapsDlg">
+    <dialog id="mapsDlg" class="wide">
       <form method="dialog" class="dlg">
         <h2>Queensland maps</h2>
         <input id="mapsFilter" placeholder="Filter, e.g. Logan" autocomplete="off" />
