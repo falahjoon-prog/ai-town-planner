@@ -43,8 +43,11 @@ STATE_LAYERS = [
     ("state", f"{QLD}/PlanningCadastre/StatePlanning/MapServer", ["SEQ regional land use category"]),
     ("other", f"{QLD}/Biota/VegetationManagement/MapServer", ["Protected plants trigger map"]),
     # National electricity infrastructure (Geoscience Australia), wider SEQ window for "nearest" searches
-    ("infra", "https://services.ga.gov.au/gis/rest/services/National_Electricity_Infrastructure/MapServer",
-     ["Transmission Lines", "Transmission Substations", "Power Generation"]),
+    # GA has moved this service before: try each candidate; layers are matched by keyword ("~" prefix).
+    ("infra", ["https://services.ga.gov.au/gis/rest/services/Foundation_Electricity_Infrastructure/MapServer",
+               "https://services.ga.gov.au/gis/rest/services/National_Electricity_Infrastructure/MapServer",
+               "https://services.ga.gov.au/gis/rest/services/Electricity_Infrastructure/MapServer"],
+     ["~transmission line", "~substation", "~power station", "~generation"]),
 ]
 SEQ_BBOX = "152.3,-28.1,153.6,-26.6"
 
@@ -246,12 +249,21 @@ def arcgis_features(url, oid, bbox=BNE_BBOX):
 
 def load_state_layers(db, start_lid):
     lid, failed = start_lid, []
-    for authority, svc, wanted in STATE_LAYERS:
-        try:
-            meta = json.loads(get(svc, {"f": "json"}))
-        except Exception as e:  # noqa: BLE001
-            failed.append(svc); print(f"::warning title=Data pack layer failed::{svc}: {e}", flush=True); continue
+    for authority, svcs, wanted in STATE_LAYERS:
+        meta, svc = {}, None
+        for cand in ([svcs] if isinstance(svcs, str) else svcs):
+            try:
+                m = json.loads(get(cand, {"f": "json"}, retries=2))
+            except Exception as e:  # noqa: BLE001
+                print(f"  {cand}: {e}", flush=True)
+                continue
+            if m.get("layers"):
+                meta, svc = m, cand
+                break
+        if not svc:
+            failed.append(str(svcs)); print(f"::warning title=Data pack layer failed::no working service in {svcs}", flush=True); continue
         layers = meta.get("layers", [])
+        done_ids = set()
         by_id = {l["id"]: l for l in layers}
 
         def leaves(l):  # group layers expand to their data sublayers
@@ -259,13 +271,19 @@ def load_state_layers(db, start_lid):
             return [x for s in subs if s in by_id for x in leaves(by_id[s])] if subs else [l]
 
         for w in wanted:
-            exact = [l for l in layers if l.get("name", "").lower() == w.lower()]
-            match = exact or [l for l in layers if l.get("name", "").lower().startswith(w.lower())][:1]
+            if w.startswith("~"):  # keyword match, any position
+                match = [l for l in layers if w[1:] in l.get("name", "").lower() and l["id"] not in done_ids][:1]
+            else:
+                exact = [l for l in layers if l.get("name", "").lower() == w.lower()]
+                match = exact or [l for l in layers if l.get("name", "").lower().startswith(w.lower())][:1]
             # Leaf layers of a group keep the group name so rules can still recognise them.
             targets = [(x, x["name"] if x is l else f"{l['name']} — {x['name']}") for l in match for x in leaves(l)]
             if not targets:
                 failed.append(w); print(f"::warning title=Data pack layer not found::{w}", flush=True)
             for layer, name in targets:
+                if layer["id"] in done_ids:
+                    continue
+                done_ids.add(layer["id"])
                 lid += 1
                 if not load_one(db, svc, layer, name, authority, lid, SEQ_BBOX if authority == "infra" else BNE_BBOX):
                     failed.append(layer.get("name", w))
