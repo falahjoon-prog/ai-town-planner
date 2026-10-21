@@ -132,3 +132,14 @@ select { font: inherit; flex: 1; padding: 9px 10px; border: 1px solid var(--line
 .dim { font: 600 11px/1 "Segoe UI", system-ui, sans-serif; background: rgba(255,255,255,.9); color: #111827; border: 1px solid #9ca3af; border-radius: 4px; padding: 2px 4px; white-space: nowrap; }
 .dim.front { border-color: #0f5e4b; color: #0f5e4b; }
 #forms .mapitem { margin-bottom: 4px; }
+
+/* Draft documents */
+dialog.wide { width: min(820px, 94vw); }
+.doc { overflow: auto; max-height: 62vh; padding-bottom: 6px; }
+.fpart { margin: 14px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+.frow { display: grid; grid-template-columns: 38% 1fr; gap: 10px; align-items: start; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.frow label { color: var(--muted); font-size: 12.5px; padding-top: 6px; }
+.frow textarea { width: 100%; resize: vertical; font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+.fans { padding: 6px 0; }
+.letter { background: #fff; color: #1f2937; font: 14px/1.7 Georgia, "Times New Roman", serif; padding: 36px 44px; border-radius: 4px; min-height: 380px; box-shadow: 0 1px 8px rgba(0,0,0,.3); }
+@media print { #printArea .frow { display: block; page-break-inside: avoid; } #printArea .frow label { display: block; font-weight: 600; font-size: 10pt; } #printArea .fpart { font-size: 11pt; color: #111; } #printArea .letter { box-shadow: none; padding: 0; } }

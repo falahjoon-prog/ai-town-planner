@@ -287,8 +287,6 @@ async function loadSite(pid: number) {
   renderChat();
   $("saveBtn").hidden = true;
   $("pdfBtn").hidden = true;
-  $("formOut").innerHTML = "";
-  $("formCopy").hidden = true;
   subOn = false; contOn = false; powerOn = false;
   toolUi("subBtn", false); toolUi("contBtn", false); toolUi("powerBtn", false);
   drawMap(a);
@@ -463,25 +461,72 @@ $("powerBtn").addEventListener("click", async () => {
   }
 });
 
-$("formBtn").addEventListener("click", async () => {
-  if (!current) return;
-  const b = $("formBtn") as HTMLButtonElement;
-  b.disabled = true;
-  b.textContent = "Drafting…";
-  let text = "";
-  const ch = new Channel<string>();
-  ch.onmessage = (t) => { text += t; $("formOut").innerHTML = marked.parse(text) as string; };
-  try {
-    await invoke("draft_form", { pid: current.parcel.pid, useId: useId(), proposal: val("question"), onToken: ch });
-    $("formCopy").hidden = !text;
-    ($("formCopy") as HTMLElement).dataset.text = text;
-  } catch (e) {
-    $("formOut").innerHTML = `<p class="err">${esc(e)}</p>`;
+function renderForm(text: string, edit: boolean): string {
+  let html = "";
+  for (const line of text.split("\n")) {
+    const l = line.trim();
+    if (l.startsWith("## ")) html += `<h3 class="fpart">${esc(l.slice(3))}</h3>`;
+    else if (l.startsWith("Q:")) {
+      const [q, ...a] = l.slice(2).split("| A:");
+      const ans = a.join("| A:").trim();
+      html += `<div class="frow"><label>${esc(q.trim())}</label>${edit ? `<textarea rows="2">${esc(ans)}</textarea>` : `<div class="fans">${esc(ans)}</div>`}</div>`;
+    }
   }
-  b.disabled = false;
-  b.textContent = "Draft DA Form 1 answers with AI";
+  return html || `<p class="meta">Drafting…</p>`;
+}
+
+function renderLetter(text: string): string {
+  return `<div class="letter">${esc(text).replace(/\n/g, "<br>")}</div>`;
+}
+
+let docText = "";
+async function draft(letter: boolean) {
+  if (!current) return;
+  const btn = $(letter ? "letterBtn" : "formBtn") as HTMLButtonElement;
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Drafting…";
+  docText = "";
+  $("docTitle").textContent = letter ? "Cover letter" : "DA Form 1 – Development application details";
+  $("docBody").innerHTML = `<p class="meta">Drafting…</p>`;
+  ($("docDlg") as HTMLDialogElement).showModal();
+  const ch = new Channel<string>();
+  ch.onmessage = (t) => {
+    docText += t;
+    $("docBody").innerHTML = letter ? renderLetter(docText) : renderForm(docText, false);
+  };
+  try {
+    await invoke("draft_form", { pid: current.parcel.pid, useId: useId(), proposal: val("question"), letter, onToken: ch });
+    if (!letter) $("docBody").innerHTML = renderForm(docText, true);
+  } catch (e) {
+    $("docBody").innerHTML = `<p class="err">${esc(e)}</p>`;
+  }
+  btn.disabled = false;
+  btn.textContent = label;
+}
+$("formBtn").addEventListener("click", () => draft(false));
+$("letterBtn").addEventListener("click", () => draft(true));
+
+function docPlain(): string {
+  const body = $("docBody");
+  if (body.querySelector(".letter")) return docText;
+  return [...body.children].map((el) => el.classList.contains("fpart")
+    ? `\n${el.textContent}\n`
+    : `${el.querySelector("label")?.textContent}: ${(el.querySelector("textarea") as HTMLTextAreaElement | null)?.value ?? el.querySelector(".fans")?.textContent ?? ""}`).join("\n");
+}
+$("docCopy").addEventListener("click", () => navigator.clipboard.writeText(docPlain()));
+$("docPdf").addEventListener("click", () => {
+  const clone = $("docBody").cloneNode(true) as HTMLElement;
+  clone.querySelectorAll("textarea").forEach((t) => {
+    const d = document.createElement("div");
+    d.className = "fans";
+    d.textContent = (t as HTMLTextAreaElement).value;
+    t.replaceWith(d);
+  });
+  $("printArea").innerHTML = `<h1>${esc($("docTitle").textContent ?? "")}</h1>` + clone.innerHTML;
+  ($("docDlg") as HTMLDialogElement).close();
+  window.print();
 });
-$("formCopy").addEventListener("click", () => navigator.clipboard.writeText(($("formCopy") as HTMLElement).dataset.text ?? ""));
 const FLOOD_COLORS = ["#1d4ed8", "#0891b2", "#7c3aed", "#0369a1", "#4f46e5", "#0e7490", "#2563eb", "#6d28d9"];
 
 function fitTo(geoms: any[]) {

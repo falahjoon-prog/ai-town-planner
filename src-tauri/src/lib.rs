@@ -270,6 +270,7 @@ async fn draft_form(
     pid: i64,
     use_id: String,
     proposal: String,
+    letter: bool,
     on_token: Channel<String>,
 ) -> Result<(), String> {
     let cfg = load_settings(&app);
@@ -284,7 +285,7 @@ async fn draft_form(
     })
     .await
     .map_err(e)??;
-    let (sys, user) = rules::form_prompt(&a, &dev_facts, &proposal);
+    let (sys, user) = rules::form_prompt(&a, &dev_facts, &proposal, letter);
     let sink: ai::Sink = Arc::new(move |t: &str| {
         let _ = on_token.send(t.to_string());
     });

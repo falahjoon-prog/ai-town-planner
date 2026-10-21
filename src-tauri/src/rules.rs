@@ -238,16 +238,11 @@ pub fn potential_prompt(a: &Assessment, dev: &Value, question: &str) -> (String,
 }
 
 /// Prompt to draft DA Form 1 answers: prefilled facts plus AI-written descriptions; unknowns are marked.
-pub fn form_prompt(a: &Assessment, dev: &Value, proposal: &str) -> (String, String) {
+pub fn form_prompt(a: &Assessment, dev: &Value, proposal: &str, letter: bool) -> (String, String) {
     let p = &a.parcel;
-    let user = format!(
-        "Draft answers for DA Form 1 – Development application details (Queensland Planning Act 2016). Check the current form version on planning.qld.gov.au.\n\
-SITE: address {}, lot on plan {}, area {:?} m², local government area: Brisbane City Council.\n\
-ZONES: {}\nTRIGGERS BY AUTHORITY: {}\nPOTENTIAL / FORMS FACTS: {dev}\nPROPOSAL: {}\n\n\
-Write a Markdown table per Part with the columns 'Question' and 'Draft answer', covering: Part 2 Location details (3.1 street address and lot on plan, 3.2 coordinates if known, 4 premises characteristics, 5 easements); \
-Part 3 Development details (6.1 type of development, approval type, level of assessment as 'to be confirmed', brief description; 7 development types; 8.1 general description of the use, planning scheme definition, dwelling units and GFA if applicable; 9–10 reconfiguring details if subdivision); \
-Part 4 Assessment manager; Part 5 Referral details (list likely SARA referral matters from the triggers); Part 7 Further details (23.x further legislative requirements that apply, e.g. ERA, koala, vegetation, coastal, heritage). \
-Use only the facts. For anything not known (applicant, owner, plans, values), write '[to complete]'. Then list the attachments the applicant should prepare.",
+    let facts = format!(
+        "SITE: address {}, lot on plan {}, area {:?} m², local government area: Brisbane City Council.\n\
+ZONES: {}\nTRIGGERS BY AUTHORITY: {}\nPOTENTIAL / FORMS FACTS: {dev}\nPROPOSAL: {}\n",
         p.address,
         p.lotplan,
         p.area_m2,
@@ -255,6 +250,25 @@ Use only the facts. For anything not known (applicant, owner, plans, values), wr
         json!(a.flags.iter().map(|f| json!({"authority": f.rule.authority, "matter": f.rule.title, "legislation": f.rule.code})).collect::<Vec<_>>()),
         if proposal.trim().is_empty() { "[describe the proposal]" } else { proposal.trim() }
     );
+    let user = if letter {
+        format!(
+            "Write a covering letter to accompany a development application (Queensland Planning Act 2016).\n{facts}\n\
+Output plain text only, no Markdown, in this letter layout, one item per line:\n\
+[Applicant name and address]\n[Date]\nThe Assessment Manager\n(Brisbane City Council; Economic Development Queensland if a PDA site)\n\n\
+Re: <site address and lot on plan> – <short description of proposal>\n\nDear Sir/Madam,\n\n\
+Then 3–5 short paragraphs: what is proposed; the site and zone; the approvals and referrals likely needed (from the triggers, level of assessment 'to be confirmed'); the supporting documents attached; a request to contact the applicant. \
+Finish with 'Yours faithfully,' then '[Name]' and '[Position / company]'. Use only the facts; write '[to complete]' for unknowns. Do not invent code references."
+        )
+    } else {
+        format!(
+            "Draft answers for DA Form 1 – Development application details (Queensland Planning Act 2016). Check the current form version on planning.qld.gov.au.\n{facts}\n\
+Output plain text only, no Markdown and no tables, in exactly this layout. A line starting '## ' starts a Part; every other line is one question in the form 'Q: <number and question> | A: <draft answer>'.\n\
+Parts to cover: Part 2 Location details (3.1 street address and lot on plan, 3.2 coordinates if known, 4 premises characteristics, 5 easements); \
+Part 3 Development details (6.1 type of development, approval type, level of assessment as 'to be confirmed', brief description; 7 development types; 8.1 general description of the use, planning scheme definition, dwelling units and GFA if applicable; 9–10 reconfiguring details if subdivision); \
+Part 4 Assessment manager; Part 5 Referral details (list likely SARA referral matters from the triggers); Part 7 Further details (23.x further legislative requirements that apply, e.g. ERA, koala, vegetation, coastal, heritage). \
+Use only the facts. For anything not known (applicant, owner, plans, values), write '[to complete]'. End with a '## Attachments to prepare' Part whose lines are 'Q: <attachment> | A: <why it is needed>'."
+        )
+    };
     (PERSONA.to_string(), user)
 }
 
