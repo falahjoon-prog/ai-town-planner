@@ -282,8 +282,71 @@ function bounds(geom: any): [number, number, number, number] {
   return [x0, y0, x1, y1];
 }
 
+let floodOn = false;
+const FLOOD_COLORS = ["#1d4ed8", "#0891b2", "#7c3aed", "#0369a1", "#4f46e5", "#0e7490", "#2563eb", "#6d28d9"];
+
+function fitTo(geoms: any[]) {
+  let [x0, y0, x1, y1] = [180, 90, -180, -90];
+  for (const g of geoms) {
+    if (!g?.coordinates) continue;
+    const b = bounds(g);
+    x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]);
+  }
+  map?.fitBounds([[x0, y0], [x1, y1]], { padding: 30, duration: 300 });
+}
+
+function setFloodUi(on: boolean, legend = "") {
+  floodOn = on;
+  $("floodBtn").textContent = on ? "Hide flood map" : "Flood map";
+  $("floodBtn").classList.toggle("on", on);
+  $("legend").innerHTML = legend;
+  $("legend").hidden = !legend;
+}
+
+// Flood map: all flood layers within ~400 m of the lot, coloured by layer, with a legend.
+$("floodBtn").addEventListener("click", async () => {
+  if (!current || !map) return;
+  const m = map;
+  if (floodOn) {
+    if (m.getLayer("flood")) m.removeLayer("flood");
+    if (m.getLayer("flood-line")) m.removeLayer("flood-line");
+    if (m.getSource("flood")) m.removeSource("flood");
+    setFloodUi(false);
+    fitTo([current.parcel.geom]);
+    return;
+  }
+  $("floodBtn").textContent = "Loading…";
+  let feats: Overlay[];
+  try {
+    feats = await invoke<Overlay[]>("flood_map", { pid: current.parcel.pid });
+  } catch (e) {
+    setFloodUi(false);
+    return alertMsg(e);
+  }
+  if (!feats.length) {
+    setFloodUi(true, `<b>No mapped flooding within 400 m</b><div class="meta">Check Council's FloodWise Property Report to confirm.</div>`);
+    return;
+  }
+  const titles = [...new Set(feats.map((f) => f.title))];
+  const color = (t: string) => FLOOD_COLORS[titles.indexOf(t) % FLOOD_COLORS.length];
+  m.addSource("flood", {
+    type: "geojson",
+    data: { type: "FeatureCollection", features: feats.map((f) => ({ type: "Feature", properties: { c: color(f.title) }, geometry: f.geom })) },
+  });
+  m.addLayer({ id: "flood", type: "fill", source: "flood", paint: { "fill-color": ["get", "c"], "fill-opacity": 0.35 } }, "lot");
+  m.addLayer({ id: "flood-line", type: "line", source: "flood", paint: { "line-color": ["get", "c"], "line-width": 1 } }, "lot");
+  const short = (t: string) => t.replace(/^City Plan 2014 — /, "").replace(/^Queensland — /, "State: ");
+  setFloodUi(
+    true,
+    titles.map((t) => `<div><i style="background:${color(t)}"></i>${esc(short(t))}</div>`).join("") +
+      `<div class="meta">Mapped flood planning areas. Levels: FloodWise Property Report.</div>`
+  );
+  fitTo([current.parcel.geom, ...feats.map((f) => f.geom)]);
+});
+
 function drawMap(a: Assessment) {
   map?.remove();
+  setFloodUi(false);
   map = new maplibregl.Map({
     container: "map",
     style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#efece4" } }] },

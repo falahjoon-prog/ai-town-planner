@@ -1,6 +1,6 @@
 [package]
 name = "ai-town-planner"
-version = "0.2.0"
+version = "0.2.1"
 description = "Offline AI town planner for Brisbane"
 edition = "2021"
 

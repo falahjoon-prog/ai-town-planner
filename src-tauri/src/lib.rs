@@ -166,6 +166,18 @@ async fn assess(state: State<'_, AppState>, pid: i64) -> Result<rules::Assessmen
     tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)?
 }
 
+#[tauri::command]
+async fn flood_map(state: State<'_, AppState>, pid: i64) -> Result<Vec<data::OverlayHit>, String> {
+    let db = state.db.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let g = db.lock().map_err(e)?;
+        let c = g.as_ref().ok_or("No data pack loaded")?;
+        data::flood_map(c, &data::parcel(c, pid)?, 400.0)
+    })
+    .await
+    .map_err(e)?
+}
+
 fn load_assessment(db: &Arc<Mutex<Option<rusqlite::Connection>>>, pid: i64) -> Result<rules::Assessment, String> {
     let g = db.lock().map_err(e)?;
     let c = g.as_ref().ok_or("No data pack loaded")?;
@@ -346,6 +358,7 @@ pub fn run() {
             import_datapack,
             search,
             assess,
+            flood_map,
             generate_report,
             chat,
             cancel_report,

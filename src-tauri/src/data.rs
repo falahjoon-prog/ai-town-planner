@@ -302,3 +302,44 @@ pub fn overlays(c: &Connection, p: &Parcel) -> Result<Vec<OverlayHit>, String> {
     hits.sort_by(|a, b| a.title.cmp(&b.title));
     Ok(hits)
 }
+
+/// Flood-related features within `radius_m` of the lot, clipped to that window (for the flood map view).
+pub fn flood_map(c: &Connection, p: &Parcel, radius_m: f64) -> Result<Vec<OverlayHit>, String> {
+    let pg = to_geo(&p.geom.to_string())?;
+    let rect = geo::BoundingRect::bounding_rect(&pg).ok_or("Empty lot geometry")?;
+    let pr = Proj::new(rect.center().y);
+    let (px, py) = (radius_m / pr.kx, radius_m / pr.ky);
+    let (x0, x1, y0, y1) = (rect.min().x - px, rect.max().x + px, rect.min().y - py, rect.max().y + py);
+    let window = MultiPolygon(vec![geo::Rect::new(geo::coord! { x: x0, y: y0 }, geo::coord! { x: x1, y: y1 }).to_polygon()]);
+    let auth = if has_authority_column(c) { "COALESCE(l.authority, 'council')" } else { "'council'" };
+    let mut st = c
+        .prepare(&format!(
+            "SELECT {auth}, l.dataset_id, l.title, f.props, f.geom FROM feature_idx i
+             JOIN features f ON f.fid = i.fid JOIN layers l ON l.lid = f.lid
+             WHERE i.minx <= ?2 AND i.maxx >= ?1 AND i.miny <= ?4 AND i.maxy >= ?3
+               AND (lower(l.title) LIKE '%flood%' OR lower(l.title) LIKE '%overland%'
+                    OR lower(l.title) LIKE '%storm tide%' OR lower(l.title) LIKE '%hazard area%')
+             LIMIT 4000"
+        ))
+        .map_err(e)?;
+    let rows = st
+        .query_map(rusqlite::params![x0, x1, y0, y1], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?, r.get::<_, String>(3)?, r.get::<_, String>(4)?))
+        })
+        .map_err(e)?;
+    let mut out = Vec::new();
+    for row in rows {
+        let (authority, dataset_id, title, props, geom) = row.map_err(e)?;
+        let Ok(fg) = to_geo(&geom) else { continue };
+        let geom = match polys(&fg) {
+            Some(fm) => match catch_unwind(AssertUnwindSafe(|| window.intersection(&fm))) {
+                Ok(clip) if !clip.0.is_empty() => geo_json(&clip),
+                _ => continue,
+            },
+            None => serde_json::from_str(&geom).unwrap_or(Value::Null),
+        };
+        let props = serde_json::from_str(&props).unwrap_or(Value::Null);
+        out.push(OverlayHit { authority, dataset_id, title, props, coverage_pct: None, distance_m: None, geom });
+    }
+    Ok(out)
+}
