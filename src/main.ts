@@ -346,7 +346,7 @@ async function loadSite(pid: number) {
   chatHistory = [];
   renderChat();
   $("saveBtn").hidden = true;
-  $("pdfBtn").hidden = true;
+  $("pdfBtn").hidden = false; // the client PDF works before an AI report too
   subOn = false; contOn = false; powerOn = false;
   toolUi("subBtn", false); toolUi("contBtn", false); toolUi("powerBtn", false);
   drawMap(a);
@@ -658,6 +658,7 @@ function drawMap(a: Assessment) {
     container: "map",
     style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#efece4" } }] },
     attributionControl: { compact: true },
+    canvasContextAttributes: { preserveDrawingBuffer: true }, // lets the PDF include a map snapshot
   });
   map.on("load", () => {
     const m = map!;
@@ -721,7 +722,6 @@ $("genBtn").addEventListener("click", async () => {
     if (sections.length) activeTab = sections[0].key;
     renderReport();
     $("saveBtn").hidden = !sections.length;
-    $("pdfBtn").hidden = !sections.length;
   } catch (e) {
     $("report").innerHTML = `<p class="err">${esc(e)}</p>`;
   }
@@ -771,9 +771,29 @@ $("chatForm").addEventListener("submit", async (ev) => {
 
 $("stopBtn").addEventListener("click", () => invoke("cancel_report"));
 
-function reportBody(a: Assessment): string {
-  return `<h1>Planning assessment: ${esc(a.parcel.address || a.parcel.lotplan)}</h1>
-<small>${esc(a.parcel.lotplan)}${a.parcel.area_m2 ? ` · ${Math.round(a.parcel.area_m2).toLocaleString()} m²` : ""} · Data pack ${esc(a.manifest.built_at)} · Generated ${new Date().toLocaleString("en-AU")}</small>
+type Brand = { company?: string; by?: string; logo?: string };
+function brand(): Brand {
+  try { return JSON.parse(localStorage.getItem("brand") ?? "{}"); } catch { return {}; }
+}
+
+// Client-ready report: branding, map, zoning and constraints by authority, potential, title, notes, AI report.
+function reportBody(a: Assessment, full = true): string {
+  const b = brand();
+  const site = sites()[a.parcel.lotplan];
+  let mapImg = "";
+  try { if (full && map) mapImg = `<img class="rmap" src="${map.getCanvas().toDataURL("image/png")}" alt="Site map">`; } catch { /* map not ready */ }
+  const byAuth = (k: string) => a.flags.filter((f) => f.rule.authority === k);
+  const auths: [string, string][] = [["council", "Council"], ["sara", "State (SARA)"], ["pda", "Economic Development Queensland (PDA)"], ["state", "State interests"], ["other", "Other agencies and services"]];
+  const head = b.logo || b.company
+    ? `<div class="rbrand">${b.logo ? `<img src="${b.logo}" alt="">` : ""}<div><b>${esc(b.company ?? "")}</b>${b.by ? `<br><small>Prepared by ${esc(b.by)}</small>` : ""}</div></div>` : "";
+  return `${head}<h1>Planning assessment: ${esc(a.parcel.address || a.parcel.lotplan)}</h1>
+<small>${esc(a.parcel.lotplan)}${a.parcel.area_m2 ? ` · ${Math.round(a.parcel.area_m2).toLocaleString()} m²` : ""} · Data pack ${esc(a.manifest.built_at)} · ${new Date().toLocaleDateString("en-AU")}</small>
+${mapImg}
+${full ? `<h2>Zoning</h2><ul>${a.zones.map((z) => `<li><b>${esc(z.zone.name)}</b> (${esc(z.authority)})${z.coverage_pct != null ? ` – ${Math.round(z.coverage_pct)}% of lot` : ""}</li>`).join("")}</ul>
+<h2>Constraints by authority</h2>${auths.filter(([k]) => byAuth(k).length).map(([k, t]) => `<h3>${t}</h3><ul>${byAuth(k).map((f) => `<li><b>${esc(f.rule.title)}</b> – ${esc(f.rule.note)}</li>`).join("")}</ul>`).join("") || "<p>No mapped constraints.</p>"}
+<h2>Development potential</h2>${$("pot").innerHTML}
+${site?.title ? `<h2>Title search summary</h2>${marked.parse(site.title)}` : ""}
+${site?.note ? `<h2>Notes</h2><p>${esc(site.note).replace(/\n/g, "<br>")}</p>` : ""}` : ""}
 ${sections.map((x) => `<h2>${esc(x.title)}</h2>${marked.parse(x.text)}`).join("")}
 <p class="d">${esc($("disclaimer").textContent)}<br>${esc(a.manifest.attribution)}</p>`;
 }
@@ -947,3 +967,28 @@ $("daRegBtn").addEventListener("click", () => {
   navigator.clipboard.writeText(current.parcel.address || current.parcel.lotplan).catch(() => {});
   new WebviewWindow(`ext-${Date.now()}`, { url: "https://developmenti.brisbane.qld.gov.au/", title: "Development.i – nearby applications", width: 1200, height: 850 });
 });
+
+// ---- Report branding (Settings) ----
+function showBrand() {
+  const b = brand();
+  setVal("brandCompany", b.company ?? "");
+  setVal("brandBy", b.by ?? "");
+  ($("brandLogoPrev") as HTMLImageElement).src = b.logo ?? "";
+  $("brandLogoPrev").hidden = !b.logo;
+}
+function saveBrand(patch: Brand) {
+  try { localStorage.setItem("brand", JSON.stringify({ ...brand(), ...patch })); } catch { alertMsg("Could not save branding (logo may be too large)."); }
+  showBrand();
+}
+$("brandCompany").addEventListener("change", () => saveBrand({ company: val("brandCompany") }));
+$("brandBy").addEventListener("change", () => saveBrand({ by: val("brandBy") }));
+$("brandLogo").addEventListener("change", () => {
+  const f = ($("brandLogo") as HTMLInputElement).files?.[0];
+  if (!f) return;
+  if (f.size > 1_500_000) return alertMsg("Please use a logo under 1.5 MB.");
+  const r = new FileReader();
+  r.onload = () => saveBrand({ logo: String(r.result) });
+  r.readAsDataURL(f);
+});
+$("brandClear").addEventListener("click", () => saveBrand({ logo: undefined }));
+showBrand();

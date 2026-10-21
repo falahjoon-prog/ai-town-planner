@@ -121,6 +121,11 @@
         <p id="packDetail" class="meta"></p>
         <button type="button" id="downloadPack">Download data pack (about 400 MB)</button>
         <button type="button" id="importPack">Import data pack (.sqlite or .sqlite.gz)</button>
+        <h3>Report branding</h3>
+        <input id="brandCompany" placeholder="Company name (shown on the PDF report)" />
+        <input id="brandBy" placeholder="Prepared by (your name)" />
+        <div class="report-bar"><label class="ghost-file">Logo image <input id="brandLogo" type="file" accept="image/png,image/jpeg,image/svg+xml" /></label>
+          <img id="brandLogoPrev" class="logo-prev" alt="" hidden /><button type="button" class="ghost" id="brandClear">Remove logo</button></div>
         <h3>Address search</h3>
         <input id="googleKey" type="password" placeholder="Google Places API key (optional – better address search)" autocomplete="off" />
         <p class="meta" id="googleHint"></p>
