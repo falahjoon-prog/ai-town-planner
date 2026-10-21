@@ -225,12 +225,26 @@ $("q").addEventListener("input", () => {
 
 let hasGoogle = false;
 
+type Recent = { pid: number; address: string; lotplan: string };
+function recents(): Recent[] {
+  try { return JSON.parse(localStorage.getItem("recent") ?? "[]"); } catch { return []; }
+}
+function addRecent(p: { pid: number; address: string; lotplan: string }) {
+  const r = [{ pid: p.pid, address: p.address, lotplan: p.lotplan }, ...recents().filter((x) => x.lotplan !== p.lotplan)].slice(0, 20);
+  try { localStorage.setItem("recent", JSON.stringify(r)); } catch { /* storage unavailable */ }
+}
+function showRecents() {
+  const r = recents();
+  $("results").innerHTML = r.map((h) => `<li data-pid="${h.pid}" data-lp="${esc(h.lotplan)}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></li>`).join("");
+  $("hint").textContent = r.length ? "Recent addresses" : "";
+}
+
 async function runSearch() {
   const q = ($("q") as HTMLInputElement).value.trim();
   const list = $("results");
   $("hint").classList.remove("err");
   if (q.length < 3) {
-    list.innerHTML = "";
+    showRecents();
     return;
   }
   if (hasGoogle) {
@@ -262,8 +276,20 @@ $("results").addEventListener("click", (ev) => {
   document.querySelectorAll("#results li").forEach((x) => x.classList.toggle("sel", x === li));
   if (li.dataset.place) {
     invoke<Hit>("google_pick", { placeId: li.dataset.place }).then((h) => loadSite(h.pid), alertMsg);
-  } else loadSite(Number(li.dataset.pid));
+  } else openSaved(li);
 });
+
+// A saved lot is re-found by lot/plan if the data pack was replaced and the id changed.
+async function openSaved(li: HTMLElement) {
+  const lp = li.dataset.lp;
+  if (!lp) return loadSite(Number(li.dataset.pid));
+  await loadSite(Number(li.dataset.pid));
+  if (current?.parcel.lotplan !== lp) {
+    const hits = await invoke<Hit[]>("search", { q: lp }).catch(() => []);
+    const h = hits.find((x) => x.lotplan === lp);
+    if (h) await loadSite(h.pid);
+  }
+}
 
 // ---- Site ----
 const PALETTE = ["#c2410c", "#0e7490", "#7c3aed", "#b91c1c", "#15803d", "#a16207", "#be185d", "#1d4ed8"];
@@ -275,6 +301,7 @@ async function loadSite(pid: number) {
     return alertMsg(e);
   }
   const a = current;
+  addRecent(a.parcel);
   $("empty").hidden = true;
   $("site").hidden = false;
   $("siteAddr").textContent = a.parcel.address || a.parcel.lotplan;
