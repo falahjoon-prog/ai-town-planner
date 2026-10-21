@@ -1,74 +1,74 @@
 [
- {
-  "id": "daform1",
-  "name": "DA Form 1 – Development application details",
-  "to": "Assessment manager (Council; EDQ for PDA sites)",
-  "when": "Any development application: material change of use, reconfiguring a lot or operational work",
-  "url": "https://planning.qld.gov.au/",
-  "lodge": "Brisbane: Development.i online lodgement",
-  "lodge_url": "https://developmenti.brisbane.qld.gov.au/"
- },
- {
-  "id": "daform2",
-  "name": "DA Form 2 – Building work details",
-  "to": "Assessment manager / building certifier",
-  "when": "Building work assessable against the planning scheme, or that needs referral",
-  "url": "https://planning.qld.gov.au/",
-  "lodge": "With the development application",
-  "lodge_url": ""
- },
- {
-  "id": "sara",
-  "name": "SARA referral (DA Form 1 Part 5 + SARA lodgement)",
-  "to": "State Assessment and Referral Agency (SARA)",
-  "when": "State referral triggers apply (state-controlled road, koala, vegetation, wetland, coastal)",
-  "url": "https://planning.qld.gov.au/planning-framework/mapping",
-  "lodge": "MyDAS2 (SARA's online system), after the assessment manager confirms the application",
-  "lodge_url": ""
- },
- {
-  "id": "pda",
-  "name": "PDA development application",
-  "to": "Economic Development Queensland (EDQ)",
-  "when": "Site is in a Priority Development Area",
-  "url": "https://planning.qld.gov.au/",
-  "lodge": "EDQ online lodgement",
-  "lodge_url": ""
- },
- {
-  "id": "era",
-  "name": "Environmental authority application (ERA)",
-  "to": "Department of the Environment, Tourism, Science and Innovation (DESI)",
-  "when": "An environmentally relevant activity is proposed (e.g. large generators, fuel burning or chemical storage for a data centre or industry)",
-  "url": "https://www.business.qld.gov.au/",
-  "lodge": "Queensland Government Online Services (environmental authorities)",
-  "lodge_url": ""
- },
- {
-  "id": "water",
-  "name": "Water and sewer connection application",
-  "to": "Urban Utilities",
-  "when": "New lots, new dwellings or intensified use",
-  "url": "https://urbanutilities.com.au/",
-  "lodge": "Urban Utilities developer applications portal",
-  "lodge_url": ""
- },
- {
-  "id": "power",
-  "name": "Electricity connection application",
-  "to": "Energex",
-  "when": "New or upgraded supply; large loads (data centres) need an early enquiry",
-  "url": "https://www.energex.com.au/",
-  "lodge": "Energex connections portal",
-  "lodge_url": ""
- },
- {
-  "id": "qleave",
-  "name": "QLeave levy (Portable long service leave)",
-  "to": "QLeave",
-  "when": "Building or construction work at or above the QLeave levy threshold (check current value)",
-  "url": "https://www.qleave.qld.gov.au/",
-  "lodge": "QLeave online",
-  "lodge_url": ""
- }
+  {
+    "id": "daform1",
+    "name": "DA Form 1 – Development application details",
+    "to": "Assessment manager (Council; EDQ for PDA sites)",
+    "when": "Any development application: material change of use, reconfiguring a lot or operational work",
+    "url": "https://www.planning.qld.gov.au/__data/assets/word_doc/0025/86218/da-form-1.docx",
+    "lodge": "Brisbane: development application lodgement form (online)",
+    "lodge_url": "https://services.brisbane.qld.gov.au/online-services/development/development-application-lodgement-form"
+  },
+  {
+    "id": "daform2",
+    "name": "DA Form 2 – Building work details",
+    "to": "Assessment manager / building certifier",
+    "when": "Building work assessable against the planning scheme, or that needs referral",
+    "url": "https://dsdmipprd.blob.core.windows.net/general/D17129101DAForm2-Buildingworkdetails.docx",
+    "lodge": "Attach to DA Form 1 in Brisbane online lodgement",
+    "lodge_url": "https://services.brisbane.qld.gov.au/online-services/development/development-application-lodgement-form"
+  },
+  {
+    "id": "sara",
+    "name": "SARA referral (DA Form 1 Part 5 + SARA lodgement)",
+    "to": "State Assessment and Referral Agency (SARA)",
+    "when": "State referral triggers apply (state-controlled road, koala, vegetation, wetland, coastal)",
+    "url": "https://dsdmipprd.blob.core.windows.net/general/sara-referral-pathways-under-the-planning-act-2016.pdf",
+    "lodge": "MyDAS2 (SARA's online system), after the assessment manager confirms the application",
+    "lodge_url": "https://www.planning.qld.gov.au/planning-framework/planning-online-services"
+  },
+  {
+    "id": "pda",
+    "name": "PDA development application",
+    "to": "Economic Development Queensland (EDQ)",
+    "when": "Site is in a Priority Development Area",
+    "url": "https://www.edq.qld.gov.au/__data/assets/word_doc/0007/104200/edq-development-application-form-v12.docx",
+    "lodge": "EDQ – follow the lodgement instructions in the form",
+    "lodge_url": ""
+  },
+  {
+    "id": "era",
+    "name": "Environmental authority application (ERA)",
+    "to": "Department of the Environment, Tourism, Science and Innovation (DESI)",
+    "when": "An environmentally relevant activity is proposed (e.g. large generators, fuel burning or chemical storage for a data centre or industry)",
+    "url": "https://www.business.qld.gov.au/running-business/environment/licences-permits/applying",
+    "lodge": "Queensland Government Online Services (environmental authorities)",
+    "lodge_url": ""
+  },
+  {
+    "id": "water",
+    "name": "Water and sewer connection application",
+    "to": "Urban Utilities",
+    "when": "New lots, new dwellings or intensified use",
+    "url": "https://www.urbanutilities.com.au/development/our-services/how-to-connect-water-and-sewerage/standard-connections",
+    "lodge": "Urban Utilities developer services",
+    "lodge_url": ""
+  },
+  {
+    "id": "power",
+    "name": "Electricity connection application",
+    "to": "Energex",
+    "when": "New or upgraded supply; large loads (data centres) need an early enquiry",
+    "url": "https://www.energex.com.au/our-services/connections/large-customer-connections/standards-manuals-and-fact-sheets/pdf/seq/enquiry-and-application-forms-al/Large-Customer-Connection-Application-Form.pdf",
+    "lodge": "Energex large-customer connections (for data centres and other large loads)",
+    "lodge_url": "https://www.energex.com.au/our-services/connections/large-customer-connections/large-customer-electricity-connections"
+  },
+  {
+    "id": "qleave",
+    "name": "QLeave levy (Portable long service leave)",
+    "to": "QLeave",
+    "when": "Building or construction work at or above the QLeave levy threshold (check current value)",
+    "url": "https://bcilevies.qleave.qld.gov.au/",
+    "lodge": "QLeave levy portal (online)",
+    "lodge_url": "https://bcilevies.qleave.qld.gov.au/"
+  }
 ]
