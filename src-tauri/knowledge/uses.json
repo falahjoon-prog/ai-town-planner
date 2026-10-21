@@ -42,6 +42,13 @@
             "source": "Building Act 1975",
             "url": "https://www.business.qld.gov.au/industries/building-property-development/building-construction/approvals",
             "verify": false
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
           }
         ]
       },
@@ -57,6 +64,13 @@
             "source": "BCC fact sheet: Residential development in suburban zones",
             "url": "https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones",
             "verify": true
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
           }
         ]
       }
@@ -102,6 +116,13 @@
             "source": "BCC: Low-medium density residential design amendment",
             "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
             "verify": true
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
           }
         ]
       },
@@ -124,6 +145,13 @@
             "source": "Dual occupancy code (v37.00/2026), as summarised by LandIntel",
             "url": "https://landintel.com.au/blogs/news/can-i-build-a-duplex-in-brisbane",
             "verify": true
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
           }
         ]
       },
@@ -139,6 +167,13 @@
             "source": "Brisbane City Plan 2014 Part 5",
             "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
             "verify": true
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
           }
         ]
       }
@@ -176,6 +211,13 @@
             "source": "Brisbane City Plan 2014 Part 5",
             "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
             "verify": true
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
           }
         ]
       },
@@ -217,6 +259,13 @@
             "source": "Brisbane City Plan 2014 Part 5",
             "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
             "verify": true
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
           }
         ]
       }
@@ -232,6 +281,30 @@
       "Rear lot access handle width",
       "Services connections for each new lot (Urban Utilities, Energex)",
       "Survey plan by a registered surveyor; compliance assessment for the plan of subdivision"
+    ],
+    "rules": [
+      {
+        "zone": [],
+        "level": "Usually code assessment where the lot meets the zone's minimum lot size and frontage; impact assessment where it does not. Check the Subdivision code and the zone's table of assessment.",
+        "items": [
+          {
+            "label": "Infrastructure charge – Council (reconfiguring a lot)",
+            "value": "$18,793.33 per additional lot (Resolution No. 15, from 1 July 2026; indexed at payment). Credit for each existing lot.",
+            "source": "Brisbane Infrastructure Charges Resolution (No. 15) 2026, Schedule 2 Table A",
+            "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/brisbane-infrastructure-charges-resolution-no-15-2026.pdf",
+            "verify": false,
+            "key": "ic_lot",
+            "n": 18793.33
+          },
+          {
+            "label": "Infrastructure charge – water and sewer",
+            "value": "Charged separately by Urban Utilities (call 13 26 57)",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
+          }
+        ]
+      }
     ]
   },
   {
@@ -250,6 +323,28 @@
       "Centre hierarchy and gross floor area limits",
       "Car parking and servicing",
       "Amenity: hours, noise, lighting"
+    ],
+    "rules": [
+      {
+        "zone": [],
+        "level": "Depends on the zone, precinct and floor area – check the zone's table of assessment.",
+        "items": [
+          {
+            "label": "Tables of assessment",
+            "value": "Zone table for this lot",
+            "source": "Brisbane City Plan 2014 Part 5",
+            "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
+            "verify": false
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
+          }
+        ]
+      }
     ]
   },
   {
@@ -266,6 +361,28 @@
       "Separation from sensitive uses",
       "Environmentally relevant activity (ERA) triggers",
       "Heavy vehicle access and servicing"
+    ],
+    "rules": [
+      {
+        "zone": [],
+        "level": "Depends on the zone, precinct and floor area – check the zone's table of assessment.",
+        "items": [
+          {
+            "label": "Tables of assessment",
+            "value": "Zone table for this lot",
+            "source": "Brisbane City Plan 2014 Part 5",
+            "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
+            "verify": false
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
+          }
+        ]
+      }
     ]
   },
   {
@@ -302,6 +419,28 @@
       "Flood immunity: critical infrastructure usually needs high flood immunity – check flood overlays and FloodWise levels",
       "Interface with residential uses: visual bulk, lighting, setbacks, landscaping",
       "Traffic: construction traffic and heavy vehicle deliveries (generators, transformers)"
+    ],
+    "rules": [
+      {
+        "zone": [],
+        "level": "Depends on the zone, precinct and floor area – check the zone's table of assessment.",
+        "items": [
+          {
+            "label": "Tables of assessment",
+            "value": "Zone table for this lot",
+            "source": "Brisbane City Plan 2014 Part 5",
+            "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
+            "verify": false
+          },
+          {
+            "label": "Infrastructure charges",
+            "value": "Payable on new dwellings, lots and floor area – get a Council estimate (Request for Infrastructure Charges Estimate) and an Urban Utilities quote",
+            "source": "BCC: Infrastructure charges",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/fees-and-charges/infrastructure-charges",
+            "verify": false
+          }
+        ]
+      }
     ]
   }
 ]

@@ -373,7 +373,7 @@ type Pot = {
   provisions: { title: string; items: { label: string; value: string; source: string; url: string; verify: boolean }[] } | null;
   subdivision: string[]; lots_by_area: number | null; sketch: { area_m2: number; geom: any }[];
   use_fit: { use_def: { name: string; term: string; checks: string[]; sources: { name: string; url: string }[] }; zone_ok: boolean | null; note: string;
-    rule: { level: string; items: { label: string; value: string; source: string; url: string; verify: boolean }[] } | null } | null;
+    rule: { level: string; items: { label: string; value: string; source: string; url: string; verify: boolean; key?: string; n?: number }[] } | null } | null;
   forms: { form: { name: string; to: string; when: string; url: string; lodge: string; lodge_url: string }; reason: string }[];
   pda: boolean;
   power: { kind: string; distance_m: number; props: Record<string, unknown> }[];
@@ -421,7 +421,7 @@ function renderPotential() {
     ? `<div class="${p.use_fit.zone_ok === false ? "flag" : "zone"}"><span class="auth">Proposal</span> <b>${esc(p.use_fit.use_def.name)}</b>
        <div class="meta">Planning use term: ${esc(p.use_fit.use_def.term)}</div><p>${esc(p.use_fit.note)}</p>
        ${p.use_fit.rule ? `<p><b>Level of assessment:</b> ${esc(p.use_fit.rule.level)}</p>
-         <table class="ptable"><tbody>${p.use_fit.rule.items.map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ' <span class="pill warn">verify</span>' : ""}</td><td class="meta">${i.url ? link(i.url, i.source) : esc(i.source)}</td></tr>`).join("")}</tbody></table>` : ""}
+         <table class="ptable"><tbody>${p.use_fit.rule.items.map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ' <span class="pill warn">verify</span>' : ""}</td><td class="meta">${i.url ? link(i.url, i.source) : esc(i.source)}</td></tr>`).join("")}</tbody></table>${chargeEstimate(p)}` : ""}
        <ul>${p.use_fit.use_def.checks.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
        ${(p.use_fit.use_def.sources ?? []).length ? `<div class="meta">Sources: ${p.use_fit.use_def.sources.map((x) => link(x.url, x.name)).join(" · ")}</div>` : ""}</div>`
     : "";
@@ -930,4 +930,20 @@ $("baseSel").addEventListener("change", () => {
   const k = ($("baseSel") as HTMLSelectElement).value;
   try { localStorage.setItem("base", k); } catch { /* storage unavailable */ }
   setBase(k);
+});
+
+// Council infrastructure charge for the extra lots a subdivision would create (Council share only).
+function chargeEstimate(p: any): string {
+  const rate = p.use_fit?.rule?.items.find((i: any) => i.key === "ic_lot")?.n;
+  const n = p.lots_by_area;
+  if (!rate || !n || n < 2) return "";
+  const money = (x: number) => `$${Math.round(x).toLocaleString()}`;
+  return `<p class="meta"><b>Estimate:</b> ${n} lots = ${n - 1} additional × ${money(rate)} = <b>${money((n - 1) * rate)}</b> Council charge, plus Urban Utilities water and sewer. Before indexation and any credits.</p>`;
+}
+
+// ---- Nearby approvals: Brisbane's DA register (Development.i), address copied for pasting ----
+$("daRegBtn").addEventListener("click", () => {
+  if (!current) return;
+  navigator.clipboard.writeText(current.parcel.address || current.parcel.lotplan).catch(() => {});
+  new WebviewWindow(`ext-${Date.now()}`, { url: "https://developmenti.brisbane.qld.gov.au/", title: "Development.i – nearby applications", width: 1200, height: 850 });
 });
