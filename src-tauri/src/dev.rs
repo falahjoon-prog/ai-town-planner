@@ -191,18 +191,24 @@ fn neighbour_segments(c: &Connection, p: &Parcel, pm: &MultiPolygon<f64>, pr: &P
     let (px, py) = (3.0 / pr.kx, 3.0 / pr.ky);
     let mut st = c
         .prepare(
-            "SELECT p.pid, p.geom FROM parcel_idx i JOIN parcels p ON p.pid = i.pid
+            "SELECT p.pid, p.geom, p.lotplan, p.props FROM parcel_idx i JOIN parcels p ON p.pid = i.pid
              WHERE i.minx <= ?2 AND i.maxx >= ?1 AND i.miny <= ?4 AND i.maxy >= ?3 AND p.pid <> ?5 LIMIT 400",
         )
         .ok()?;
     let rows = st
         .query_map(rusqlite::params![rect.min().x - px, rect.max().x + px, rect.min().y - py, rect.max().y + py, p.pid], |r| {
-            Ok(r.get::<_, String>(1)?)
+            // Road, easement and other non-lot polygons are not neighbours: the lot boundary next to them is open.
+            let lp: String = r.get::<_, Option<String>>(2)?.unwrap_or_default();
+            let props: Value = serde_json::from_str(&r.get::<_, Option<String>>(3)?.unwrap_or_default()).unwrap_or_default();
+            let field = |k: &str| props[k].as_str().unwrap_or("").to_uppercase();
+            let kind = format!("{} {}", field("PARCEL_TYP_DESC"), field("TENURE_DESC"));
+            let non_lot = lp.trim().is_empty() || ["ROAD", "EASEMENT", "RESERVE", "WATER", "RAIL"].iter().any(|k| kind.contains(k));
+            Ok(if non_lot { None } else { Some(r.get::<_, String>(1)?) })
         })
         .ok()?;
     let self_c = geo::Centroid::centroid(pm).map(|c| pr.xy(c.0));
     let mut segs = Vec::new();
-    for g in rows.flatten() {
+    for g in rows.flatten().flatten() {
         let Some(nm) = to_geo(&g).ok().and_then(|g| polys(&g)) else { continue };
         // Strata/unit records repeat the same base lot: skip identical geometry.
         let nc = geo::Centroid::centroid(&nm).map(|c| pr.xy(c.0));
@@ -338,7 +344,8 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
         let mid = to_lonlat(&pr, (a0.0 + a1.0) / 2.0, (a0.1 + a1.1) / 2.0);
         edges.push(Edge { length_m: (len * 10.0).round() / 10.0, mid: [mid.x, mid.y], frontage });
     }
-    let frontage_m = neigh.as_ref().map(|_| front_dirs.iter().map(|(l, _)| l).sum::<f64>());
+    // 0 m means the open side could not be told apart from neighbours: report it as unknown, not as no frontage.
+    let frontage_m = neigh.as_ref().map(|_| front_dirs.iter().map(|(l, _)| l).sum::<f64>()).filter(|f| *f > 0.5);
     let main = front_dirs.iter().cloned().max_by(|a, b| a.0.total_cmp(&b.0)).or_else(|| {
         sides(&ring).iter().map(|(a0, a1)| {
             let l = ((a1.0 - a0.0).powi(2) + (a1.1 - a0.1).powi(2)).sqrt();

@@ -408,7 +408,7 @@ function renderPotential() {
   const p = pot;
   const facts = [
     `<b>${Math.round(p.area_m2).toLocaleString()} m²</b> lot area`,
-    p.frontage_m != null ? `<b>${p.frontage_m} m</b> open boundary / frontage` : `frontage: needs the latest data pack`,
+    p.frontage_m != null ? `<b>${p.frontage_m} m</b> open boundary / frontage` : `frontage: could not be measured – check the plan`,
     p.depth_m != null ? `≈ <b>${p.depth_m} m</b> depth` : "",
   ].filter(Boolean).join(" · ");
   const prov = p.provisions
@@ -654,10 +654,11 @@ function drawMap(a: Assessment) {
   map = new maplibregl.Map({
     container: "map",
     style: { version: 8, sources: {}, layers: [{ id: "bg", type: "background", paint: { "background-color": "#efece4" } }] },
-    attributionControl: false,
+    attributionControl: { compact: true },
   });
   map.on("load", () => {
     const m = map!;
+    setBase(baseKind());
     a.overlays.forEach((o, i) => {
       const id = `o${i}`;
       const color = PALETTE[i % PALETTE.length];
@@ -892,4 +893,38 @@ $("titleBtn").addEventListener("click", async () => {
   }
   b.disabled = false;
   b.textContent = "Attach title search PDF";
+});
+
+// ---- Base map: plain, street (OpenStreetMap) or aerial photo (Queensland Government imagery) ----
+const BASES: Record<string, { tiles: string[]; attribution: string; maxzoom: number } | null> = {
+  plain: null,
+  street: { tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors", maxzoom: 19 },
+  sat: {
+    tiles: ["https://spatial-img.information.qld.gov.au/arcgis/rest/services/Basemaps/LatestStateProgram_AllUsers/ImageServer/exportImage?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=jpg&f=image"],
+    attribution: "Imagery © State of Queensland; © Planet Labs",
+    maxzoom: 20,
+  },
+};
+function baseKind(): string {
+  let k: string | null = null;
+  try { k = localStorage.getItem("base"); } catch { /* storage unavailable */ }
+  return k && k in BASES ? k : "plain";
+}
+function setBase(kind: string) {
+  const m = map;
+  if (!m) return;
+  if (m.getLayer("base")) m.removeLayer("base");
+  if (m.getSource("base")) m.removeSource("base");
+  const b = BASES[kind];
+  if (b) {
+    m.addSource("base", { type: "raster", tileSize: 256, ...b });
+    const first = m.getStyle().layers.find((l) => l.id !== "bg")?.id; // keep overlays and the lot above the photo
+    m.addLayer({ id: "base", type: "raster", source: "base" }, first);
+  }
+}
+($("baseSel") as HTMLSelectElement).value = baseKind();
+$("baseSel").addEventListener("change", () => {
+  const k = ($("baseSel") as HTMLSelectElement).value;
+  try { localStorage.setItem("base", k); } catch { /* storage unavailable */ }
+  setBase(k);
 });
