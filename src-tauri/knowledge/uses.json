@@ -1,141 +1,307 @@
 [
- {
-  "id": "general",
-  "name": "General site assessment",
-  "term": "",
-  "zones": [],
-  "checks": []
- },
- {
-  "id": "house",
-  "name": "Dwelling house / secondary dwelling",
-  "term": "Dwelling house",
-  "zones": [
-   "low density residential",
-   "character residential",
-   "low medium density residential",
-   "rural residential",
-   "rural"
-  ],
-  "checks": [
-   "Height and siting against QDC MP1.1/1.2 and City Plan (small lot code under 450 m²)",
-   "Character overlay may control demolition and design"
-  ]
- },
- {
-  "id": "dual",
-  "name": "Dual occupancy (duplex)",
-  "term": "Dual occupancy",
-  "zones": [
-   "low medium density residential",
-   "character residential",
-   "medium density residential"
-  ],
-  "checks": [
-   "Minimum lot size for dual occupancy in the zone/precinct",
-   "Car parking and access for 2 dwellings"
-  ]
- },
- {
-  "id": "md",
-  "name": "Multiple dwellings (townhouses / apartments)",
-  "term": "Multiple dwelling",
-  "zones": [
-   "low medium density residential",
-   "medium density residential",
-   "high density residential",
-   "mixed use",
-   "principal centre",
-   "major centre",
-   "district centre"
-  ],
-  "checks": [
-   "Minimum site area and frontage for multiple dwellings",
-   "Height, site cover, setbacks and communal open space (Multiple dwelling code)",
-   "Car parking rates: Transport, access, parking and servicing planning scheme policy",
-   "Infrastructure charges"
-  ]
- },
- {
-  "id": "rol",
-  "name": "Subdivision (reconfiguring a lot)",
-  "term": "Reconfiguring a lot",
-  "zones": [],
-  "checks": [
-   "Minimum lot size, frontage and development rectangle (Subdivision code)",
-   "Rear lot access handle width",
-   "Services connections for each new lot (Urban Utilities, Energex)",
-   "Survey plan by a registered surveyor; compliance assessment for the plan of subdivision"
-  ]
- },
- {
-  "id": "commercial",
-  "name": "Shop / office / food and drink",
-  "term": "Shop, Office, Food and drink outlet",
-  "zones": [
-   "neighbourhood centre",
-   "district centre",
-   "major centre",
-   "principal centre",
-   "mixed use",
-   "specialised centre"
-  ],
-  "checks": [
-   "Centre hierarchy and gross floor area limits",
-   "Car parking and servicing",
-   "Amenity: hours, noise, lighting"
-  ]
- },
- {
-  "id": "industry",
-  "name": "Industry / warehouse",
-  "term": "Low impact industry, Medium impact industry, Warehouse",
-  "zones": [
-   "low impact industry",
-   "general industry",
-   "industry zone",
-   "special industry"
-  ],
-  "checks": [
-   "Separation from sensitive uses",
-   "Environmentally relevant activity (ERA) triggers",
-   "Heavy vehicle access and servicing"
-  ]
- },
- {
-  "id": "datacentre",
-  "name": "Data centre",
-  "term": "Research and technology industry (how Queensland planning schemes usually classify data centres – confirm against City Plan Schedule 1 definitions)",
-  "zones": [
-   "low impact industry",
-   "general industry",
-   "industry zone",
-   "specialised centre"
-  ],
-  "sources": [
-   {
-    "name": "Sunshine Coast Council – data centres defined as Research and Technology Industry (Sept 2026)",
-    "url": "https://www.sunshinecoastnews.com.au/2026/09/28/petition-challenges-data-centre-expansion/"
-   },
-   {
-    "name": "Western Downs – data centre lodged as MCU for Research and Technology Industry, impact assessable",
-    "url": "https://w.media/zerra-plans-1-44gw-aud-14-5bn-data-centre-campus-in-queensland/"
-   },
-   {
-    "name": "Federal data centre energy expectations (2026)",
-    "url": "https://www.pinsentmasons.com/out-law/analysis/australia-new-data-centre-rules-mean-planning-environment"
-   }
-  ],
-  "checks": [
-   "Use term: Research and technology industry. Level of assessment depends on zone; outside industry zones expect impact assessment (public notification)",
-   "Power: early Energex / Powerlink connection enquiry; large loads may need a substation or easement. Federal expectations (2026) ask new large data centres to match demand with new renewable generation and pay connection costs",
-   "Backup generators: emissions and noise modelling; diesel or gas generation and fuel storage may trigger environmentally relevant activities (check ERA thresholds in Environmental Protection Regulation 2019, Schedule 2 – e.g. electricity generation, fuel burning, chemical storage) needing an environmental authority from DESI",
-   "Noise: 24/7 cooling plant and generator testing against Council noise criteria and the Environmental Protection (Noise) Policy",
-   "Water/cooling: Urban Utilities water supply capacity and trade waste approval; consider recycled water and low-water cooling",
-   "Fire safety: NCC fire engineering, QFES requirements for battery (UPS) rooms and fuel storage; hazardous chemicals (WHS) notifications if thresholds reached",
-   "Flood immunity: critical infrastructure usually needs high flood immunity – check flood overlays and FloodWise levels",
-   "Interface with residential uses: visual bulk, lighting, setbacks, landscaping",
-   "Traffic: construction traffic and heavy vehicle deliveries (generators, transformers)"
-  ]
- }
+  {
+    "id": "general",
+    "name": "General site assessment",
+    "term": "",
+    "zones": [],
+    "checks": []
+  },
+  {
+    "id": "house",
+    "name": "Dwelling house / secondary dwelling",
+    "term": "Dwelling house",
+    "zones": [
+      "low density residential",
+      "character residential",
+      "low medium density residential",
+      "rural residential",
+      "rural"
+    ],
+    "checks": [
+      "Height and siting against QDC MP1.1/1.2 and City Plan (small lot code under 450 m²)",
+      "Character overlay may control demolition and design"
+    ],
+    "rules": [
+      {
+        "zone": [
+          "low density residential",
+          "low medium density residential"
+        ],
+        "level": "Accepted development (no planning approval) if it meets the Dwelling house code's acceptable outcomes; code assessment if not – for example over 9.5 m. Overlays such as flood or character can change this.",
+        "items": [
+          {
+            "label": "Height",
+            "value": "9.5 m and 2 storeys (over 9.5 m = code assessment)",
+            "source": "BCC fact sheet: Residential development in suburban zones",
+            "url": "https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones",
+            "verify": true
+          },
+          {
+            "label": "Building approval",
+            "value": "Always needed from a private certifier",
+            "source": "Building Act 1975",
+            "url": "https://www.business.qld.gov.au/industries/building-property-development/building-construction/approvals",
+            "verify": false
+          }
+        ]
+      },
+      {
+        "zone": [
+          "character residential"
+        ],
+        "level": "Code assessment is common: the Traditional building character overlay controls demolition, alterations and new houses. Check the overlay before design.",
+        "items": [
+          {
+            "label": "Height",
+            "value": "9.5 m and 2 storeys",
+            "source": "BCC fact sheet: Residential development in suburban zones",
+            "url": "https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones",
+            "verify": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dual",
+    "name": "Dual occupancy (duplex)",
+    "term": "Dual occupancy",
+    "zones": [
+      "low medium density residential",
+      "character residential",
+      "medium density residential"
+    ],
+    "checks": [
+      "Minimum lot size for dual occupancy in the zone/precinct",
+      "Car parking and access for 2 dwellings"
+    ],
+    "rules": [
+      {
+        "zone": [
+          "low medium density residential"
+        ],
+        "level": "Accepted subject to requirements if every frontage is outside a Key Location and all Dual occupancy code acceptable outcomes are met; otherwise code assessment; above the precinct height cap, impact assessment. Flood planning areas or overland flow on the lot make it code assessment.",
+        "items": [
+          {
+            "label": "Minimum site area",
+            "value": "600 m² (2 storey mix); 400 m² (3 or 4 storey mix, outside a Key Location); 600 m² (any frontage in a Key Location)",
+            "source": "Dual occupancy code Table 9.3.6.3.B (v37.00/2026), as summarised by LandIntel",
+            "url": "https://landintel.com.au/blogs/news/can-i-build-a-duplex-in-brisbane",
+            "verify": true
+          },
+          {
+            "label": "Minimum frontage",
+            "value": "15 m (2 storey mix); 12 m, or 10 m with a shared crossover (3 or 4 storey mix, outside a Key Location); 15 m in a Key Location",
+            "source": "Dual occupancy code Table 9.3.6.3.B (v37.00/2026), as summarised by LandIntel",
+            "url": "https://landintel.com.au/blogs/news/can-i-build-a-duplex-in-brisbane",
+            "verify": true
+          },
+          {
+            "label": "Height",
+            "value": "2 storeys / 9.5 m (2 storey mix); 3 storeys / 11.5 m (3 or 4 storey mix)",
+            "source": "BCC: Low-medium density residential design amendment",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+            "verify": true
+          }
+        ]
+      },
+      {
+        "zone": [
+          "character residential"
+        ],
+        "level": "Code assessment in the Infill housing precinct only, keeping any house built in 1946 or earlier and staying within 2 storeys / 9.5 m; otherwise impact assessment.",
+        "items": [
+          {
+            "label": "Minimum site area",
+            "value": "800 m² (Infill housing precinct)",
+            "source": "Dual occupancy code (v37.00/2026), as summarised by LandIntel",
+            "url": "https://landintel.com.au/blogs/news/can-i-build-a-duplex-in-brisbane",
+            "verify": true
+          },
+          {
+            "label": "Minimum frontage",
+            "value": "20 m (Infill housing precinct)",
+            "source": "Dual occupancy code (v37.00/2026), as summarised by LandIntel",
+            "url": "https://landintel.com.au/blogs/news/can-i-build-a-duplex-in-brisbane",
+            "verify": true
+          }
+        ]
+      },
+      {
+        "zone": [
+          "low density residential"
+        ],
+        "level": "Impact assessment: dual occupancy is not listed for this zone, so it defaults to impact (public notification) and is generally not supported.",
+        "items": [
+          {
+            "label": "Tables of assessment",
+            "value": "Low density residential zone table",
+            "source": "Brisbane City Plan 2014 Part 5",
+            "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
+            "verify": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "md",
+    "name": "Multiple dwellings (townhouses / apartments)",
+    "term": "Multiple dwelling",
+    "zones": [
+      "low medium density residential",
+      "medium density residential",
+      "high density residential",
+      "mixed use",
+      "principal centre",
+      "major centre",
+      "district centre"
+    ],
+    "checks": [
+      "Minimum site area and frontage for multiple dwellings",
+      "Height, site cover, setbacks and communal open space (Multiple dwelling code)",
+      "Car parking rates: Transport, access, parking and servicing planning scheme policy",
+      "Infrastructure charges"
+    ],
+    "rules": [
+      {
+        "zone": [
+          "low density residential"
+        ],
+        "level": "Impact assessment: multiple dwellings are generally inconsistent with this zone.",
+        "items": [
+          {
+            "label": "Tables of assessment",
+            "value": "Low density residential zone table",
+            "source": "Brisbane City Plan 2014 Part 5",
+            "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
+            "verify": true
+          }
+        ]
+      },
+      {
+        "zone": [],
+        "level": "Depends on the zone, precinct and building height: usually code assessment where the zone intends units, impact assessment where it does not. Check the zone's table of assessment.",
+        "items": [
+          {
+            "label": "Resident car parking (outside City core and City frame)",
+            "value": "Per dwelling – 1 bed: 1 · 2 bed: 1.5 · 3 bed: 2 · 4+ bed: 2.5 (round down; at least 1 space per dwelling)",
+            "source": "BCC City Plan amendment v36.00/2026 – car parking for multiple dwellings",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/car-parking-for-multiple-dwellings",
+            "verify": false
+          },
+          {
+            "label": "Resident car parking in a Key Location",
+            "value": "Per dwelling – 1 bed: 1 · 2 bed: 1.2 · 3 bed: 1.6 · 4+ bed: 2.0. Key Locations: Principal, Major, District or Mixed use zones, or within 400 m walk of a major transport interchange or frequent stop",
+            "source": "BCC City Plan amendment v36.00/2026 – car parking for multiple dwellings",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/car-parking-for-multiple-dwellings",
+            "verify": false
+          },
+          {
+            "label": "Visitor car parking",
+            "value": "0.25 per dwelling (round up)",
+            "source": "BCC City Plan amendment v36.00/2026 – car parking for multiple dwellings",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/car-parking-for-multiple-dwellings",
+            "verify": false
+          },
+          {
+            "label": "City core / City frame and neighbourhood plans",
+            "value": "Different rates apply – check the Transport, access, parking and servicing planning scheme policy",
+            "source": "BCC City Plan amendment v36.00/2026",
+            "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/car-parking-for-multiple-dwellings",
+            "verify": true
+          },
+          {
+            "label": "Tables of assessment",
+            "value": "Zone table for this lot",
+            "source": "Brisbane City Plan 2014 Part 5",
+            "url": "http://eplan.brisbane.qld.gov.au/CP/Part5TablesOfAssessmentIntro",
+            "verify": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rol",
+    "name": "Subdivision (reconfiguring a lot)",
+    "term": "Reconfiguring a lot",
+    "zones": [],
+    "checks": [
+      "Minimum lot size, frontage and development rectangle (Subdivision code)",
+      "Rear lot access handle width",
+      "Services connections for each new lot (Urban Utilities, Energex)",
+      "Survey plan by a registered surveyor; compliance assessment for the plan of subdivision"
+    ]
+  },
+  {
+    "id": "commercial",
+    "name": "Shop / office / food and drink",
+    "term": "Shop, Office, Food and drink outlet",
+    "zones": [
+      "neighbourhood centre",
+      "district centre",
+      "major centre",
+      "principal centre",
+      "mixed use",
+      "specialised centre"
+    ],
+    "checks": [
+      "Centre hierarchy and gross floor area limits",
+      "Car parking and servicing",
+      "Amenity: hours, noise, lighting"
+    ]
+  },
+  {
+    "id": "industry",
+    "name": "Industry / warehouse",
+    "term": "Low impact industry, Medium impact industry, Warehouse",
+    "zones": [
+      "low impact industry",
+      "general industry",
+      "industry zone",
+      "special industry"
+    ],
+    "checks": [
+      "Separation from sensitive uses",
+      "Environmentally relevant activity (ERA) triggers",
+      "Heavy vehicle access and servicing"
+    ]
+  },
+  {
+    "id": "datacentre",
+    "name": "Data centre",
+    "term": "Research and technology industry (how Queensland planning schemes usually classify data centres – confirm against City Plan Schedule 1 definitions)",
+    "zones": [
+      "low impact industry",
+      "general industry",
+      "industry zone",
+      "specialised centre"
+    ],
+    "sources": [
+      {
+        "name": "Sunshine Coast Council – data centres defined as Research and Technology Industry (Sept 2026)",
+        "url": "https://www.sunshinecoastnews.com.au/2026/09/28/petition-challenges-data-centre-expansion/"
+      },
+      {
+        "name": "Western Downs – data centre lodged as MCU for Research and Technology Industry, impact assessable",
+        "url": "https://w.media/zerra-plans-1-44gw-aud-14-5bn-data-centre-campus-in-queensland/"
+      },
+      {
+        "name": "Federal data centre energy expectations (2026)",
+        "url": "https://www.pinsentmasons.com/out-law/analysis/australia-new-data-centre-rules-mean-planning-environment"
+      }
+    ],
+    "checks": [
+      "Use term: Research and technology industry. Level of assessment depends on zone; outside industry zones expect impact assessment (public notification)",
+      "Power: early Energex / Powerlink connection enquiry; large loads may need a substation or easement. Federal expectations (2026) ask new large data centres to match demand with new renewable generation and pay connection costs",
+      "Backup generators: emissions and noise modelling; diesel or gas generation and fuel storage may trigger environmentally relevant activities (check ERA thresholds in Environmental Protection Regulation 2019, Schedule 2 – e.g. electricity generation, fuel burning, chemical storage) needing an environmental authority from DESI",
+      "Noise: 24/7 cooling plant and generator testing against Council noise criteria and the Environmental Protection (Noise) Policy",
+      "Water/cooling: Urban Utilities water supply capacity and trade waste approval; consider recycled water and low-water cooling",
+      "Fire safety: NCC fire engineering, QFES requirements for battery (UPS) rooms and fuel storage; hazardous chemicals (WHS) notifications if thresholds reached",
+      "Flood immunity: critical infrastructure usually needs high flood immunity – check flood overlays and FloodWise levels",
+      "Interface with residential uses: visual bulk, lighting, setbacks, landscaping",
+      "Traffic: construction traffic and heavy vehicle deliveries (generators, transformers)"
+    ]
+  }
 ]

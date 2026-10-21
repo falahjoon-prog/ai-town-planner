@@ -39,6 +39,16 @@ pub struct UseDef {
     #[serde(default)]
     pub sources: Vec<Value>,
     pub checks: Vec<String>,
+    /// Level of assessment and key numbers by zone (first matching rule wins; empty zone list = any zone)
+    #[serde(default)]
+    pub rules: Vec<UseRule>,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct UseRule {
+    pub zone: Vec<String>,
+    pub level: String,
+    pub items: Vec<ProvItem>,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -72,6 +82,7 @@ pub struct UseFit {
     pub use_def: UseDef,
     pub zone_ok: Option<bool>,
     pub note: String,
+    pub rule: Option<UseRule>,
 }
 
 #[derive(Serialize, Clone)]
@@ -407,7 +418,8 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
             (_, Some(false)) => "This use is not typical in this zone. Expect impact assessment (public notification), and approval is less likely.".to_string(),
             _ => String::new(),
         };
-        UseFit { use_def: u.clone(), zone_ok, note }
+        let rule = if pda { None } else { u.rules.iter().find(|r| r.zone.is_empty() || r.zone.iter().any(|z| text.contains(&norm(z)))).cloned() };
+        UseFit { use_def: u.clone(), zone_ok, note, rule }
     });
 
     Ok(Potential {
@@ -491,7 +503,9 @@ pub fn facts(pot: &Potential) -> Value {
         "provisions": pot.provisions.as_ref().map(|p| json!({"set": p.title, "items": p.items.iter().map(|i| json!({"item": i.label, "value": i.value, "source": i.source, "verify": i.verify})).collect::<Vec<_>>()})),
         "subdivision": pot.subdivision,
         "indicative_lots": pot.sketch.iter().map(|s| s.area_m2).collect::<Vec<_>>(),
-        "proposed_use": pot.use_fit.as_ref().map(|u| json!({"use": u.use_def.name, "planning_use_term": u.use_def.term, "zone_generally_supports": u.zone_ok, "note": u.note, "key_requirements": u.use_def.checks})),
+        "proposed_use": pot.use_fit.as_ref().map(|u| json!({"use": u.use_def.name, "planning_use_term": u.use_def.term, "zone_generally_supports": u.zone_ok, "note": u.note, "key_requirements": u.use_def.checks,
+            "level_of_assessment": u.rule.as_ref().map(|r| &r.level),
+            "rule_numbers": u.rule.as_ref().map(|r| r.items.iter().map(|i| json!({"item": i.label, "value": i.value, "source": i.source})).collect::<Vec<_>>())})),
         "nearest_power_infrastructure": pot.power.iter().map(|n| json!({"kind": n.kind, "distance_m": n.distance_m, "details": n.props})).collect::<Vec<_>>(),
         "forms_needed": pot.forms.iter().map(|f| json!({"form": f.form.name, "lodge_with": f.form.to, "why": f.reason})).collect::<Vec<_>>(),
     })

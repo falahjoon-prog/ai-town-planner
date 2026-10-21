@@ -372,7 +372,8 @@ type Pot = {
   edges: { length_m: number; mid: [number, number]; frontage: boolean | null }[];
   provisions: { title: string; items: { label: string; value: string; source: string; url: string; verify: boolean }[] } | null;
   subdivision: string[]; lots_by_area: number | null; sketch: { area_m2: number; geom: any }[];
-  use_fit: { use_def: { name: string; term: string; checks: string[]; sources: { name: string; url: string }[] }; zone_ok: boolean | null; note: string } | null;
+  use_fit: { use_def: { name: string; term: string; checks: string[]; sources: { name: string; url: string }[] }; zone_ok: boolean | null; note: string;
+    rule: { level: string; items: { label: string; value: string; source: string; url: string; verify: boolean }[] } | null } | null;
   forms: { form: { name: string; to: string; when: string; url: string; lodge: string; lodge_url: string }; reason: string }[];
   pda: boolean;
   power: { kind: string; distance_m: number; props: Record<string, unknown> }[];
@@ -419,6 +420,8 @@ function renderPotential() {
   const fit = p.use_fit
     ? `<div class="${p.use_fit.zone_ok === false ? "flag" : "zone"}"><span class="auth">Proposal</span> <b>${esc(p.use_fit.use_def.name)}</b>
        <div class="meta">Planning use term: ${esc(p.use_fit.use_def.term)}</div><p>${esc(p.use_fit.note)}</p>
+       ${p.use_fit.rule ? `<p><b>Level of assessment:</b> ${esc(p.use_fit.rule.level)}</p>
+         <table class="ptable"><tbody>${p.use_fit.rule.items.map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ' <span class="pill warn">verify</span>' : ""}</td><td class="meta">${i.url ? link(i.url, i.source) : esc(i.source)}</td></tr>`).join("")}</tbody></table>` : ""}
        <ul>${p.use_fit.use_def.checks.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
        ${(p.use_fit.use_def.sources ?? []).length ? `<div class="meta">Sources: ${p.use_fit.use_def.sources.map((x) => link(x.url, x.name)).join(" · ")}</div>` : ""}</div>`
     : "";
