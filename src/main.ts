@@ -272,8 +272,8 @@ async function loadSite(pid: number) {
   $("pdfBtn").hidden = true;
   $("formOut").innerHTML = "";
   $("formCopy").hidden = true;
-  subOn = false; contOn = false;
-  toolUi("subBtn", false); toolUi("contBtn", false);
+  subOn = false; contOn = false; powerOn = false;
+  toolUi("subBtn", false); toolUi("contBtn", false); toolUi("powerBtn", false);
   drawMap(a);
   loadPotential();
 }
@@ -300,7 +300,13 @@ type Pot = {
   use_fit: { use_def: { name: string; term: string; checks: string[]; sources: { name: string; url: string }[] }; zone_ok: boolean | null; note: string } | null;
   forms: { form: { name: string; to: string; when: string; url: string; lodge: string; lodge_url: string }; reason: string }[];
   pda: boolean;
+  power: { kind: string; distance_m: number; props: Record<string, unknown> }[];
 };
+let powerOn = false;
+const POWER_COLORS: Record<string, string> = { "Transmission line": "#dc2626", Substation: "#7c3aed", "Solar farm": "#f59e0b", "Wind farm": "#0891b2", "Power station": "#111827" };
+const km = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${Math.round(m)} m`);
+const brief = (o: Record<string, unknown>) =>
+  Object.entries(o).filter(([k, v]) => v != null && v !== "" && /name|owner|operator|volt|kv|capacity|mw|fuel|class|status/i.test(k)).slice(0, 5).map(([k, v]) => `${k}: ${v}`).join(" · ");
 let pot: Pot | null = null;
 let dimMarkers: maplibregl.Marker[] = [];
 let dimOn = true;
@@ -342,6 +348,8 @@ function renderPotential() {
        ${(p.use_fit.use_def.sources ?? []).length ? `<div class="meta">Sources: ${p.use_fit.use_def.sources.map((x) => link(x.url, x.name)).join(" · ")}</div>` : ""}</div>`
     : "";
   $("pot").innerHTML = `<p>${facts}</p>${prov}<h4>Subdivision</h4><ul>${p.subdivision.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+    ${p.power?.length ? `<h4>Nearest power infrastructure</h4><ul>${p.power.map((n) => `<li><b>${esc(n.kind)}</b>: ${km(n.distance_m)} <span class="meta">${esc(brief(n.props))}</span></li>`).join("")}</ul>
+      <p class="meta">Source: Geoscience Australia national electricity infrastructure. Energex distribution lines/capacity, water, sewer, recycled water and fibre aren't open data: see Maps → Energex DAPR map and BYDA.</p>` : ""}
     ${p.sketch.length ? `<p class="meta">Indicative split: ${p.sketch.map((s) => `${Math.round(s.area_m2)} m²`).join(" + ")}. Concept only; a surveyor confirms the layout.</p>` : ""}${fit}`;
   $("forms").innerHTML = p.forms
     .map((f) => `<div class="mapitem"><div><b>${esc(f.form.name)}</b><div class="meta">To: ${esc(f.form.to)} · ${esc(f.reason)}</div>
@@ -414,6 +422,28 @@ $("contBtn").addEventListener("click", async () => {
     alertMsg(e);
   }
   $("contBtn").textContent = "Contours";
+});
+
+$("powerBtn").addEventListener("click", async () => {
+  if (!current || !map) return;
+  const m = map;
+  powerOn = !powerOn;
+  toolUi("powerBtn", powerOn);
+  if (m.getLayer("pw-line")) { m.removeLayer("pw-line"); m.removeLayer("pw-pt"); m.removeSource("pw"); }
+  if (!powerOn) { setFloodUi(floodOn); return fitTo([current.parcel.geom]); }
+  try {
+    const feats = await invoke<any[]>("infra_map", { pid: current.parcel.pid });
+    feats.forEach((f) => (f.properties.c = POWER_COLORS[f.properties.kind] ?? "#111827"));
+    m.addSource("pw", { type: "geojson", data: { type: "FeatureCollection", features: feats } });
+    m.addLayer({ id: "pw-line", type: "line", source: "pw", filter: ["==", ["geometry-type"], "LineString"], paint: { "line-color": ["get", "c"], "line-width": 2.5 } });
+    m.addLayer({ id: "pw-pt", type: "circle", source: "pw", filter: ["!=", ["geometry-type"], "LineString"], paint: { "circle-color": ["get", "c"], "circle-radius": 6, "circle-stroke-color": "#fff", "circle-stroke-width": 1.5 } });
+    const kinds = [...new Set(feats.map((f) => f.properties.kind as string))];
+    setFloodUi(floodOn, (kinds.length ? kinds.map((k) => `<div><i style="background:${POWER_COLORS[k] ?? "#111827"}"></i>${esc(k)}</div>`).join("") : "<b>No major power infrastructure within 5 km</b>")
+      + `<div class="meta">Within 5 km · Geoscience Australia. Distribution (Energex) lines not shown.</div>`);
+    fitTo([current.parcel.geom, ...feats.map((f) => f.geometry)]);
+  } catch (e) {
+    powerOn = false; toolUi("powerBtn", false); alertMsg(e);
+  }
 });
 
 $("formBtn").addEventListener("click", async () => {

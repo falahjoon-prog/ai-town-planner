@@ -213,7 +213,7 @@ fn segments(g: &Geometry<f64>, pr: &Proj) -> Vec<((f64, f64), (f64, f64))> {
 }
 
 /// Minimum distance in metres between two geometries (0 if they intersect).
-fn distance_m(a: &Geometry<f64>, b: &Geometry<f64>, pr: &Proj) -> f64 {
+pub(crate) fn distance_m(a: &Geometry<f64>, b: &Geometry<f64>, pr: &Proj) -> f64 {
     if a.intersects(b) {
         return 0.0;
     }

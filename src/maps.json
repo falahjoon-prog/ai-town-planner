@@ -34,6 +34,26 @@
    "name": "QSpatial data catalogue",
    "url": "https://qldspatial.information.qld.gov.au/catalogue/custom/index.page",
    "desc": "Queensland spatial datasets"
+  },
+  {
+   "name": "Energex network capacity map (DAPR)",
+   "url": "https://www.energex.com.au/daprmap2024",
+   "desc": "Zone substations, feeders and spare capacity (SEQ distribution network)"
+  },
+  {
+   "name": "Before You Dig Australia (BYDA)",
+   "url": "https://www.byda.com.au/",
+   "desc": "Free plans of underground services: water, sewer, recycled water, power, gas, fibre/telecoms"
+  },
+  {
+   "name": "Urban Utilities",
+   "url": "https://urbanutilities.com.au/",
+   "desc": "Water, sewer and recycled water connections (Brisbane, Ipswich, Lockyer, Scenic Rim, Somerset)"
+  },
+  {
+   "name": "Powerlink",
+   "url": "https://www.powerlink.com.au/",
+   "desc": "Queensland high-voltage transmission network operator"
   }
  ],
  "councils": [

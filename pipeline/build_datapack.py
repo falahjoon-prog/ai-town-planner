@@ -42,7 +42,11 @@ STATE_LAYERS = [
     ("pda", f"{QLD}/PlanningCadastre/StatePlanning/MapServer", ["Priority development areas"]),
     ("state", f"{QLD}/PlanningCadastre/StatePlanning/MapServer", ["SEQ regional land use category"]),
     ("other", f"{QLD}/Biota/VegetationManagement/MapServer", ["Protected plants trigger map"]),
+    # National electricity infrastructure (Geoscience Australia), wider SEQ window for "nearest" searches
+    ("infra", "https://services.ga.gov.au/gis/rest/services/National_Electricity_Infrastructure/MapServer",
+     ["Transmission Lines", "Transmission Substations", "Power Generation"]),
 ]
+SEQ_BBOX = "152.3,-28.1,153.6,-26.6"
 
 
 def get(url, params=None, retries=5):
@@ -218,11 +222,11 @@ def load_layer(db, lid, did, title, tmpdir):
     return n
 
 
-def arcgis_features(url, oid):
+def arcgis_features(url, oid, bbox=BNE_BBOX):
     """Page through a statewide ArcGIS layer, limited to the Brisbane envelope."""
     last = -1
     while True:
-        body = get(f"{url}/query", {"where": f"{oid}>{last}", "geometry": BNE_BBOX,
+        body = get(f"{url}/query", {"where": f"{oid}>{last}", "geometry": bbox,
                                     "geometryType": "esriGeometryEnvelope", "inSR": 4326,
                                     "spatialRel": "esriSpatialRelIntersects", "outFields": "*",
                                     "outSR": 4326, "f": "geojson", "orderByFields": oid,
@@ -263,20 +267,21 @@ def load_state_layers(db, start_lid):
                 failed.append(w); print(f"  NOT FOUND {w}", flush=True)
             for layer, name in targets:
                 lid += 1
-                if not load_one(db, svc, layer, name, authority, lid):
+                if not load_one(db, svc, layer, name, authority, lid, SEQ_BBOX if authority == "infra" else BNE_BBOX):
                     failed.append(layer.get("name", w))
     return lid - start_lid, failed
 
 
-def load_one(db, svc, layer, name, authority, lid):
+def load_one(db, svc, layer, name, authority, lid, bbox):
     url = f"{svc}/{layer['id']}"
     try:
         info = json.loads(get(url, {"f": "json"}))
         oid = info.get("objectIdField") or next((f["name"] for f in info.get("fields", [])
                                                  if f.get("type") == "esriFieldTypeOID"), "OBJECTID")
-        n = insert_features(db, lid, arcgis_features(url, oid))
+        n = insert_features(db, lid, arcgis_features(url, oid, bbox))
         did = f"qld:{layer['id']}:" + name.lower().replace(" ", "-")[:80]
-        db.execute("INSERT INTO layers VALUES(?,?,?,?,?)", (lid, did, f"Queensland — {name}", n, authority))
+        prefix = "Australia" if authority == "infra" else "Queensland"
+        db.execute("INSERT INTO layers VALUES(?,?,?,?,?)", (lid, did, f"{prefix} — {name}", n, authority))
         db.commit()
         print(f"  [{authority}] {name}: {n}", flush=True)
         return True

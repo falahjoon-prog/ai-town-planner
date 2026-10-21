@@ -1,6 +1,6 @@
 //! Development potential: lot dimensions, frontage, zone provisions (sourced), subdivision yield and sketch,
 //! proposed-use fit, required forms, and contours (online, cached).
-use crate::data::{e, geo_json, polys, to_geo, Parcel, Proj};
+use crate::data::{distance_m, e, geo_json, polys, to_geo, Parcel, Proj};
 use crate::rules::Assessment;
 use geo::{Area, BooleanOps, Coord, LineString, MultiPolygon, Polygon};
 use rusqlite::Connection;
@@ -81,7 +81,16 @@ pub struct FormNeed {
 }
 
 #[derive(Serialize, Clone)]
+pub struct Nearest {
+    pub kind: String,
+    pub distance_m: f64,
+    pub props: Value,
+}
+
+#[derive(Serialize, Clone)]
 pub struct Potential {
+    /// Nearest transmission line, substation, power station and solar farm (national data)
+    pub power: Vec<Nearest>,
     pub area_m2: f64,
     pub frontage_m: Option<f64>,
     pub depth_m: Option<f64>,
@@ -395,6 +404,7 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
     });
 
     Ok(Potential {
+        power: infra(c, &pg, &pr, 25_000.0, 0.0).map(|(n, _)| n).unwrap_or_default(),
         area_m2: area.round(),
         frontage_m: frontage_m.map(|f| (f * 10.0).round() / 10.0),
         depth_m,
@@ -409,6 +419,64 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
     })
 }
 
+fn infra_kind(title: &str, props: &Value) -> String {
+    let t = title.to_lowercase();
+    let txt = props.to_string().to_lowercase();
+    if t.contains("line") {
+        "Transmission line".into()
+    } else if t.contains("substation") {
+        "Substation".into()
+    } else if txt.contains("solar") {
+        "Solar farm".into()
+    } else if txt.contains("wind") {
+        "Wind farm".into()
+    } else {
+        "Power station".into()
+    }
+}
+
+/// Nearest electricity infrastructure of each kind within `search_m`, plus features within `map_m` for the map.
+pub fn infra(c: &Connection, pg: &geo::Geometry<f64>, pr: &Proj, search_m: f64, map_m: f64) -> Result<(Vec<Nearest>, Vec<Value>), String> {
+    if c.prepare("SELECT authority FROM layers LIMIT 1").is_err() {
+        return Ok((vec![], vec![]));
+    }
+    let rect = geo::BoundingRect::bounding_rect(pg).ok_or("Empty lot")?;
+    let (px, py) = (search_m / pr.kx, search_m / pr.ky);
+    let mut st = c
+        .prepare(
+            "SELECT l.title, f.props, f.geom FROM feature_idx i JOIN features f ON f.fid = i.fid JOIN layers l ON l.lid = f.lid
+             WHERE l.authority = 'infra' AND i.minx <= ?2 AND i.maxx >= ?1 AND i.miny <= ?4 AND i.maxy >= ?3",
+        )
+        .map_err(e)?;
+    let rows = st
+        .query_map(rusqlite::params![rect.min().x - px, rect.max().x + px, rect.min().y - py, rect.max().y + py], |r| {
+            Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?))
+        })
+        .map_err(e)?;
+    let mut best: Vec<Nearest> = Vec::new();
+    let mut feats = Vec::new();
+    for row in rows.flatten() {
+        let (title, props, geom) = row;
+        let Ok(fg) = to_geo(&geom) else { continue };
+        let props: Value = serde_json::from_str(&props).unwrap_or(Value::Null);
+        let d = distance_m(pg, &fg, pr);
+        let kind = infra_kind(&title, &props);
+        if d <= map_m {
+            feats.push(json!({"type": "Feature", "properties": {"kind": kind}, "geometry": serde_json::from_str::<Value>(&geom).unwrap_or(Value::Null)}));
+        }
+        match best.iter_mut().find(|b| b.kind == kind) {
+            Some(b) if b.distance_m <= d => {}
+            Some(b) => {
+                b.distance_m = d.round();
+                b.props = props;
+            }
+            None => best.push(Nearest { kind, distance_m: d.round(), props }),
+        }
+    }
+    best.sort_by(|a, b| a.distance_m.total_cmp(&b.distance_m));
+    Ok((best, feats))
+}
+
 /// Facts for the AI (compact).
 pub fn facts(pot: &Potential) -> Value {
     json!({
@@ -417,6 +485,7 @@ pub fn facts(pot: &Potential) -> Value {
         "subdivision": pot.subdivision,
         "indicative_lots": pot.sketch.iter().map(|s| s.area_m2).collect::<Vec<_>>(),
         "proposed_use": pot.use_fit.as_ref().map(|u| json!({"use": u.use_def.name, "planning_use_term": u.use_def.term, "zone_generally_supports": u.zone_ok, "note": u.note, "key_requirements": u.use_def.checks})),
+        "nearest_power_infrastructure": pot.power.iter().map(|n| json!({"kind": n.kind, "distance_m": n.distance_m, "details": n.props})).collect::<Vec<_>>(),
         "forms_needed": pot.forms.iter().map(|f| json!({"form": f.form.name, "lodge_with": f.form.to, "why": f.reason})).collect::<Vec<_>>(),
     })
 }

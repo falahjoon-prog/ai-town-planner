@@ -192,6 +192,23 @@ async fn potential(state: State<'_, AppState>, pid: i64, use_id: String) -> Resu
     .map_err(e)?
 }
 
+/// Electricity infrastructure within 5 km of the lot (for the map).
+#[tauri::command]
+async fn infra_map(state: State<'_, AppState>, pid: i64) -> Result<Vec<serde_json::Value>, String> {
+    let db = state.db.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let g = db.lock().map_err(e)?;
+        let c = g.as_ref().ok_or("No data pack loaded")?;
+        let p = data::parcel(c, pid)?;
+        let pg = data::to_geo(&p.geom.to_string())?;
+        let rect = geo::BoundingRect::bounding_rect(&pg).ok_or("Empty lot")?;
+        let pr = data::Proj::new(rect.center().y);
+        dev::infra(c, &pg, &pr, 5_000.0, 5_000.0).map(|(_, f)| f)
+    })
+    .await
+    .map_err(e)?
+}
+
 /// Contours need internet the first time; results are cached per lot for offline use.
 #[tauri::command]
 async fn contours(app: AppHandle, state: State<'_, AppState>, pid: i64) -> Result<serde_json::Value, String> {
@@ -429,6 +446,7 @@ pub fn run() {
             flood_map,
             potential,
             contours,
+            infra_map,
             draft_form,
             generate_report,
             chat,
