@@ -106,9 +106,16 @@ fn edit_distance(a: &str, b: &str) -> usize {
 }
 
 /// Suburb and street-name words, built once, used to correct typos.
-fn vocab(c: &Connection) -> &'static Vec<String> {
-    static V: std::sync::OnceLock<Vec<String>> = std::sync::OnceLock::new();
-    V.get_or_init(|| {
+static VOCAB: std::sync::Mutex<Option<std::sync::Arc<Vec<String>>>> = std::sync::Mutex::new(None);
+
+/// Forget the cached words (call after the data pack is replaced).
+pub fn reset_vocab() {
+    if let Ok(mut g) = VOCAB.lock() { *g = None; }
+}
+
+fn vocab(c: &Connection) -> std::sync::Arc<Vec<String>> {
+    let mut g = VOCAB.lock().unwrap_or_else(|p| p.into_inner());
+    g.get_or_insert_with(|| {
         let mut set = std::collections::BTreeSet::new();
         if let Ok(mut st) = c.prepare("SELECT address, suburb FROM parcels") {
             if let Ok(rows) = st.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?))) {
@@ -123,8 +130,9 @@ fn vocab(c: &Connection) -> &'static Vec<String> {
                 }
             }
         }
-        set.into_iter().collect()
+        std::sync::Arc::new(set.into_iter().collect())
     })
+    .clone()
 }
 
 /// Replace words that look misspelled with the closest suburb or street word.

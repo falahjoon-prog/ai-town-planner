@@ -148,6 +148,7 @@ async fn install_pack(app: &AppHandle, db: Arc<Mutex<Option<rusqlite::Connection
         *g = None;
         fs::rename(&tmp, &dest).map_err(e)?;
         *g = Some(data::open(&dest)?);
+        data::reset_vocab();
         Ok(manifest)
     })
     .await
