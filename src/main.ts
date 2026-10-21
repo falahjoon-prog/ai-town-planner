@@ -157,6 +157,23 @@ $("models").addEventListener("click", async (ev) => {
   refreshStatus();
 });
 
+$("downloadPack").addEventListener("click", async () => {
+  const b = $("downloadPack") as HTMLButtonElement;
+  const ch = new Channel<{ done: number; total: number }>();
+  ch.onmessage = (p) => {
+    b.textContent = p.total ? `Downloading ${Math.floor((p.done / p.total) * 100)}%` : `${(p.done / 1e6).toFixed(0)} MB`;
+  };
+  b.disabled = true;
+  try {
+    await invoke("download_datapack", { onProgress: ch });
+  } catch (e) {
+    alertMsg(e);
+  }
+  b.disabled = false;
+  b.textContent = "Download data pack (about 400 MB)";
+  refreshStatus();
+});
+
 $("importPack").addEventListener("click", async () => {
   const path = await open({ multiple: false, filters: [{ name: "Data pack", extensions: ["sqlite", "gz"] }] });
   if (!path) return;

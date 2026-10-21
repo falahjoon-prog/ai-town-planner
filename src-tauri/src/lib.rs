@@ -130,11 +130,9 @@ async fn status(app: AppHandle, state: State<'_, AppState>) -> Result<Status, St
     })
 }
 
-#[tauri::command]
-async fn import_datapack(app: AppHandle, state: State<'_, AppState>, path: String) -> Result<BTreeMap<String, String>, String> {
-    let dest = datapack_path(&app)?;
+async fn install_pack(app: &AppHandle, db: Arc<Mutex<Option<rusqlite::Connection>>>, path: String) -> Result<BTreeMap<String, String>, String> {
+    let dest = datapack_path(app)?;
     let tmp = dest.with_extension("importing");
-    let db = state.db.clone();
     tauri::async_runtime::spawn_blocking(move || -> Result<BTreeMap<String, String>, String> {
         let src = fs::File::open(&path).map_err(e)?;
         let mut out = fs::File::create(&tmp).map_err(e)?;
@@ -154,6 +152,46 @@ async fn import_datapack(app: AppHandle, state: State<'_, AppState>, path: Strin
     })
     .await
     .map_err(e)?
+}
+
+#[tauri::command]
+async fn import_datapack(app: AppHandle, state: State<'_, AppState>, path: String) -> Result<BTreeMap<String, String>, String> {
+    install_pack(&app, state.db.clone(), path).await
+}
+
+const RELEASES: &str = "https://api.github.com/repos/falahjoon-prog/ai-town-planner/releases?per_page=30";
+
+#[tauri::command]
+async fn download_datapack(app: AppHandle, state: State<'_, AppState>, on_progress: Channel<Progress>) -> Result<BTreeMap<String, String>, String> {
+    let client = reqwest::Client::builder().user_agent("ai-town-planner").build().map_err(e)?;
+    let list: serde_json::Value = client.get(RELEASES).send().await.map_err(e)?.error_for_status()
+        .map_err(|_| "Data pack not available online yet. Import the file instead.".to_string())?
+        .json().await.map_err(e)?;
+    let url = list.as_array().and_then(|r| {
+        r.iter().find(|x| x["tag_name"].as_str().is_some_and(|t| t.starts_with("datapack-")))
+    }).and_then(|x| x["assets"].as_array()?.iter().find(|a| a["name"] == "datapack.sqlite.gz")?["browser_download_url"].as_str().map(String::from))
+        .ok_or("No data pack release found")?;
+    let part = datapack_path(&app)?.with_extension("download.gz");
+    let resp = client.get(&url).send().await.map_err(e)?.error_for_status().map_err(e)?;
+    let total = resp.content_length().unwrap_or(0);
+    let mut file = tokio::fs::File::create(&part).await.map_err(e)?;
+    let mut stream = resp.bytes_stream();
+    let (mut done, mut last) = (0u64, 0u64);
+    while let Some(chunk) = stream.next().await {
+        let chunk = chunk.map_err(e)?;
+        tokio::io::AsyncWriteExt::write_all(&mut file, &chunk).await.map_err(e)?;
+        done += chunk.len() as u64;
+        if done - last > 8 << 20 {
+            last = done;
+            let _ = on_progress.send(Progress { done, total });
+        }
+    }
+    tokio::io::AsyncWriteExt::flush(&mut file).await.map_err(e)?;
+    drop(file);
+    let _ = on_progress.send(Progress { done, total });
+    let r = install_pack(&app, state.db.clone(), part.to_string_lossy().to_string()).await;
+    let _ = fs::remove_file(&part);
+    r
 }
 
 #[tauri::command]
@@ -441,6 +479,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             status,
             import_datapack,
+            download_datapack,
             search,
             assess,
             flood_map,
