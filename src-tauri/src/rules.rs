@@ -1,4 +1,5 @@
-//! Deterministic rules: zone identification and overlay flags. The AI only explains these facts.
+//! Deterministic rules: zone identification and overlay flags grouped by authority.
+//! The AI only explains these facts.
 use crate::data::{OverlayHit, Parcel};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -16,6 +17,9 @@ pub struct Zone {
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Rule {
     pub id: String,
+    pub authority: String,
+    #[serde(default)]
+    pub always: bool,
     pub keywords: Vec<String>,
     pub title: String,
     pub code: String,
@@ -31,6 +35,7 @@ pub struct Flag {
 
 #[derive(Serialize, Clone)]
 pub struct ZoneMatch {
+    pub authority: String,
     pub zone: Zone,
     pub coverage_pct: Option<f64>,
     pub raw: Value,
@@ -45,7 +50,16 @@ pub struct Assessment {
     pub manifest: BTreeMap<String, String>,
 }
 
-pub const DISCLAIMER: &str = "Indicative desktop assessment generated offline from Brisbane City Council open data and an on-device AI model. It is not a formal planning certificate or legal advice. Verify against the current Brisbane City Plan 2014 and Council records, and engage a registered planner before making decisions.";
+/// Report sections, in display order: (key, title, who is responsible).
+pub const AUTHORITIES: &[(&str, &str, &str)] = &[
+    ("council", "Council", "Brisbane City Council under Brisbane City Plan 2014"),
+    ("sara", "SARA (State)", "the State Assessment and Referral Agency (SARA) under the Planning Regulation 2017 and SDAP"),
+    ("pda", "PDA (EDQ)", "Economic Development Queensland under the Economic Development Act 2012 and the PDA development scheme"),
+    ("state", "State plans", "the Queensland Government's regional and state planning instruments (ShapingSEQ 2023, State Planning Policy)"),
+    ("other", "Other agencies", "other agencies and laws: utilities (Urban Utilities, Energex), federal law (EPBC Act, airspace) and state permits"),
+];
+
+pub const DISCLAIMER: &str = "Indicative desktop assessment generated from Brisbane City Council and Queensland Government open data and an AI model. It is not a formal planning certificate or legal advice. Verify against the current Brisbane City Plan 2014, SARA DA mapping and agency records, and engage a registered planner before making decisions.";
 
 fn zones_kb() -> &'static Vec<Zone> {
     static Z: OnceLock<Vec<Zone>> = OnceLock::new();
@@ -69,6 +83,19 @@ fn prop_text(v: &Value) -> String {
     }
 }
 
+fn add_flag(flags: &mut Vec<Flag>, r: &Rule, layer: Option<&str>) {
+    match flags.iter_mut().find(|f| f.rule.id == r.id) {
+        Some(f) => {
+            if let Some(l) = layer {
+                if !f.layers.iter().any(|x| x == l) {
+                    f.layers.push(l.to_string());
+                }
+            }
+        }
+        None => flags.push(Flag { rule: r.clone(), layers: layer.map(|l| vec![l.to_string()]).unwrap_or_default() }),
+    }
+}
+
 pub fn assess(parcel: Parcel, overlays: Vec<OverlayHit>, manifest: BTreeMap<String, String>) -> Assessment {
     let mut zones = Vec::new();
     for h in overlays.iter().filter(|h| norm(&h.dataset_id).contains("zoning")) {
@@ -80,69 +107,153 @@ pub fn assess(parcel: Parcel, overlays: Vec<OverlayHit>, manifest: BTreeMap<Stri
             .filter(|(_, k)| text.contains(k.as_str()))
             .max_by_key(|(_, k)| k.len());
         if let Some((z, _)) = best {
-            zones.push(ZoneMatch { zone: z.clone(), coverage_pct: h.coverage_pct, raw: h.props.clone() });
+            let authority = if z.name.starts_with("Priority Development Area") { "pda" } else { "council" };
+            zones.push(ZoneMatch { authority: authority.into(), zone: z.clone(), coverage_pct: h.coverage_pct, raw: h.props.clone() });
         }
     }
     // A PDA overrides City Plan, so show it first.
-    zones.sort_by_key(|z| !z.zone.name.starts_with("Priority Development Area"));
+    zones.sort_by_key(|z| z.authority != "pda");
+
     let mut flags: Vec<Flag> = Vec::new();
     for h in &overlays {
         let hay = norm(&format!("{} {}", h.dataset_id, h.title));
-        if hay.contains("zoning") {
+        if h.authority == "council" && hay.contains("zoning") {
             continue;
         }
-        for r in rules_kb() {
-            if r.keywords.iter().any(|k| hay.contains(&norm(k))) {
-                match flags.iter_mut().find(|f| f.rule.id == r.id) {
-                    Some(f) if !f.layers.contains(&h.title) => f.layers.push(h.title.clone()),
-                    Some(_) => {}
-                    None => flags.push(Flag { rule: r.clone(), layers: vec![h.title.clone()] }),
-                }
+        for r in rules_kb().iter().filter(|r| !r.always) {
+            // Agency rules match their own layers; "other" rules (federal, utilities) can match any layer.
+            let same = r.authority == h.authority || r.authority == "other";
+            if same && r.keywords.iter().any(|k| hay.contains(&norm(k))) {
+                add_flag(&mut flags, r, Some(&h.title));
             }
         }
+    }
+    if zones.iter().any(|z| z.authority == "pda") {
+        if let Some(r) = rules_kb().iter().find(|r| r.id == "pda") {
+            add_flag(&mut flags, r, None);
+        }
+    }
+    for r in rules_kb().iter().filter(|r| r.always) {
+        add_flag(&mut flags, r, None);
     }
     Assessment { parcel, zones, flags, overlays, manifest }
 }
 
 fn trim(v: &Value, max: usize) -> String {
     let s = v.to_string();
-    if s.len() > max {
-        let mut cut = max;
-        while !s.is_char_boundary(cut) {
-            cut -= 1;
-        }
-        format!("{}…", &s[..cut])
-    } else {
-        s
+    if s.len() <= max {
+        return s;
     }
+    let mut cut = max;
+    while !s.is_char_boundary(cut) {
+        cut -= 1;
+    }
+    format!("{}…", &s[..cut])
 }
 
-/// Builds (system, user) prompts. Facts are compact JSON so they fit a small model's context.
-pub fn prompt(a: &Assessment, question: &str) -> (String, String) {
-    let system = "You are a senior town planner in Brisbane, Queensland, writing a desktop due-diligence assessment under the Planning Act 2016 and Brisbane City Plan 2014. \
-Use ONLY the facts supplied. Never invent provisions, numbers, heights, setbacks or levels of assessment that are not in the facts; where something must be checked, say so. \
-Name the relevant City Plan zone codes and overlay codes supplied. Be concise and practical. Write in Markdown with these sections:\n\
-## Site summary\n## Zoning and intent\n## Overlays and constraints\n## Likely assessment pathway (indicative: refer to City Plan Part 5 tables of assessment)\n## Due-diligence checklist\n## Recommended next steps".to_string();
+fn site_facts(a: &Assessment) -> Value {
     let p = &a.parcel;
-    let overlays: Vec<Value> = a
+    json!({"address": p.address, "lot_plan": p.lotplan, "suburb": p.suburb, "lot_area_m2": p.area_m2,
+           "lot_attributes": trim(&p.props, 300), "data_date": a.manifest.get("built_at")})
+}
+
+fn authority_facts(a: &Assessment, key: &str) -> Value {
+    let zones: Vec<Value> = a
+        .zones
+        .iter()
+        .filter(|z| z.authority == key)
+        .map(|z| json!({"zone": z.zone.name, "purpose": z.zone.purpose, "typical_uses": z.zone.typical, "coverage_pct": z.coverage_pct, "attributes": trim(&z.raw, 200)}))
+        .collect();
+    let triggers: Vec<Value> = a
+        .flags
+        .iter()
+        .filter(|f| f.rule.authority == key)
+        .map(|f| json!({"matter": f.rule.title, "legislation_or_code": f.rule.code, "implication": f.rule.note, "mapped_layers": f.layers, "checks": f.rule.checklist}))
+        .collect();
+    let layers: Vec<Value> = a
         .overlays
         .iter()
-        .filter(|h| !norm(&h.dataset_id).contains("zoning"))
-        .take(25)
-        .map(|h| json!({"layer": h.title, "coverage_pct": h.coverage_pct, "attributes": trim(&h.props, 220)}))
+        .filter(|h| h.authority == key && !(key == "council" && norm(&h.dataset_id).contains("zoning")))
+        .take(20)
+        .map(|h| json!({"layer": h.title, "coverage_pct": h.coverage_pct, "distance_m": h.distance_m, "attributes": trim(&h.props, 180)}))
         .collect();
-    let facts = json!({
-        "address": p.address, "lot_plan": p.lotplan, "suburb": p.suburb, "lot_area_m2": p.area_m2,
-        "lot_attributes": trim(&p.props, 400),
-        "zones": a.zones.iter().map(|z| json!({"zone": z.zone.name, "purpose": z.zone.purpose, "typical_uses": z.zone.typical, "coverage_pct": z.coverage_pct, "attributes": trim(&z.raw, 200)})).collect::<Vec<_>>(),
-        "constraints": a.flags.iter().map(|f| json!({"constraint": f.rule.title, "code": f.rule.code, "implication": f.rule.note, "layers": f.layers})).collect::<Vec<_>>(),
-        "overlay_features": overlays,
-        "data_date": a.manifest.get("built_at"),
-    });
-    let q = if question.trim().is_empty() {
-        "Prepare the planning assessment for this site.".to_string()
+    json!({"zones": zones, "triggers": triggers, "mapped_layers": layers})
+}
+
+const PERSONA: &str = "You are a senior town planner in Brisbane, Queensland. Use ONLY the facts supplied. \
+Never invent provisions, numbers, heights, setbacks, parking rates or levels of assessment that are not in the facts; \
+if something must be confirmed, say exactly what and where to check. Be concise, practical and plain-English. Use Markdown.";
+
+/// Sections to generate: only authorities with something to say, plus a summary.
+pub fn sections(a: &Assessment) -> Vec<(&'static str, &'static str)> {
+    let mut out: Vec<(&str, &str)> = AUTHORITIES
+        .iter()
+        .filter(|(k, _, _)| match *k {
+            "council" | "sara" | "other" => true,
+            k => a.flags.iter().any(|f| f.rule.authority == k) || a.zones.iter().any(|z| z.authority == k),
+        })
+        .map(|(k, t, _)| (*k, *t))
+        .collect();
+    out.push(("summary", "Summary"));
+    out
+}
+
+/// Builds the (system, user) prompt for one report section.
+pub fn section_prompt(a: &Assessment, key: &str, question: &str) -> (String, String) {
+    let proposal = if question.trim().is_empty() { String::new() } else { format!("\nProposal / question: {}", question.trim()) };
+    if key == "summary" {
+        let all: BTreeMap<&str, Value> = AUTHORITIES.iter().map(|(k, _, _)| (*k, authority_facts(a, k))).collect();
+        let user = format!(
+            "SITE: {}\nFINDINGS BY AUTHORITY: {}\n{proposal}\n\nWrite the overall summary with these headings:\n### Key findings\n### Who assesses what\n(bullet per authority: council, SARA, EDQ if PDA, others)\n### Combined due-diligence checklist\n### Recommended next steps",
+            site_facts(a),
+            json!(all)
+        );
+        return (PERSONA.to_string(), user);
+    }
+    let (_, title, who) = AUTHORITIES.iter().find(|(k, _, _)| *k == key).copied().unwrap_or(("", "", ""));
+    let facts = authority_facts(a, key);
+    let empty = facts["zones"].as_array().map_or(true, |v| v.is_empty()) && facts["triggers"].as_array().map_or(true, |v| v.is_empty());
+    let note = if empty && key == "sara" {
+        "\nNo state referral triggers were found in the data pack. Say so, and recommend confirming against the SARA DA mapping system before lodging."
     } else {
-        format!("Prepare the planning assessment for this site, specifically addressing this proposal/question: {}", question.trim())
+        ""
     };
-    (system, format!("FACTS:\n{facts}\n\n{q}"))
+    let user = format!(
+        "Write ONLY the \"{title}\" part of the site report: what {who} regulates for this site and what it means.\nSITE: {}\nFACTS FOR THIS AUTHORITY: {facts}{note}{proposal}\n\nUse these headings:\n### What applies\n### What it means for development\n### Checks before lodging\nAttribute each point to the authority (e.g. \"Council requires…\", \"SARA referral is likely because…\").",
+        site_facts(a)
+    );
+    (PERSONA.to_string(), user)
+}
+
+pub struct ChatMsg {
+    pub role: String,
+    pub content: String,
+}
+
+/// Chat messages for follow-up questions: system + site facts/report, then recent history.
+pub fn chat_messages(a: &Assessment, report: &str, history: &[ChatMsg]) -> Vec<(String, String)> {
+    let all: BTreeMap<&str, Value> = AUTHORITIES.iter().map(|(k, _, _)| (*k, authority_facts(a, k))).collect();
+    let mut report = report.to_string();
+    if report.len() > 6000 {
+        let mut cut = 6000;
+        while !report.is_char_boundary(cut) {
+            cut -= 1;
+        }
+        report.truncate(cut);
+    }
+    let system = format!(
+        "{PERSONA}\nYou are advising the user about one site and may discuss options, trade-offs and design changes that could improve the outcome \
+(e.g. reducing height, changing use, avoiding a trigger). Always say which authority (council, SARA, EDQ, other) a point relates to, \
+and be honest when the data cannot answer something.\n\nSITE: {}\nFINDINGS BY AUTHORITY: {}\nEARLIER REPORT:\n{report}",
+        site_facts(a),
+        json!(all)
+    );
+    let mut msgs = vec![("system".to_string(), system)];
+    let start = history.len().saturating_sub(10);
+    for m in &history[start..] {
+        let role = if m.role == "assistant" { "assistant" } else { "user" };
+        let content: String = m.content.chars().take(2000).collect();
+        msgs.push((role.to_string(), content));
+    }
+    msgs
 }

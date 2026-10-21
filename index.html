@@ -49,8 +49,17 @@
               <button class="ghost" id="stopBtn" hidden>Stop</button>
               <button class="ghost" id="saveBtn" hidden>Save report</button>
             </div>
+            <nav class="tabs" id="tabs"></nav>
             <article id="report" class="report"></article>
             <p class="disclaimer" id="disclaimer"></p>
+          </div>
+          <div class="chat-box">
+            <h3>Ask the planner</h3>
+            <div id="chatLog" class="chat-log"><p class="meta">Ask follow-up questions or test options, e.g. "What if I reduce it to 2 storeys?" or "How do I avoid the SARA referral?"</p></div>
+            <form id="chatForm" class="report-bar">
+              <input id="chatInput" placeholder="Type a question…" autocomplete="off" />
+              <button id="chatBtn">Send</button>
+            </form>
           </div>
         </section>
       </main>
@@ -62,7 +71,30 @@
         <h3>Data pack</h3>
         <p id="packDetail" class="meta"></p>
         <button type="button" id="importPack">Import data pack (.sqlite or .sqlite.gz)</button>
-        <h3>AI model (runs on this device)</h3>
+        <h3>AI engine</h3>
+        <div class="engine">
+          <label><input type="radio" name="provider" value="builtin" /> Built-in model (offline)</label>
+          <label><input type="radio" name="provider" value="ollama" /> Ollama on this PC (offline)</label>
+          <label><input type="radio" name="provider" value="anthropic" /> Claude API (online, most accurate)</label>
+          <label><input type="radio" name="provider" value="openai" /> Other OpenAI-compatible API (online)</label>
+        </div>
+        <div class="pcfg" data-for="ollama">
+          <input id="ollamaUrl" placeholder="http://localhost:11434" />
+          <div class="row"><select id="ollamaModel"></select><button type="button" class="ghost" id="ollamaRefresh">Refresh models</button></div>
+        </div>
+        <div class="pcfg" data-for="anthropic">
+          <input id="anthropicKey" type="password" placeholder="Claude API key (sk-ant-…)" autocomplete="off" />
+          <input id="anthropicModel" placeholder="Model, e.g. claude-sonnet-5-5" />
+          <p class="meta">Site details are sent to Anthropic when using this option. Keys are stored in the system credential store.</p>
+        </div>
+        <div class="pcfg" data-for="openai">
+          <input id="openaiBase" placeholder="https://api.openai.com/v1" />
+          <input id="openaiKey" type="password" placeholder="API key" autocomplete="off" />
+          <input id="openaiModel" placeholder="Model name" />
+        </div>
+        <button type="button" id="saveAi">Save AI settings</button>
+        <p class="meta" id="aiMsg"></p>
+        <h3>Built-in models</h3>
         <div id="models"></div>
         <button type="button" class="ghost" id="importModel">Import a .gguf model file</button>
         <p class="meta">Models are downloaded once, then everything runs offline.</p>

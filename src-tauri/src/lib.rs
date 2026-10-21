@@ -1,3 +1,4 @@
+mod ai;
 mod data;
 mod llm;
 mod rules;
@@ -33,13 +34,21 @@ fn settings_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(dir(app, "")?.join("settings.json"))
 }
 
+fn load_settings(app: &AppHandle) -> ai::AiSettings {
+    settings_path(app)
+        .ok()
+        .and_then(|p| fs::read_to_string(p).ok())
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .unwrap_or_default()
+}
+
+fn store_settings(app: &AppHandle, s: &ai::AiSettings) -> Result<(), String> {
+    fs::write(settings_path(app)?, serde_json::to_string_pretty(s).map_err(e)?).map_err(e)
+}
+
 fn active_model(app: &AppHandle) -> Result<Option<PathBuf>, String> {
     let models = dir(app, "models")?;
-    let chosen = fs::read_to_string(settings_path(app)?)
-        .ok()
-        .and_then(|s| serde_json::from_str::<serde_json::Value>(&s).ok())
-        .and_then(|v| v["model"].as_str().map(|s| models.join(s)))
-        .filter(|p| p.exists());
+    let chosen = load_settings(app).model.map(|m| models.join(m)).filter(|p| p.exists());
     if chosen.is_some() {
         return Ok(chosen);
     }
@@ -78,6 +87,9 @@ struct Status {
     models: Vec<ModelStatus>,
     custom_models: Vec<String>,
     active_model: Option<String>,
+    ai: ai::AiSettings,
+    has_anthropic_key: bool,
+    has_openai_key: bool,
     disclaimer: &'static str,
 }
 
@@ -105,7 +117,16 @@ async fn status(app: AppHandle, state: State<'_, AppState>) -> Result<Status, St
         .map(|x| x.file_name().to_string_lossy().to_string())
         .filter(|f| f.ends_with(".gguf") && !llm::CATALOG.iter().any(|m| m.file == f))
         .collect();
-    Ok(Status { datapack, models, custom_models, active_model: active, disclaimer: rules::DISCLAIMER })
+    Ok(Status {
+        datapack,
+        models,
+        custom_models,
+        active_model: active,
+        ai: load_settings(&app),
+        has_anthropic_key: ai::get_key("anthropic").is_some(),
+        has_openai_key: ai::get_key("openai").is_some(),
+        disclaimer: rules::DISCLAIMER,
+    })
 }
 
 #[tauri::command]
@@ -142,43 +163,98 @@ async fn search(state: State<'_, AppState>, q: String) -> Result<Vec<data::Parce
 #[tauri::command]
 async fn assess(state: State<'_, AppState>, pid: i64) -> Result<rules::Assessment, String> {
     let db = state.db.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let g = db.lock().map_err(e)?;
-        let c = g.as_ref().ok_or("No data pack loaded")?;
-        let p = data::parcel(c, pid)?;
-        let o = data::overlays(c, &p)?;
-        Ok(rules::assess(p, o, data::manifest(c)?))
-    })
-    .await
-    .map_err(e)?
+    tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)?
 }
 
+fn load_assessment(db: &Arc<Mutex<Option<rusqlite::Connection>>>, pid: i64) -> Result<rules::Assessment, String> {
+    let g = db.lock().map_err(e)?;
+    let c = g.as_ref().ok_or("No data pack loaded")?;
+    let p = data::parcel(c, pid)?;
+    let o = data::overlays(c, &p)?;
+    Ok(rules::assess(p, o, data::manifest(c)?))
+}
+
+#[derive(Serialize, Clone)]
+struct ReportEvent {
+    section: String,
+    title: String,
+    text: String,
+}
+
+/// Generates the report one authority section at a time, streaming text tagged with its section.
 #[tauri::command]
 async fn generate_report(
     app: AppHandle,
     state: State<'_, AppState>,
     pid: i64,
     question: String,
+    on_event: Channel<ReportEvent>,
+) -> Result<(), String> {
+    let cfg = load_settings(&app);
+    let model = active_model(&app)?;
+    let db = state.db.clone();
+    let a = tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)??;
+    state.llm.cancel.store(false, Ordering::SeqCst);
+    for (key, title) in rules::sections(&a) {
+        if state.llm.cancel.load(Ordering::SeqCst) {
+            break;
+        }
+        let _ = on_event.send(ReportEvent { section: key.into(), title: title.into(), text: String::new() });
+        let (sys, user) = rules::section_prompt(&a, key, &question);
+        let ch = on_event.clone();
+        let sink: ai::Sink = Arc::new(move |t: &str| {
+            let _ = ch.send(ReportEvent { section: key.into(), title: title.into(), text: t.to_string() });
+        });
+        ai::generate(&cfg, model.clone(), state.llm.clone(), vec![("system".into(), sys), ("user".into(), user)], 700, sink).await?;
+    }
+    Ok(())
+}
+
+#[derive(serde::Deserialize)]
+struct ChatIn {
+    role: String,
+    content: String,
+}
+
+#[tauri::command]
+async fn chat(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    pid: i64,
+    report: String,
+    history: Vec<ChatIn>,
     on_token: Channel<String>,
 ) -> Result<(), String> {
-    let model = active_model(&app)?.ok_or("No AI model installed. Open Settings to download one.")?;
+    let cfg = load_settings(&app);
+    let model = active_model(&app)?;
     let db = state.db.clone();
-    let engine = state.llm.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let a = {
-            let g = db.lock().map_err(e)?;
-            let c = g.as_ref().ok_or("No data pack loaded")?;
-            let p = data::parcel(c, pid)?;
-            let o = data::overlays(c, &p)?;
-            rules::assess(p, o, data::manifest(c)?)
-        };
-        let (sys, user) = rules::prompt(&a, &question);
-        engine.generate(&model, &sys, &user, |t| {
-            let _ = on_token.send(t.to_string());
-        })
-    })
-    .await
-    .map_err(e)?
+    let a = tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)??;
+    let hist: Vec<rules::ChatMsg> = history.into_iter().map(|m| rules::ChatMsg { role: m.role, content: m.content }).collect();
+    let msgs = rules::chat_messages(&a, &report, &hist);
+    let sink: ai::Sink = Arc::new(move |t: &str| {
+        let _ = on_token.send(t.to_string());
+    });
+    ai::generate(&cfg, model, state.llm.clone(), msgs, 900, sink).await
+}
+
+#[tauri::command]
+fn save_ai_settings(app: AppHandle, settings: ai::AiSettings) -> Result<(), String> {
+    let mut s = settings;
+    s.model = load_settings(&app).model; // built-in model choice is managed by set_model
+    store_settings(&app, &s)
+}
+
+#[tauri::command]
+fn set_api_key(provider: String, key: String) -> Result<(), String> {
+    if provider != "anthropic" && provider != "openai" {
+        return Err("Unknown provider".into());
+    }
+    ai::set_key(&provider, key.trim())
+}
+
+#[tauri::command]
+async fn ollama_models(url: String) -> Result<Vec<String>, String> {
+    ai::ollama_models(&url).await
 }
 
 #[tauri::command]
@@ -235,7 +311,10 @@ async fn import_model(app: AppHandle, path: String) -> Result<String, String> {
 
 #[tauri::command]
 fn set_model(app: AppHandle, file: String) -> Result<(), String> {
-    fs::write(settings_path(&app)?, serde_json::json!({ "model": file }).to_string()).map_err(e)
+    let mut s = load_settings(&app);
+    s.model = Some(file);
+    s.provider = "builtin".into();
+    store_settings(&app, &s)
 }
 
 #[tauri::command]
@@ -268,7 +347,11 @@ pub fn run() {
             search,
             assess,
             generate_report,
+            chat,
             cancel_report,
+            save_ai_settings,
+            set_api_key,
+            ollama_models,
             download_model,
             import_model,
             set_model,

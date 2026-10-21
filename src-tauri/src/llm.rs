@@ -47,7 +47,6 @@ pub const CATALOG: &[ModelSpec] = &[
 ];
 
 const N_CTX: u32 = 8192;
-const MAX_NEW: usize = 1800;
 const CHUNK: usize = 512;
 
 pub struct Engine {
@@ -64,8 +63,8 @@ impl Engine {
     pub fn generate(
         &self,
         model_path: &Path,
-        system: &str,
-        user: &str,
+        messages: &[(String, String)],
+        max_new: usize,
         mut on_text: impl FnMut(&str),
     ) -> Result<(), String> {
         self.cancel.store(false, Ordering::SeqCst);
@@ -84,9 +83,11 @@ impl Engine {
         }
         let model = &mguard.as_ref().unwrap().1;
 
-        let prompt = format!(
-            "<|im_start|>system\n{system}<|im_end|>\n<|im_start|>user\n{user}<|im_end|>\n<|im_start|>assistant\n"
-        );
+        let mut prompt: String = messages
+            .iter()
+            .map(|(role, content)| format!("<|im_start|>{role}\n{content}<|im_end|>\n"))
+            .collect();
+        prompt.push_str("<|im_start|>assistant\n");
         let ctx_params = LlamaContextParams::default().with_n_ctx(NonZeroU32::new(N_CTX));
         let mut ctx = model.new_context(backend, ctx_params).map_err(e)?;
         let vocab = model.vocab();
@@ -114,7 +115,7 @@ impl Engine {
             LlamaSampler::dist(42),
         ]);
         let mut pending: Vec<u8> = Vec::new();
-        for _ in 0..MAX_NEW {
+        for _ in 0..max_new {
             if self.cancel.load(Ordering::SeqCst) || pos as u32 >= N_CTX - 1 {
                 break;
             }

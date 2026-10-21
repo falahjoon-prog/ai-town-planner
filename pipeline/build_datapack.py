@@ -30,6 +30,19 @@ PARCEL_FIELDS = ["OBJECTID", "LOT", "PLAN_", "LOTPLAN", "LOT_AREA", "HOUSE_NUMBE
 DROP_PROPS = {"geo_point_2d", "geo_shape", "objectid", "shape_area", "shape_length",
               "shape__area", "shape__length"}
 UA = {"User-Agent": "ai-town-planner-datapack/1.0"}
+QLD = "https://spatial-gis.information.qld.gov.au/arcgis/rest/services"
+BNE_BBOX = "152.66,-27.77,153.47,-27.02"  # Brisbane LGA envelope (WGS84)
+# (authority, MapServer, layer-name prefixes). Layers are resolved by name, so ID changes don't break the build.
+STATE_LAYERS = [
+    ("sara", f"{QLD}/Transportation/StateRoadInformation/MapServer", ["State controlled road"]),
+    ("sara", f"{QLD}/Environment/KoalaPlan/MapServer", ["Koala priority area", "Core koala habitat area", "Locally refined koala habitat area"]),
+    ("sara", f"{QLD}/Environment/WetlandProtection/MapServer", ["Wetland protection area", "Wetlands of high ecological significance"]),
+    ("sara", f"{QLD}/Biota/VegetationManagement/MapServer", ["RVM category A", "RVM category B", "RVM category C", "RVM category R", "Essential habitat map"]),
+    ("sara", f"{QLD}/PlanningCadastre/CoastalManagement/MapServer", ["Coastal management district", "Erosion prone area", "High hazard area", "Medium hazard area"]),
+    ("pda", f"{QLD}/PlanningCadastre/StatePlanning/MapServer", ["Priority development areas"]),
+    ("state", f"{QLD}/PlanningCadastre/StatePlanning/MapServer", ["SEQ regional land use category"]),
+    ("other", f"{QLD}/Biota/VegetationManagement/MapServer", ["Protected plants trigger map"]),
+]
 
 
 def get(url, params=None, retries=5):
@@ -107,7 +120,7 @@ def schema(db):
     CREATE TABLE parcels(pid INTEGER PRIMARY KEY, lotplan TEXT, address TEXT, suburb TEXT,
         search TEXT, area REAL, props TEXT, geom TEXT);
     CREATE INDEX parcels_lotplan ON parcels(lotplan);
-    CREATE TABLE layers(lid INTEGER PRIMARY KEY, dataset_id TEXT UNIQUE, title TEXT, n INTEGER);
+    CREATE TABLE layers(lid INTEGER PRIMARY KEY, dataset_id TEXT UNIQUE, title TEXT, n INTEGER, authority TEXT);
     CREATE TABLE features(fid INTEGER PRIMARY KEY, lid INTEGER, props TEXT, geom TEXT);
     CREATE VIRTUAL TABLE feature_idx USING rtree(fid, minx, maxx, miny, maxy);
     """)
@@ -172,29 +185,85 @@ def cp14_datasets():
             return out
 
 
+def insert_features(db, lid, feats):
+    n, rows, idx = 0, [], []
+    next_fid = (db.execute("SELECT COALESCE(MAX(fid),0) FROM features").fetchone()[0]) + 1
+    for f in feats:
+        g, b = clean_geom(f.get("geometry"))
+        if not g:
+            continue
+        rows.append((next_fid, lid, json.dumps(clean_props(f.get("properties"))), g))
+        idx.append((next_fid, *b))
+        next_fid += 1
+        n += 1
+        if len(rows) >= 5000:
+            db.executemany("INSERT INTO features VALUES(?,?,?,?)", rows)
+            db.executemany("INSERT INTO feature_idx VALUES(?,?,?,?,?)", idx)
+            rows, idx = [], []
+    db.executemany("INSERT INTO features VALUES(?,?,?,?)", rows)
+    db.executemany("INSERT INTO feature_idx VALUES(?,?,?,?,?)", idx)
+    return n
+
+
 def load_layer(db, lid, did, title, tmpdir):
     path = os.path.join(tmpdir, f"{did}.geojson")
     download(f"{ODS}/catalog/datasets/{did}/exports/geojson", path)
-    n, rows, idx = 0, [], []
-    next_fid = (db.execute("SELECT COALESCE(MAX(fid),0) FROM features").fetchone()[0]) + 1
     with open(path, "rb") as fh:
-        for f in ijson.items(fh, "features.item", use_float=True):
-            g, b = clean_geom(f.get("geometry"))
-            if not g:
-                continue
-            rows.append((next_fid, lid, json.dumps(clean_props(f.get("properties"))), g))
-            idx.append((next_fid, *b))
-            next_fid += 1
-            n += 1
-            if len(rows) >= 5000:
-                db.executemany("INSERT INTO features VALUES(?,?,?,?)", rows)
-                db.executemany("INSERT INTO feature_idx VALUES(?,?,?,?,?)", idx)
-                rows, idx = [], []
-    db.executemany("INSERT INTO features VALUES(?,?,?,?)", rows)
-    db.executemany("INSERT INTO feature_idx VALUES(?,?,?,?,?)", idx)
-    db.execute("INSERT INTO layers VALUES(?,?,?,?)", (lid, did, title, n))
+        n = insert_features(db, lid, ijson.items(fh, "features.item", use_float=True))
+    db.execute("INSERT INTO layers VALUES(?,?,?,?,?)", (lid, did, title, n, "council"))
     os.remove(path)
     return n
+
+
+def arcgis_features(url, oid):
+    """Page through a statewide ArcGIS layer, limited to the Brisbane envelope."""
+    last = -1
+    while True:
+        body = get(f"{url}/query", {"where": f"{oid}>{last}", "geometry": BNE_BBOX,
+                                    "geometryType": "esriGeometryEnvelope", "inSR": 4326,
+                                    "spatialRel": "esriSpatialRelIntersects", "outFields": "*",
+                                    "outSR": 4326, "f": "geojson", "orderByFields": oid,
+                                    "resultRecordCount": 1000, "geometryPrecision": 6})
+        feats = json.loads(body).get("features", [])
+        if not feats:
+            return
+        for f in feats:
+            props = f.get("properties") or {}
+            v = props.get(oid, f.get("id"))
+            if v is not None:
+                last = max(last, int(v))
+            yield f
+        if len(feats) < 1000:
+            return
+
+
+def load_state_layers(db, start_lid):
+    lid, failed = start_lid, []
+    for authority, svc, wanted in STATE_LAYERS:
+        try:
+            meta = json.loads(get(svc, {"f": "json"}))
+        except Exception as e:  # noqa: BLE001
+            failed.append(svc); print(f"  FAILED {svc}: {e}", flush=True); continue
+        for w in wanted:
+            layer = next((l for l in meta.get("layers", []) if l.get("name", "").lower().startswith(w.lower())
+                          and not l.get("subLayerIds")), None)
+            if not layer:
+                failed.append(w); print(f"  NOT FOUND {w}", flush=True); continue
+            url = f"{svc}/{layer['id']}"
+            try:
+                info = json.loads(get(url, {"f": "json"}))
+                oid = info.get("objectIdField") or next((f["name"] for f in info.get("fields", [])
+                                                         if f.get("type") == "esriFieldTypeOID"), "OBJECTID")
+                lid += 1
+                n = insert_features(db, lid, arcgis_features(url, oid))
+                did = "qld:" + layer["name"].lower().replace(" ", "-")[:60]
+                db.execute("INSERT INTO layers VALUES(?,?,?,?,?)",
+                           (lid, did, f"Queensland — {layer['name']}", n, authority))
+                db.commit()
+                print(f"  [{authority}] {layer['name']}: {n}", flush=True)
+            except Exception as e:  # noqa: BLE001
+                failed.append(w); print(f"  FAILED {w}: {e}", flush=True)
+    return lid - start_lid, failed
 
 
 def main():
@@ -223,14 +292,16 @@ def main():
                 failed.append(did)
                 print(f"  FAILED {did}: {e}", flush=True)
             db.commit()
+    print("Queensland state layers…", flush=True)
+    n_state, failed_state = load_state_layers(db, len(sets) + 1)
     meta = {
         "built_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d"),
         "region": "Brisbane City Council",
         "parcels": str(np_),
-        "layers": str(len(sets) - len(failed)),
-        "failed_layers": ",".join(failed),
-        "attribution": "Contains data (c) Brisbane City Council, licensed under CC BY 4.0.",
-        "sources": "data.brisbane.qld.gov.au (City Plan 2014 datasets); BCC property_boundaries_parcel",
+        "layers": str(len(sets) - len(failed) + n_state),
+        "failed_layers": ",".join(failed + failed_state),
+        "attribution": "Contains data (c) Brisbane City Council and (c) State of Queensland, licensed under CC BY 4.0.",
+        "sources": "data.brisbane.qld.gov.au (City Plan 2014); BCC property_boundaries_parcel; QSpatial (state planning, SARA trigger, koala, wetland, vegetation, coastal layers)",
     }
     db.executemany("INSERT INTO manifest VALUES(?,?)", meta.items())
     db.commit()

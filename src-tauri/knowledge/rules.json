@@ -1,16 +1,399 @@
 [
-  {"id": "flood", "keywords": ["flood", "overland flow", "storm tide"], "title": "Flood / overland flow / storm tide", "code": "Flood overlay code", "note": "Part of the lot is mapped in a flood planning area. Minimum habitable floor levels, flood-resilient design and limits on filling and intensification are likely to apply.", "checklist": ["Order a Council FloodWise Property Report for flood levels", "Confirm the flood planning area category and minimum habitable floor level", "Check whether filling or excavation is needed and its flood impacts"]},
-  {"id": "heritage", "keywords": ["heritage", "pre-1911", "pre 1911"], "title": "Heritage", "code": "Heritage overlay code", "note": "The lot is on, or adjoins, a heritage place or pre-1911 building. Demolition and building work can trigger assessment and heritage impact requirements.", "checklist": ["Check the Local Heritage Places register and the Queensland Heritage Register citation", "Assess whether a heritage impact statement is needed", "Note that any state heritage place is referred to SARA"]},
-  {"id": "character", "keywords": ["traditional building character", "dwelling house character", "commercial character"], "title": "Character protection", "code": "Traditional building character overlay code / Dwelling house character overlay code / Commercial character building overlay code", "note": "Character controls restrict demolition or removal of older buildings and require new work to respect the streetscape.", "checklist": ["Establish the house's construction date (pre-1947 is relevant)", "Check whether demolition or removal needs approval", "Review the design requirements for new work and extensions"]},
-  {"id": "bushfire", "keywords": ["bushfire"], "title": "Bushfire hazard", "code": "Bushfire overlay code", "note": "The lot is in a mapped bushfire hazard area. Separation, access and building construction standards (AS 3959) may apply.", "checklist": ["Confirm the hazard level", "Obtain a BAL assessment (AS 3959)", "Check the access and water supply requirements"]},
-  {"id": "landslide", "keywords": ["landslide", "steep"], "title": "Landslide / steep land", "code": "Landslide overlay code", "note": "Mapped landslide or steep land hazard. A geotechnical assessment is likely to be required.", "checklist": ["Commission a geotechnical report", "Minimise cut and fill and retaining walls"]},
-  {"id": "acid", "keywords": ["acid sulfate"], "title": "Acid sulfate soils", "code": "Potential and actual acid sulfate soils overlay code", "note": "Excavation or filling may disturb acid sulfate soils. Testing and a management plan may be required.", "checklist": ["Check excavation depth against the mapped thresholds", "Arrange soil testing if excavation is proposed"]},
-  {"id": "biodiversity", "keywords": ["biodiversity", "koala", "wetland", "waterway", "riparian", "significant landscape tree", "vegetation"], "title": "Biodiversity / waterways / vegetation", "code": "Biodiversity areas overlay code / Waterway corridors overlay code / Wetlands overlay code / Significant landscape tree overlay code", "note": "Ecological values are mapped on the lot. Vegetation clearing, setbacks from waterways and ecological assessment may be required, and state koala mapping may also apply.", "checklist": ["Map vegetation and waterways on site", "Check clearing restrictions and protected vegetation", "Check the state koala habitat mapping (SPP / Queensland Globe)"]},
-  {"id": "airport", "keywords": ["airport"], "title": "Airport environs", "code": "Airport environs overlay code", "note": "Height limits (obstacle limitation surfaces), aircraft noise (ANEF) or lighting and wildlife controls may apply.", "checklist": ["Check the building height against the OLS", "Check the ANEF contour for noise attenuation"]},
-  {"id": "noise", "keywords": ["transport noise", "noise corridor", "air quality"], "title": "Transport noise / air quality", "code": "Transport noise corridor overlay code / Transport air quality corridor overlay code", "note": "The lot is near a major road or rail corridor. Acoustic treatment of the building (QDC MP4.4) and air quality design may be required.", "checklist": ["Identify the noise category", "Allow for the cost of acoustic glazing and construction"]},
-  {"id": "road", "keywords": ["road hierarchy", "streetscape", "bicycle network", "critical infrastructure", "movement network", "regional infrastructure", "infrastructure corridor"], "title": "Road, transport and infrastructure networks", "code": "Road hierarchy overlay code / Streetscape hierarchy overlay code / Critical infrastructure and movement network overlay code", "note": "Frontage roads, access, streetscape treatment and infrastructure corridors can affect driveway location, setbacks and works requirements.", "checklist": ["Confirm the road hierarchy of each frontage", "Check access and driveway constraints", "Check for any infrastructure easements or corridors"]},
-  {"id": "industrial", "keywords": ["industrial amenity", "extractive resources"], "title": "Industrial amenity / extractive resources", "code": "Industrial amenity overlay code / Extractive resources overlay code", "note": "Nearby industry or extractive resources may limit sensitive uses or require separation and amenity mitigation.", "checklist": ["Identify nearby industry or quarries and their buffers"]},
-  {"id": "coastal", "keywords": ["coastal"], "title": "Coastal hazard", "code": "Coastal hazard overlay code", "note": "Coastal erosion or storm tide inundation hazards are mapped on the lot.", "checklist": ["Check the erosion prone area and storm tide levels"]},
-  {"id": "neighbourhood", "keywords": ["neighbourhood plan"], "title": "Neighbourhood plan", "code": "Neighbourhood plan code (the relevant plan)", "note": "A neighbourhood plan applies. It can change the levels of assessment, building heights and the uses supported compared with the base zone.", "checklist": ["Read the neighbourhood plan code and its precinct for this lot", "Check the neighbourhood plan's tables of assessment"]},
-  {"id": "frontage", "keywords": ["active frontage"], "title": "Active frontages", "code": "Active frontages in residential zones overlay code", "note": "Ground-level activation of the street frontage may be required.", "checklist": ["Plan for ground-floor street activation"]}
+ {
+  "id": "flood",
+  "keywords": [
+   "flood",
+   "overland flow",
+   "storm tide"
+  ],
+  "title": "Flood / overland flow / storm tide",
+  "code": "Flood overlay code",
+  "note": "Part of the lot is mapped in a flood planning area. Minimum habitable floor levels, flood-resilient design and limits on filling and intensification are likely to apply.",
+  "checklist": [
+   "Order a Council FloodWise Property Report for flood levels",
+   "Confirm the flood planning area category and minimum habitable floor level",
+   "Check whether filling or excavation is needed and its flood impacts"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "heritage",
+  "keywords": [
+   "heritage",
+   "pre-1911",
+   "pre 1911"
+  ],
+  "title": "Heritage",
+  "code": "Heritage overlay code",
+  "note": "The lot is on, or adjoins, a heritage place or pre-1911 building. Demolition and building work can trigger assessment and heritage impact requirements.",
+  "checklist": [
+   "Check the Local Heritage Places register and the Queensland Heritage Register citation",
+   "Assess whether a heritage impact statement is needed",
+   "Note that any state heritage place is referred to SARA"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "character",
+  "keywords": [
+   "traditional building character",
+   "dwelling house character",
+   "commercial character"
+  ],
+  "title": "Character protection",
+  "code": "Traditional building character overlay code / Dwelling house character overlay code / Commercial character building overlay code",
+  "note": "Character controls restrict demolition or removal of older buildings and require new work to respect the streetscape.",
+  "checklist": [
+   "Establish the house's construction date (pre-1947 is relevant)",
+   "Check whether demolition or removal needs approval",
+   "Review the design requirements for new work and extensions"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "bushfire",
+  "keywords": [
+   "bushfire"
+  ],
+  "title": "Bushfire hazard",
+  "code": "Bushfire overlay code",
+  "note": "The lot is in a mapped bushfire hazard area. Separation, access and building construction standards (AS 3959) may apply.",
+  "checklist": [
+   "Confirm the hazard level",
+   "Obtain a BAL assessment (AS 3959)",
+   "Check the access and water supply requirements"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "landslide",
+  "keywords": [
+   "landslide",
+   "steep"
+  ],
+  "title": "Landslide / steep land",
+  "code": "Landslide overlay code",
+  "note": "Mapped landslide or steep land hazard. A geotechnical assessment is likely to be required.",
+  "checklist": [
+   "Commission a geotechnical report",
+   "Minimise cut and fill and retaining walls"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "acid",
+  "keywords": [
+   "acid sulfate"
+  ],
+  "title": "Acid sulfate soils",
+  "code": "Potential and actual acid sulfate soils overlay code",
+  "note": "Excavation or filling may disturb acid sulfate soils. Testing and a management plan may be required.",
+  "checklist": [
+   "Check excavation depth against the mapped thresholds",
+   "Arrange soil testing if excavation is proposed"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "biodiversity",
+  "keywords": [
+   "biodiversity",
+   "koala",
+   "wetland",
+   "waterway",
+   "riparian",
+   "significant landscape tree",
+   "vegetation"
+  ],
+  "title": "Biodiversity / waterways / vegetation",
+  "code": "Biodiversity areas overlay code / Waterway corridors overlay code / Wetlands overlay code / Significant landscape tree overlay code",
+  "note": "Ecological values are mapped on the lot. Vegetation clearing, setbacks from waterways and ecological assessment may be required, and state koala mapping may also apply.",
+  "checklist": [
+   "Map vegetation and waterways on site",
+   "Check clearing restrictions and protected vegetation",
+   "Check the state koala habitat mapping (SPP / Queensland Globe)"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "airport",
+  "keywords": [
+   "airport"
+  ],
+  "title": "Airport environs",
+  "code": "Airport environs overlay code",
+  "note": "Height limits (obstacle limitation surfaces), aircraft noise (ANEF) or lighting and wildlife controls may apply.",
+  "checklist": [
+   "Check the building height against the OLS",
+   "Check the ANEF contour for noise attenuation"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "noise",
+  "keywords": [
+   "transport noise",
+   "noise corridor",
+   "air quality"
+  ],
+  "title": "Transport noise / air quality",
+  "code": "Transport noise corridor overlay code / Transport air quality corridor overlay code",
+  "note": "The lot is near a major road or rail corridor. Acoustic treatment of the building (QDC MP4.4) and air quality design may be required.",
+  "checklist": [
+   "Identify the noise category",
+   "Allow for the cost of acoustic glazing and construction"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "road",
+  "keywords": [
+   "road hierarchy",
+   "streetscape",
+   "bicycle network",
+   "critical infrastructure",
+   "movement network",
+   "regional infrastructure",
+   "infrastructure corridor"
+  ],
+  "title": "Road, transport and infrastructure networks",
+  "code": "Road hierarchy overlay code / Streetscape hierarchy overlay code / Critical infrastructure and movement network overlay code",
+  "note": "Frontage roads, access, streetscape treatment and infrastructure corridors can affect driveway location, setbacks and works requirements.",
+  "checklist": [
+   "Confirm the road hierarchy of each frontage",
+   "Check access and driveway constraints",
+   "Check for any infrastructure easements or corridors"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "industrial",
+  "keywords": [
+   "industrial amenity",
+   "extractive resources"
+  ],
+  "title": "Industrial amenity / extractive resources",
+  "code": "Industrial amenity overlay code / Extractive resources overlay code",
+  "note": "Nearby industry or extractive resources may limit sensitive uses or require separation and amenity mitigation.",
+  "checklist": [
+   "Identify nearby industry or quarries and their buffers"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "coastal",
+  "keywords": [
+   "coastal"
+  ],
+  "title": "Coastal hazard",
+  "code": "Coastal hazard overlay code",
+  "note": "Coastal erosion or storm tide inundation hazards are mapped on the lot.",
+  "checklist": [
+   "Check the erosion prone area and storm tide levels"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "neighbourhood",
+  "keywords": [
+   "neighbourhood plan"
+  ],
+  "title": "Neighbourhood plan",
+  "code": "Neighbourhood plan code (the relevant plan)",
+  "note": "A neighbourhood plan applies. It can change the levels of assessment, building heights and the uses supported compared with the base zone.",
+  "checklist": [
+   "Read the neighbourhood plan code and its precinct for this lot",
+   "Check the neighbourhood plan's tables of assessment"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "frontage",
+  "keywords": [
+   "active frontage"
+  ],
+  "title": "Active frontages",
+  "code": "Active frontages in residential zones overlay code",
+  "note": "Ground-level activation of the street frontage may be required.",
+  "checklist": [
+   "Plan for ground-floor street activation"
+  ],
+  "authority": "council"
+ },
+ {
+  "id": "scr",
+  "authority": "sara",
+  "keywords": [
+   "state controlled road"
+  ],
+  "title": "Within 25 m of a state-controlled road",
+  "code": "Planning Regulation 2017, Schedule 10 (state transport infrastructure); State Development Assessment Provisions (SDAP) state code for development in a state-controlled road environment",
+  "note": "The lot is within 25 m of a state-controlled road. A material change of use, reconfiguring a lot or operational work may need referral to SARA, with the Department of Transport and Main Roads advising. Conditions can cover access, stormwater, noise and road works.",
+  "checklist": [
+   "Check SARA DA mapping (state-controlled road layers)",
+   "Confirm whether access is from the state-controlled road",
+   "Allow for a pre-lodgement meeting with SARA"
+  ]
+ },
+ {
+  "id": "koala-state",
+  "authority": "sara",
+  "keywords": [
+   "koala priority area",
+   "core koala habitat",
+   "locally refined koala habitat"
+  ],
+  "title": "SEQ koala habitat",
+  "code": "Planning Regulation 2017, Schedules 10 and 11 (SEQ koala habitat); SDAP state code for development in SEQ koala habitat areas",
+  "note": "State koala mapping applies. Clearing koala habitat where a koala priority area and a koala habitat area overlap is generally prohibited. Other clearing or development can trigger SARA referral.",
+  "checklist": [
+   "Survey for koala habitat trees",
+   "Check whether the lot is in both a koala priority area and a koala habitat area",
+   "Design to avoid clearing mapped habitat"
+  ]
+ },
+ {
+  "id": "wetland-state",
+  "authority": "sara",
+  "keywords": [
+   "wetland protection area",
+   "wetlands of high ecological significance"
+  ],
+  "title": "Wetland protection area / HES wetland",
+  "code": "Planning Regulation 2017, Schedule 10 (wetland protection areas); SDAP wetland state code",
+  "note": "Earthworks or development in or near a mapped wetland can trigger SARA referral and buffer requirements.",
+  "checklist": [
+   "Confirm the wetland boundary and trigger area",
+   "Plan buffers to the wetland"
+  ]
+ },
+ {
+  "id": "veg-state",
+  "authority": "sara",
+  "keywords": [
+   "rvm category a",
+   "rvm category b",
+   "rvm category c",
+   "rvm category r",
+   "essential habitat"
+  ],
+  "title": "Regulated native vegetation",
+  "code": "Planning Regulation 2017, Schedule 10 (clearing native vegetation); Vegetation Management Act 1999; SDAP native vegetation clearing state code",
+  "note": "Regulated vegetation or essential habitat is mapped on the lot. Clearing for a material change of use or reconfiguring a lot can trigger SARA referral and offsets.",
+  "checklist": [
+   "Confirm the regulated vegetation category (A, B, C or R)",
+   "Check whether a PMAV applies",
+   "Avoid or minimise clearing"
+  ]
+ },
+ {
+  "id": "coastal-state",
+  "authority": "sara",
+  "keywords": [
+   "coastal management district",
+   "erosion prone area",
+   "high hazard area",
+   "medium hazard area"
+  ],
+  "title": "Coastal management district / erosion prone area / storm tide",
+  "code": "Planning Regulation 2017, Schedule 10 (coastal protection); Coastal Protection and Management Act 1995; SDAP coastal development state code",
+  "note": "Coastal mapping applies. Building, tidal works or reconfiguring a lot may trigger SARA referral, and storm tide hazard affects floor levels.",
+  "checklist": [
+   "Check the erosion prone area width",
+   "Check the storm tide hazard and minimum floor levels"
+  ]
+ },
+ {
+  "id": "pda",
+  "authority": "pda",
+  "keywords": [
+   "priority development area"
+  ],
+  "title": "Priority Development Area",
+  "code": "Economic Development Act 2012; relevant PDA development scheme (Economic Development Queensland)",
+  "note": "The site is in a PDA. The PDA development scheme replaces City Plan for development assessment, and EDQ is usually the assessment manager. Council's City Plan zone is for reference only.",
+  "checklist": [
+   "Download the PDA development scheme and its land-use plan",
+   "Identify the precinct and its height and density provisions",
+   "Book a pre-lodgement meeting with EDQ"
+  ]
+ },
+ {
+  "id": "seq",
+  "authority": "state",
+  "keywords": [
+   "seq regional land use category"
+  ],
+  "title": "SEQ Regional Plan (ShapingSEQ 2023)",
+  "code": "ShapingSEQ 2023; Planning Regulation 2017, Schedule 12 (regional landscape and rural production area)",
+  "note": "Check the land use category. Urban Footprint supports urban development, while the Regional Landscape and Rural Production Area strictly limits urban uses and subdivision.",
+  "checklist": [
+   "Confirm the regional land use category"
+  ]
+ },
+ {
+  "id": "plants",
+  "authority": "other",
+  "keywords": [
+   "protected plants"
+  ],
+  "title": "Protected plants trigger area (DESI)",
+  "code": "Nature Conservation Act 1992 — protected plants framework",
+  "note": "Clearing native plants here may need a flora survey and a clearing permit from the Department of the Environment, Tourism, Science and Innovation.",
+  "checklist": [
+   "Commission a protected plants flora survey before clearing"
+  ]
+ },
+ {
+  "id": "epbc",
+  "authority": "other",
+  "keywords": [
+   "koala"
+  ],
+  "title": "Federal EPBC Act (koala)",
+  "code": "Environment Protection and Biodiversity Conservation Act 1999 (Cth)",
+  "note": "The koala is a nationally listed threatened species. A significant impact on koala habitat may need referral to the Australian Government, separate from council and SARA.",
+  "checklist": [
+   "Assess whether a significant impact is likely (EPBC self-assessment)"
+  ]
+ },
+ {
+  "id": "airspace",
+  "authority": "other",
+  "keywords": [
+   "airport"
+  ],
+  "title": "Airport / federal airspace",
+  "code": "Airports Act 1996 (Cth); Airports (Protection of Airspace) Regulations",
+  "note": "Buildings or cranes that penetrate prescribed airspace need federal approval through the airport operator.",
+  "checklist": [
+   "Check building and crane heights against the prescribed airspace"
+  ]
+ },
+ {
+  "id": "water",
+  "authority": "other",
+  "always": true,
+  "keywords": [],
+  "title": "Water and sewer (Urban Utilities)",
+  "code": "South East Queensland Water (Distribution and Retail Restructuring) Act 2009 — Urban Utilities connections",
+  "note": "New or intensified development needs water and sewer connection approval from Urban Utilities and may attract infrastructure charges.",
+  "checklist": [
+   "Request an Urban Utilities connection or services advice",
+   "Check for sewer mains through the lot (build-over rules)"
+  ]
+ },
+ {
+  "id": "power",
+  "authority": "other",
+  "always": true,
+  "keywords": [],
+  "title": "Electricity and services",
+  "code": "Energex supply requirements; Before You Dig Australia",
+  "note": "Check easements, overhead lines, substations and service locations before design.",
+  "checklist": [
+   "Lodge a Before You Dig enquiry",
+   "Check the title for easements"
+  ]
+ }
 ]
