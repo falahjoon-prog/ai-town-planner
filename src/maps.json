@@ -225,7 +225,7 @@
   {
    "name": "Ipswich",
    "website": "https://www.ipswich.qld.gov.au/",
-   "map": null
+   "map": "https://ipswich.qld.gov.au/residents/planning-and-development"
   },
   {
    "name": "Isaac",
@@ -255,7 +255,7 @@
   {
    "name": "Logan",
    "website": "https://www.logan.qld.gov.au/",
-   "map": null
+   "map": "https://www.logan.qld.gov.au/planning-and-building/planning-and-development/logan-planning-scheme/logan-eplan"
   },
   {
    "name": "Longreach",
@@ -290,7 +290,7 @@
   {
    "name": "Moreton Bay",
    "website": "https://www.moretonbay.qld.gov.au/",
-   "map": null
+   "map": "https://www.moretonbay.qld.gov.au/mbrcplanningscheme"
   },
   {
    "name": "Mornington",
@@ -350,7 +350,7 @@
   {
    "name": "Redland",
    "website": "https://www.redland.qld.gov.au/",
-   "map": null
+   "map": "https://redland.qld.gov.au/CityPlanDocuments"
   },
   {
    "name": "Richmond",
@@ -385,7 +385,7 @@
   {
    "name": "Sunshine Coast",
    "website": "https://www.sunshinecoast.qld.gov.au/",
-   "map": null
+   "map": "https://www.sunshinecoast.qld.gov.au/Development/Development-Tools-and-Guidelines/sunshine-coast-mapping-mymaps"
   },
   {
    "name": "Tablelands",
