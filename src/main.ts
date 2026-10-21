@@ -3,6 +3,8 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { marked } from "marked";
+import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
+import MAPS from "./maps.json";
 import "./style.css";
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string };
@@ -488,6 +490,38 @@ $("pdfBtn").addEventListener("click", () => {
   if (!current) return;
   $("printArea").innerHTML = reportBody(current);
   window.print();
+});
+
+// ---- Queensland maps (open in an in-app window) ----
+function openMap(url: string, title: string) {
+  new WebviewWindow(`map-${Date.now()}`, { url, title, width: 1280, height: 860 });
+}
+
+function renderMaps() {
+  const f = val("mapsFilter").toLowerCase();
+  const ok = (n: string) => !f || n.toLowerCase().includes(f);
+  $("stateMaps").innerHTML = MAPS.state
+    .filter((m) => ok(m.name))
+    .map((m) => `<div class="mapitem"><div><b>${esc(m.name)}</b><div class="meta">${esc(m.desc)}</div></div><button type="button" data-url="${esc(m.url)}" data-title="${esc(m.name)}">Open</button></div>`)
+    .join("");
+  $("councilMaps").innerHTML = MAPS.councils
+    .filter((c) => ok(c.name))
+    .map(
+      (c) => `<div class="mapitem"><b>${esc(c.name)}</b><div class="model-act">
+        ${c.map ? `<button type="button" data-url="${esc(c.map)}" data-title="${esc(c.name)} mapping">Interactive map</button>` : ""}
+        <button type="button" class="ghost" data-url="${esc(c.website)}" data-title="${esc(c.name)} Council">Website</button></div></div>`
+    )
+    .join("");
+}
+
+$("mapsBtn").addEventListener("click", () => {
+  renderMaps();
+  ($("mapsDlg") as HTMLDialogElement).showModal();
+});
+$("mapsFilter").addEventListener("input", renderMaps);
+$("mapsDlg").addEventListener("click", (ev) => {
+  const b = (ev.target as HTMLElement).closest("button[data-url]") as HTMLElement | null;
+  if (b) openMap(b.dataset.url!, b.dataset.title!);
 });
 
 refreshStatus().then((s) => {

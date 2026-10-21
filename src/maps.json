@@ -1,0 +1,431 @@
+{
+ "state": [
+  {
+   "name": "Queensland Globe",
+   "url": "https://qldglobe.information.qld.gov.au/",
+   "desc": "Property, cadastre, aerial imagery, planning and environment layers"
+  },
+  {
+   "name": "State planning mapping (SARA DA mapping & SPP IMS)",
+   "url": "https://planning.qld.gov.au/planning-framework/mapping",
+   "desc": "State referral triggers and State Planning Policy mapping"
+  },
+  {
+   "name": "FloodCheck Queensland",
+   "url": "https://floodcheck.information.qld.gov.au/",
+   "desc": "Flood extents and studies"
+  },
+  {
+   "name": "Queensland Heritage Register",
+   "url": "https://environment.ehp.qld.gov.au/heritage-register",
+   "desc": "State heritage places"
+  },
+  {
+   "name": "Protected plants trigger map",
+   "url": "http://www.ehp.qld.gov.au/licences-permits/plants-animals/protected-plants/map-request.php",
+   "desc": "Flora survey trigger areas"
+  },
+  {
+   "name": "EPBC Protected Matters Search",
+   "url": "http://www.environment.gov.au/epbc/pmst/index.html",
+   "desc": "Federal environmental matters"
+  },
+  {
+   "name": "QSpatial data catalogue",
+   "url": "https://qldspatial.information.qld.gov.au/catalogue/custom/index.page",
+   "desc": "Queensland spatial datasets"
+  }
+ ],
+ "councils": [
+  {
+   "name": "Aurukun",
+   "website": "https://www.aurukun.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Balonne",
+   "website": "https://www.balonne.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Banana",
+   "website": "https://www.banana.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Barcaldine",
+   "website": "https://www.barcaldinerc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Barcoo",
+   "website": "https://www.barcoo.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Blackall-Tambo",
+   "website": "https://www.btrc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Boulia",
+   "website": "https://www.boulia.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Brisbane",
+   "website": "https://www.brisbane.qld.gov.au/",
+   "map": "https://cityplan.brisbane.qld.gov.au/eplan/"
+  },
+  {
+   "name": "Bulloo",
+   "website": "https://www.bulloo.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Bundaberg",
+   "website": "https://www.bundaberg.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Burdekin",
+   "website": "https://www.burdekin.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Burke",
+   "website": "https://www.burke.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Cairns",
+   "website": "https://www.cairns.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Carpentaria",
+   "website": "https://www.carpentaria.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Cassowary Coast",
+   "website": "https://www.cassowarycoast.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Central Highlands",
+   "website": "https://www.chrc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Charters Towers",
+   "website": "https://www.charterstowers.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Cherbourg",
+   "website": "https://www.cherbourg.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Cloncurry",
+   "website": "https://www.cloncurry.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Cook",
+   "website": "https://www.cook.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Croydon",
+   "website": "https://www.croydon.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Diamantina",
+   "website": "https://www.diamantina.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Doomadgee",
+   "website": "https://www.doomadgee.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Douglas",
+   "website": "https://www.douglas.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Etheridge",
+   "website": "https://www.etheridge.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Flinders",
+   "website": "https://www.flinders.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Fraser Coast",
+   "website": "https://www.frasercoast.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Gladstone",
+   "website": "https://www.gladstone.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Gold Coast",
+   "website": "https://www.goldcoast.qld.gov.au/",
+   "map": "https://www.goldcoast.qld.gov.au/Planning-building/Planning-our-city"
+  },
+  {
+   "name": "Goondiwindi",
+   "website": "https://www.grc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Gympie",
+   "website": "https://www.gympie.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Hinchinbrook",
+   "website": "https://www.hinchinbrook.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Hope Vale",
+   "website": "https://www.hopevale.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Ipswich",
+   "website": "https://www.ipswich.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Isaac",
+   "website": "https://www.isaac.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Kowanyama",
+   "website": "https://www.kowanyama.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Livingstone",
+   "website": "https://www.livingstone.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Lockhart River",
+   "website": "https://www.lockhart.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Lockyer Valley",
+   "website": "https://www.lockyervalley.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Logan",
+   "website": "https://www.logan.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Longreach",
+   "website": "https://www.longreach.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Mackay",
+   "website": "https://www.mackay.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Mapoon",
+   "website": "https://www.mapoon.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Maranoa",
+   "website": "https://www.maranoa.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Mareeba",
+   "website": "https://www.msc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "McKinlay",
+   "website": "https://www.mckinlay.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Moreton Bay",
+   "website": "https://www.moretonbay.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Mornington",
+   "website": "https://www.mornington.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Mount Isa",
+   "website": "https://www.mountisa.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Murweh",
+   "website": "https://www.murweh.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Napranum",
+   "website": "https://www.napranum.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Noosa",
+   "website": "https://www.noosa.qld.gov.au/",
+   "map": "https://www.noosa.qld.gov.au/Community/Mapping"
+  },
+  {
+   "name": "North Burnett",
+   "website": "https://www.northburnett.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Northern Peninsula Area",
+   "website": "https://www.nparc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Palm Island",
+   "website": "https://www.palmisland.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Paroo",
+   "website": "https://www.paroo.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Pormpuraaw",
+   "website": "https://www.pormpuraaw.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Quilpie",
+   "website": "https://www.quilpie.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Redland",
+   "website": "https://www.redland.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Richmond",
+   "website": "https://www.richmond.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Rockhampton",
+   "website": "https://www.rockhamptonregion.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Scenic Rim",
+   "website": "https://www.scenicrim.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Somerset",
+   "website": "https://www.somerset.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "South Burnett",
+   "website": "https://www.southburnett.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Southern Downs",
+   "website": "https://www.sdrc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Sunshine Coast",
+   "website": "https://www.sunshinecoast.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Tablelands",
+   "website": "https://www.trc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Toowoomba",
+   "website": "https://www.tr.qld.gov.au/",
+   "map": "https://www.tr.qld.gov.au/Council/Mapping/Online-mapping"
+  },
+  {
+   "name": "Torres",
+   "website": "https://www.torres.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Torres Strait Island",
+   "website": "https://www.tsirc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Townsville",
+   "website": "https://www.townsville.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Weipa (Town Authority)",
+   "website": "https://www.weipatownauthority.com.au/",
+   "map": null
+  },
+  {
+   "name": "Western Downs",
+   "website": "https://www.wdrc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Whitsunday",
+   "website": "https://www.whitsundayrc.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Winton",
+   "website": "https://www.winton.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Woorabinda",
+   "website": "https://www.woorabinda.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Wujal Wujal",
+   "website": "https://www.wujalwujal.qld.gov.au/",
+   "map": null
+  },
+  {
+   "name": "Yarrabah",
+   "website": "https://www.yarrabah.qld.gov.au/",
+   "map": null
+  }
+ ]
+}

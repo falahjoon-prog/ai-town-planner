@@ -9,6 +9,7 @@
     <header class="top">
       <div class="brand"><span class="mark">◩</span> AI Town Planner <small>Brisbane</small></div>
       <div class="pack" id="packInfo">No data pack</div>
+      <button class="ghost" id="mapsBtn">Maps</button>
       <button class="ghost" id="settingsBtn">Settings</button>
     </header>
     <div class="layout">
@@ -103,6 +104,18 @@
         <div id="models"></div>
         <button type="button" class="ghost" id="importModel">Import a .gguf model file</button>
         <p class="meta">Models are downloaded once, then everything runs offline.</p>
+        <div class="dlg-foot"><button>Close</button></div>
+      </form>
+    </dialog>
+    <dialog id="mapsDlg">
+      <form method="dialog" class="dlg">
+        <h2>Queensland maps</h2>
+        <input id="mapsFilter" placeholder="Filter, e.g. Logan" autocomplete="off" />
+        <h3>State &amp; federal</h3>
+        <div id="stateMaps" class="maplist"></div>
+        <h3>Councils</h3>
+        <div id="councilMaps" class="maplist"></div>
+        <p class="meta">Opens inside the app (needs internet). "Website" links go to the council's site where its planning scheme and mapping are listed.</p>
         <div class="dlg-foot"><button>Close</button></div>
       </form>
     </dialog>

@@ -42,6 +42,9 @@ jobs:
         shell: bash
         run: echo "LIBCLANG_PATH=C:\\Program Files\\LLVM\\bin" >> $GITHUB_ENV
       - run: npm install
+      - name: Check map links
+        if: runner.os == 'Linux'
+        run: python3 .github/scripts/check_links.py
       - run: npx tauri icon app-icon.png
       - name: Compile check (reports errors as annotations)
         shell: bash
