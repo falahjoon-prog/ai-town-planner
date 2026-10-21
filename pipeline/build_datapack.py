@@ -244,26 +244,42 @@ def load_state_layers(db, start_lid):
             meta = json.loads(get(svc, {"f": "json"}))
         except Exception as e:  # noqa: BLE001
             failed.append(svc); print(f"  FAILED {svc}: {e}", flush=True); continue
+        layers = meta.get("layers", [])
+        by_id = {l["id"]: l for l in layers}
+
+        def leaves(l):  # group layers expand to their data sublayers
+            subs = l.get("subLayerIds") or []
+            return [x for s in subs if s in by_id for x in leaves(by_id[s])] if subs else [l]
+
         for w in wanted:
-            layer = next((l for l in meta.get("layers", []) if l.get("name", "").lower().startswith(w.lower())
-                          and not l.get("subLayerIds")), None)
-            if not layer:
-                failed.append(w); print(f"  NOT FOUND {w}", flush=True); continue
-            url = f"{svc}/{layer['id']}"
-            try:
-                info = json.loads(get(url, {"f": "json"}))
-                oid = info.get("objectIdField") or next((f["name"] for f in info.get("fields", [])
-                                                         if f.get("type") == "esriFieldTypeOID"), "OBJECTID")
+            exact = [l for l in layers if l.get("name", "").lower() == w.lower()]
+            match = exact or [l for l in layers if l.get("name", "").lower().startswith(w.lower())][:1]
+            # Leaf layers of a group keep the group name so rules can still recognise them.
+            targets = [(x, x["name"] if x is l else f"{l['name']} — {x['name']}") for l in match for x in leaves(l)]
+            if not targets:
+                failed.append(w); print(f"  NOT FOUND {w}", flush=True)
+            for layer, name in targets:
                 lid += 1
-                n = insert_features(db, lid, arcgis_features(url, oid))
-                did = "qld:" + layer["name"].lower().replace(" ", "-")[:60]
-                db.execute("INSERT INTO layers VALUES(?,?,?,?,?)",
-                           (lid, did, f"Queensland — {layer['name']}", n, authority))
-                db.commit()
-                print(f"  [{authority}] {layer['name']}: {n}", flush=True)
-            except Exception as e:  # noqa: BLE001
-                failed.append(w); print(f"  FAILED {w}: {e}", flush=True)
+                if not load_one(db, svc, layer, name, authority, lid):
+                    failed.append(layer.get("name", w))
     return lid - start_lid, failed
+
+
+def load_one(db, svc, layer, name, authority, lid):
+    url = f"{svc}/{layer['id']}"
+    try:
+        info = json.loads(get(url, {"f": "json"}))
+        oid = info.get("objectIdField") or next((f["name"] for f in info.get("fields", [])
+                                                 if f.get("type") == "esriFieldTypeOID"), "OBJECTID")
+        n = insert_features(db, lid, arcgis_features(url, oid))
+        did = f"qld:{layer['id']}:" + name.lower().replace(" ", "-")[:80]
+        db.execute("INSERT INTO layers VALUES(?,?,?,?,?)", (lid, did, f"Queensland — {name}", n, authority))
+        db.commit()
+        print(f"  [{authority}] {name}: {n}", flush=True)
+        return True
+    except Exception as e:  # noqa: BLE001
+        print(f"  FAILED {name}: {e}", flush=True)
+        return False
 
 
 def main():
