@@ -174,3 +174,6 @@ a.ext { color: var(--accent); }
 
 .logo-prev { max-height: 36px; max-width: 120px; border-radius: 4px; background: #fff; padding: 2px; }
 .ghost-file input { font-size: 12px; }
+
+.cmp th, .cmp td { vertical-align: top; text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+#cmpPick .mapitem { cursor: pointer; }

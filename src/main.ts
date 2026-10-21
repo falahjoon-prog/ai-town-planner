@@ -349,6 +349,8 @@ async function loadSite(pid: number) {
   $("pdfBtn").hidden = false; // the client PDF works before an AI report too
   subOn = false; contOn = false; powerOn = false;
   toolUi("subBtn", false); toolUi("contBtn", false); toolUi("powerBtn", false);
+  envOn = false; toolUi("envBtn", false);
+  $("suburbOut").innerHTML = "";
   drawMap(a);
   loadPotential();
 }
@@ -992,3 +994,84 @@ $("brandLogo").addEventListener("change", () => {
 });
 $("brandClear").addEventListener("click", () => saveBrand({ logo: undefined }));
 showBrand();
+
+// ---- 3D height envelope: the lot extruded to its height limit (setbacks and site cover not applied) ----
+let envOn = false;
+function envHeight(): number {
+  const it = (pot?.provisions?.items ?? []).find((i: any) => /height/i.test(i.label));
+  const m = it?.value.match(/(\d+(?:\.\d+)?)\s*m\b/);
+  return m ? Number(m[1]) : 9.5;
+}
+$("envBtn").addEventListener("click", () => {
+  if (!current || !map) return;
+  const m = map;
+  envOn = !envOn;
+  toolUi("envBtn", envOn);
+  if (m.getLayer("env")) { m.removeLayer("env"); m.removeSource("env"); }
+  if (!envOn) { m.easeTo({ pitch: 0, bearing: 0, duration: 400 }); return setFloodUi(floodOn); }
+  const h = envHeight();
+  m.addSource("env", { type: "geojson", data: { type: "Feature", properties: {}, geometry: current.parcel.geom } });
+  m.addLayer({ id: "env", type: "fill-extrusion", source: "env", paint: { "fill-extrusion-color": "#2563eb", "fill-extrusion-height": h, "fill-extrusion-opacity": 0.45 } });
+  m.easeTo({ pitch: 60, bearing: -25, duration: 700 });
+  setFloodUi(floodOn, `<div><b>3D envelope: ${h} m</b></div><div class="meta">Whole lot raised to the height limit. Setbacks and site cover are not applied – indicative only. Turn on Aerial photo for context.</div>`);
+});
+
+// ---- Suburb report (from the data pack) ----
+$("suburbBtn").addEventListener("click", async () => {
+  if (!current) return;
+  const sub = current.parcel.suburb;
+  try {
+    const r = await invoke<any>("suburb_stats", { suburb: sub });
+    const lot = current.parcel.area_m2 ?? 0;
+    $("suburbOut").innerHTML = `<table class="ptable"><tbody>
+      <tr><td>Lots in ${esc(r.suburb)}</td><td><b>${r.lots.toLocaleString()}</b></td></tr>
+      <tr><td>Median lot size</td><td><b>${r.median_m2} m²</b> (middle half ${r.p25_m2}–${r.p75_m2} m²)</td></tr>
+      <tr><td>This lot</td><td><b>${Math.round(lot)} m²</b> – ${lot >= r.median_m2 ? "larger" : "smaller"} than the suburb median</td></tr>
+      <tr><td>Lots 600 m² or more</td><td>${r.pct_600}%</td></tr>
+      <tr><td>Lots 800 m² or more</td><td>${r.pct_800}%</td></tr>
+      <tr><td>Lots 900 m² or more (2 × 450 m² by area)</td><td>${r.pct_900}% (${r.count_900.toLocaleString()} lots)</td></tr>
+      <tr><td>Lots 1,000 m² or more</td><td>${r.pct_1000}%</td></tr></tbody></table>
+      <p class="meta">From the Brisbane cadastre in the data pack. Population, income and housing: ${link("https://www.abs.gov.au/census/find-census-data/quickstats", "ABS Census QuickStats")} (search "${esc(sub)}").</p>`;
+  } catch (e) {
+    alertMsg(e);
+  }
+});
+
+// ---- Compare 2–3 sites ----
+$("cmpBtn").addEventListener("click", () => {
+  const list = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts);
+  $("cmpPick").innerHTML = list.length
+    ? list.map((h) => `<label class="mapitem"><span><input type="checkbox" value="${esc(h.lotplan)}" data-pid="${h.pid}"> ${h.star ? "★ " : ""}<b>${esc(h.address || h.lotplan)}</b></span><span class="meta">${esc(h.lotplan)}</span></label>`).join("")
+    : `<p class="meta">Open a few addresses first – they appear here.</p>`;
+  $("cmpOut").innerHTML = "";
+  ($("cmpDlg") as HTMLDialogElement).showModal();
+});
+$("cmpGo").addEventListener("click", async () => {
+  const picked = [...document.querySelectorAll<HTMLInputElement>("#cmpPick input:checked")].slice(0, 3);
+  if (picked.length < 2) return alertMsg("Pick 2 or 3 addresses.");
+  $("cmpOut").innerHTML = `<p class="meta">Comparing…</p>`;
+  const rows: { a: Assessment; p: any }[] = [];
+  for (const el of picked) {
+    try {
+      let a = await invoke<Assessment>("assess", { pid: Number(el.dataset.pid) });
+      if (a.parcel.lotplan !== el.value) {
+        const h = (await invoke<Hit[]>("search", { q: el.value })).find((x) => x.lotplan === el.value);
+        if (!h) continue;
+        a = await invoke<Assessment>("assess", { pid: h.pid });
+      }
+      rows.push({ a, p: await invoke("potential", { pid: a.parcel.pid, useId: useId() }) });
+    } catch { /* skip lots that fail */ }
+  }
+  const cell = (f: (r: { a: Assessment; p: any }) => string) => rows.map((r) => `<td>${f(r)}</td>`).join("");
+  const height = (p: any) => (p.provisions?.items ?? []).find((i: any) => /height/i.test(i.label))?.value ?? "–";
+  $("cmpOut").innerHTML = `<table class="ptable cmp"><thead><tr><th></th>${cell((r) => `<b>${esc(r.a.parcel.address || r.a.parcel.lotplan)}</b>`)}</tr></thead><tbody>
+    <tr><td>Lot/plan</td>${cell((r) => esc(r.a.parcel.lotplan))}</tr>
+    <tr><td>Area</td>${cell((r) => `${Math.round(r.p.area_m2)} m²`)}</tr>
+    <tr><td>Frontage</td>${cell((r) => (r.p.frontage_m != null ? `${r.p.frontage_m} m` : "–"))}</tr>
+    <tr><td>Zone</td>${cell((r) => esc(r.a.zones.map((z) => z.zone.name).join(", ") || "–"))}</tr>
+    <tr><td>Height</td>${cell((r) => esc(height(r.p)))}</tr>
+    <tr><td>Lots by area</td>${cell((r) => (r.p.lots_by_area ? String(r.p.lots_by_area) : "1"))}</tr>
+    <tr><td>Level of assessment</td>${cell((r) => esc(r.p.use_fit?.rule?.level ?? "Choose a proposal type"))}</tr>
+    <tr><td>Constraints</td>${cell((r) => r.a.flags.map((f) => `<span class="auth">${esc(f.rule.authority)}</span> ${esc(f.rule.title)}`).join("<br>") || "None mapped")}</tr>
+  </tbody></table>`;
+});

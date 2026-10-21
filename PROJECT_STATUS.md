@@ -10,16 +10,20 @@
 
 ## Completed
 - v0.1: pipeline, Rust core, UI (search, map, zoning and constraints, AI report, save HTML), CI workflows.
-- v0.2: report split by authority (Council / SARA / EDQ-PDA / State / Other / Summary); "Ask the planner" chat; AI engine choice (built-in, Ollama, Claude API, OpenAI-compatible; keys stored in the OS keychain via `ai.rs`); state layers (SCR 25 m trigger, koala, wetlands, RVM, coastal, PDA, ShapingSEQ); PDA recognition; PDF export via print.
-- All builds are green on Windows, Mac and Linux.
+- v0.2: report split by authority; "Ask the planner" chat; AI engines (built-in, Ollama, Claude API, OpenAI-compatible; OS keychain); State layers; PDA; PDF via print.
+- v0.3.x: development potential (lot dimensions, provisions with sources, subdivision yield and sketch), forms with exact links and AI drafts (DA Form 1 as a form, cover letter), data-centre power infrastructure (Geoscience Australia), flood map, contours, Maps dialog (78 councils), in-app data pack download (repo is public), typo-tolerant search, optional Google Places search, saved/recent addresses with notes, title search links with AI summary of the title PDF, light/dark theme, ✕ close and pinned dialog titles, easement layer + rule.
+- v0.4.0: base map (plain/street/aerial – Queensland Government imagery), level of assessment and key numbers by zone for house/dual occupancy/multiple dwelling (v36–v37 2026 sources), multiple-dwelling parking rates (v36.00/2026), Council infrastructure charge estimate for subdivisions (Resolution No. 15 2026), DA register button (Development.i), client-ready PDF (branding, map snapshot, constraints by authority, potential, title, notes), 3D height envelope, suburb lot-size report, compare 2–3 sites, frontage fix (road/easement polygons ignored).
 
 ## Current issues
-- The cloud workspace has no package registry access, so all compiling and testing happens in GitHub Actions.
-- The Windows build is CPU-only for AI (Vulkan GPU support comes later).
-- The level of assessment is not yet encoded; the report flags it as indicative.
+- No package registry access in the cloud workspace: compile and test happen only in GitHub Actions; the app is not run by the developer – the user tests on Windows.
+- Windows AI is CPU-only (Vulkan later).
+- Level of assessment is encoded only for common residential uses; other uses link to the City Plan tables. Several numbers come from secondary sources and are flagged "verify".
+- Dwelling infrastructure charges (Table B/C) not encoded – only the per-lot rate.
+- No open Brisbane DA register dataset found: nearby approvals is a link, not an in-app list.
+- Frontage fix assumes BCC parcel type/tenure fields mark roads; unconfirmed until tested on 28 Eden Elm St.
 
 ## Next steps
-1. Development potential tab: City Plan text library (RAG) for height, site cover, density, parking and subdivision tables; lot dimensions and a subdivision sketch on the map; a 3D envelope; aerial imagery (cached).
-2. Suburb report (ABS / QGSO).
-3. In-app data pack download (needs a public data repo, or a fix for the user's GitHub sign-in).
+1. User testing of v0.4.0 on Windows (report, chat, PDF, aerial, 3D, compare).
+2. City Plan code text library (quote acceptable outcomes), more uses and zones in the level-of-assessment tables, site cover.
+3. Full data pack rebuild with the easement layer (test pack first).
 4. Android and iOS builds; Windows GPU (Vulkan).
