@@ -194,6 +194,7 @@ pub fn sections(a: &Assessment) -> Vec<(&'static str, &'static str)> {
         })
         .map(|(k, t, _)| (*k, *t))
         .collect();
+    out.insert(1, ("potential", "Development potential"));
     out.push(("summary", "Summary"));
     out
 }
@@ -221,6 +222,38 @@ pub fn section_prompt(a: &Assessment, key: &str, question: &str) -> (String, Str
     let user = format!(
         "Write ONLY the \"{title}\" part of the site report: what {who} regulates for this site and what it means.\nSITE: {}\nFACTS FOR THIS AUTHORITY: {facts}{note}{proposal}\n\nUse these headings:\n### What applies\n### What it means for development\n### Checks before lodging\nAttribute each point to the authority (e.g. \"Council requires…\", \"SARA referral is likely because…\").",
         site_facts(a)
+    );
+    (PERSONA.to_string(), user)
+}
+
+/// Prompt for the development potential section (facts computed by dev.rs).
+pub fn potential_prompt(a: &Assessment, dev: &Value, question: &str) -> (String, String) {
+    let proposal = if question.trim().is_empty() { String::new() } else { format!("\nProposal / question: {}", question.trim()) };
+    let user = format!(
+        "Write ONLY the \"Development potential\" part of the site report.\nSITE: {}\nZONE: {}\nPOTENTIAL FACTS (computed from the lot geometry and sourced provisions; quote the numbers exactly and name their source; items with verify=true must be flagged 'confirm in current City Plan'): {dev}{proposal}\n\nUse these headings:\n### What could be built\n### Subdivision potential\n### Key limits (height, site cover, density, parking)\n### Forms and lodgement\nIf a limit is not in the facts, say which City Plan code or policy sets it instead of guessing.",
+        site_facts(a),
+        json!(a.zones.iter().map(|z| &z.zone.name).collect::<Vec<_>>())
+    );
+    (PERSONA.to_string(), user)
+}
+
+/// Prompt to draft DA Form 1 answers: prefilled facts plus AI-written descriptions; unknowns are marked.
+pub fn form_prompt(a: &Assessment, dev: &Value, proposal: &str) -> (String, String) {
+    let p = &a.parcel;
+    let user = format!(
+        "Draft answers for DA Form 1 – Development application details (Queensland Planning Act 2016). Check the current form version on planning.qld.gov.au.\n\
+SITE: address {}, lot on plan {}, area {:?} m², local government area: Brisbane City Council.\n\
+ZONES: {}\nTRIGGERS BY AUTHORITY: {}\nPOTENTIAL / FORMS FACTS: {dev}\nPROPOSAL: {}\n\n\
+Write a Markdown table per Part with the columns 'Question' and 'Draft answer', covering: Part 2 Location details (3.1 street address and lot on plan, 3.2 coordinates if known, 4 premises characteristics, 5 easements); \
+Part 3 Development details (6.1 type of development, approval type, level of assessment as 'to be confirmed', brief description; 7 development types; 8.1 general description of the use, planning scheme definition, dwelling units and GFA if applicable; 9–10 reconfiguring details if subdivision); \
+Part 4 Assessment manager; Part 5 Referral details (list likely SARA referral matters from the triggers); Part 7 Further details (23.x further legislative requirements that apply, e.g. ERA, koala, vegetation, coastal, heritage). \
+Use only the facts. For anything not known (applicant, owner, plans, values), write '[to complete]'. Then list the attachments the applicant should prepare.",
+        p.address,
+        p.lotplan,
+        p.area_m2,
+        json!(a.zones.iter().map(|z| json!({"zone": z.zone.name, "authority": z.authority})).collect::<Vec<_>>()),
+        json!(a.flags.iter().map(|f| json!({"authority": f.rule.authority, "matter": f.rule.title, "legislation": f.rule.code})).collect::<Vec<_>>()),
+        if proposal.trim().is_empty() { "[describe the proposal]" } else { proposal.trim() }
     );
     (PERSONA.to_string(), user)
 }

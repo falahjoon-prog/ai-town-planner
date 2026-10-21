@@ -1,0 +1,141 @@
+[
+ {
+  "id": "general",
+  "name": "General site assessment",
+  "term": "",
+  "zones": [],
+  "checks": []
+ },
+ {
+  "id": "house",
+  "name": "Dwelling house / secondary dwelling",
+  "term": "Dwelling house",
+  "zones": [
+   "low density residential",
+   "character residential",
+   "low medium density residential",
+   "rural residential",
+   "rural"
+  ],
+  "checks": [
+   "Height and siting against QDC MP1.1/1.2 and City Plan (small lot code under 450 m²)",
+   "Character overlay may control demolition and design"
+  ]
+ },
+ {
+  "id": "dual",
+  "name": "Dual occupancy (duplex)",
+  "term": "Dual occupancy",
+  "zones": [
+   "low medium density residential",
+   "character residential",
+   "medium density residential"
+  ],
+  "checks": [
+   "Minimum lot size for dual occupancy in the zone/precinct",
+   "Car parking and access for 2 dwellings"
+  ]
+ },
+ {
+  "id": "md",
+  "name": "Multiple dwellings (townhouses / apartments)",
+  "term": "Multiple dwelling",
+  "zones": [
+   "low medium density residential",
+   "medium density residential",
+   "high density residential",
+   "mixed use",
+   "principal centre",
+   "major centre",
+   "district centre"
+  ],
+  "checks": [
+   "Minimum site area and frontage for multiple dwellings",
+   "Height, site cover, setbacks and communal open space (Multiple dwelling code)",
+   "Car parking rates: Transport, access, parking and servicing planning scheme policy",
+   "Infrastructure charges"
+  ]
+ },
+ {
+  "id": "rol",
+  "name": "Subdivision (reconfiguring a lot)",
+  "term": "Reconfiguring a lot",
+  "zones": [],
+  "checks": [
+   "Minimum lot size, frontage and development rectangle (Subdivision code)",
+   "Rear lot access handle width",
+   "Services connections for each new lot (Urban Utilities, Energex)",
+   "Survey plan by a registered surveyor; compliance assessment for the plan of subdivision"
+  ]
+ },
+ {
+  "id": "commercial",
+  "name": "Shop / office / food and drink",
+  "term": "Shop, Office, Food and drink outlet",
+  "zones": [
+   "neighbourhood centre",
+   "district centre",
+   "major centre",
+   "principal centre",
+   "mixed use",
+   "specialised centre"
+  ],
+  "checks": [
+   "Centre hierarchy and gross floor area limits",
+   "Car parking and servicing",
+   "Amenity: hours, noise, lighting"
+  ]
+ },
+ {
+  "id": "industry",
+  "name": "Industry / warehouse",
+  "term": "Low impact industry, Medium impact industry, Warehouse",
+  "zones": [
+   "low impact industry",
+   "general industry",
+   "industry zone",
+   "special industry"
+  ],
+  "checks": [
+   "Separation from sensitive uses",
+   "Environmentally relevant activity (ERA) triggers",
+   "Heavy vehicle access and servicing"
+  ]
+ },
+ {
+  "id": "datacentre",
+  "name": "Data centre",
+  "term": "Research and technology industry (how Queensland planning schemes usually classify data centres – confirm against City Plan Schedule 1 definitions)",
+  "zones": [
+   "low impact industry",
+   "general industry",
+   "industry zone",
+   "specialised centre"
+  ],
+  "sources": [
+   {
+    "name": "Sunshine Coast Council – data centres defined as Research and Technology Industry (Sept 2026)",
+    "url": "https://www.sunshinecoastnews.com.au/2026/09/28/petition-challenges-data-centre-expansion/"
+   },
+   {
+    "name": "Western Downs – data centre lodged as MCU for Research and Technology Industry, impact assessable",
+    "url": "https://w.media/zerra-plans-1-44gw-aud-14-5bn-data-centre-campus-in-queensland/"
+   },
+   {
+    "name": "Federal data centre energy expectations (2026)",
+    "url": "https://www.pinsentmasons.com/out-law/analysis/australia-new-data-centre-rules-mean-planning-environment"
+   }
+  ],
+  "checks": [
+   "Use term: Research and technology industry. Level of assessment depends on zone; outside industry zones expect impact assessment (public notification)",
+   "Power: early Energex / Powerlink connection enquiry; large loads may need a substation or easement. Federal expectations (2026) ask new large data centres to match demand with new renewable generation and pay connection costs",
+   "Backup generators: emissions and noise modelling; diesel or gas generation and fuel storage may trigger environmentally relevant activities (check ERA thresholds in Environmental Protection Regulation 2019, Schedule 2 – e.g. electricity generation, fuel burning, chemical storage) needing an environmental authority from DESI",
+   "Noise: 24/7 cooling plant and generator testing against Council noise criteria and the Environmental Protection (Noise) Policy",
+   "Water/cooling: Urban Utilities water supply capacity and trade waste approval; consider recycled water and low-water cooling",
+   "Fire safety: NCC fire engineering, QFES requirements for battery (UPS) rooms and fuel storage; hazardous chemicals (WHS) notifications if thresholds reached",
+   "Flood immunity: critical infrastructure usually needs high flood immunity – check flood overlays and FloodWise levels",
+   "Interface with residential uses: visual bulk, lighting, setbacks, landscaping",
+   "Traffic: construction traffic and heavy vehicle deliveries (generators, transformers)"
+  ]
+ }
+]

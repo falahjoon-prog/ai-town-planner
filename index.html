@@ -33,7 +33,12 @@
           <div class="grid">
             <div class="map-wrap">
               <div id="map" class="map"></div>
-              <button type="button" class="map-btn" id="floodBtn">Flood map</button>
+              <div class="map-tools">
+                <button type="button" class="map-btn on" id="dimBtn">Dimensions</button>
+                <button type="button" class="map-btn" id="subBtn">Subdivision sketch</button>
+                <button type="button" class="map-btn" id="contBtn">Contours</button>
+                <button type="button" class="map-btn" id="floodBtn">Flood map</button>
+              </div>
               <div id="legend" class="legend" hidden></div>
             </div>
             <div class="facts">
@@ -46,6 +51,28 @@
                 <ul id="overlays" class="ovlist"></ul>
               </details>
             </div>
+          </div>
+          <div class="report-box pot-box">
+            <div class="pot-head">
+              <h3>Development potential</h3>
+              <label class="meta">Proposal type
+                <select id="useSel">
+                  <option value="general">General assessment</option>
+                  <option value="house">Dwelling house / secondary dwelling</option>
+                  <option value="dual">Dual occupancy (duplex)</option>
+                  <option value="md">Multiple dwellings (townhouses / apartments)</option>
+                  <option value="rol">Subdivision (reconfiguring a lot)</option>
+                  <option value="commercial">Shop / office / food and drink</option>
+                  <option value="industry">Industry / warehouse</option>
+                  <option value="datacentre">Data centre</option>
+                </select>
+              </label>
+            </div>
+            <div id="pot"></div>
+            <h3>Forms &amp; lodgement</h3>
+            <div id="forms"></div>
+            <div class="report-bar"><button type="button" id="formBtn">Draft DA Form 1 answers with AI</button><button type="button" class="ghost" id="formCopy" hidden>Copy</button></div>
+            <article id="formOut" class="report"></article>
           </div>
           <div class="report-box">
             <div class="report-bar">

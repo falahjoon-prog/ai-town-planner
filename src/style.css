@@ -106,7 +106,8 @@ select { font: inherit; flex: 1; padding: 9px 10px; border: 1px solid var(--line
 
 /* Flood map toggle and legend */
 .map-wrap { position: relative; }
-.map-btn { position: absolute; top: 10px; right: 10px; z-index: 2; padding: 6px 10px; font-size: 12.5px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+.map-tools { position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 90%; }
+.map-btn { padding: 6px 10px; font-size: 12.5px; background: var(--panel); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 1px 4px rgba(0,0,0,.15); }
 .map-btn.on { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
 .legend { position: absolute; left: 10px; bottom: 10px; z-index: 2; max-width: 75%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
 .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; opacity: .7; }
@@ -115,3 +116,16 @@ select { font: inherit; flex: 1; padding: 9px 10px; border: 1px solid var(--line
 .maplist { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow: auto; }
 .mapitem { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
 .mapitem button { padding: 5px 10px; font-size: 12.5px; }
+
+/* Development potential */
+.pot-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pot-box h3 { margin: 4px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.pot-box h4 { margin: 12px 0 4px; }
+.pot-head select { margin-left: 6px; min-width: 260px; }
+.ptable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ptable th { text-align: left; padding: 6px 8px; background: var(--chip); }
+.ptable td { padding: 6px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+.pill.warn { color: #b45309; background: #fef3c7; }
+.dim { font: 600 11px/1 "Segoe UI", system-ui, sans-serif; background: rgba(255,255,255,.9); color: #111827; border: 1px solid #9ca3af; border-radius: 4px; padding: 2px 4px; white-space: nowrap; }
+.dim.front { border-color: #0f5e4b; color: #0f5e4b; }
+#forms .mapitem { margin-bottom: 4px; }

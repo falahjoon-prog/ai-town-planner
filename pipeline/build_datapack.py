@@ -123,6 +123,7 @@ def schema(db):
     CREATE TABLE layers(lid INTEGER PRIMARY KEY, dataset_id TEXT UNIQUE, title TEXT, n INTEGER, authority TEXT);
     CREATE TABLE features(fid INTEGER PRIMARY KEY, lid INTEGER, props TEXT, geom TEXT);
     CREATE VIRTUAL TABLE feature_idx USING rtree(fid, minx, maxx, miny, maxy);
+    CREATE VIRTUAL TABLE parcel_idx USING rtree(pid, minx, maxx, miny, maxy);
     """)
 
 
@@ -146,11 +147,11 @@ def load_parcels(db, limit=None):
         feats = json.loads(body).get("features", [])
         if not feats:
             break
-        rows = []
+        rows, idx = [], []
         for f in feats:
             a = f.get("properties") or {}
             last = max(last, int(a.get("OBJECTID", last)))
-            g, _ = clean_geom(f.get("geometry"))
+            g, b = clean_geom(f.get("geometry"))
             if not g:
                 continue
             addr = address(a)
@@ -158,7 +159,9 @@ def load_parcels(db, limit=None):
             props = clean_props({k: v for k, v in a.items() if k != "OBJECTID"})
             rows.append((a["OBJECTID"], lp, addr, a.get("SUBURB") or "",
                          f"{addr} {lp}".upper(), a.get("LOT_AREA"), json.dumps(props), g))
+            idx.append((a["OBJECTID"], *b))
         db.executemany("INSERT OR REPLACE INTO parcels VALUES(?,?,?,?,?,?,?,?)", rows)
+        db.executemany("INSERT OR REPLACE INTO parcel_idx VALUES(?,?,?,?,?)", idx)
         n += len(rows)
         print(f"  parcels: {n}", flush=True)
         if limit and n >= limit:

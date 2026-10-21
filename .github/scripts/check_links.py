@@ -2,6 +2,19 @@
 import json, urllib.request
 d = json.load(open("src/maps.json"))
 urls = [(s["name"], s["url"]) for s in d["state"]] + [(c["name"], u) for c in d["councils"] for u in (c["website"], c.get("map")) if u]
+import glob
+for f in glob.glob("src-tauri/knowledge/*.json"):  # every URL in the knowledge files
+    def walk(v):
+        if isinstance(v, dict):
+            for k, x in v.items():
+                if isinstance(x, str) and x.startswith("http") and k in ("url", "lodge_url"):
+                    urls.append((f, x))
+                walk(x)
+        elif isinstance(v, list):
+            for x in v:
+                walk(x)
+    walk(json.load(open(f)))
+urls = list(dict.fromkeys(urls))
 bad = []
 for name, url in urls:
     try:

@@ -1,5 +1,6 @@
 mod ai;
 mod data;
+mod dev;
 mod llm;
 mod rules;
 
@@ -178,6 +179,63 @@ async fn flood_map(state: State<'_, AppState>, pid: i64) -> Result<Vec<data::Ove
     .map_err(e)?
 }
 
+#[tauri::command]
+async fn potential(state: State<'_, AppState>, pid: i64, use_id: String) -> Result<dev::Potential, String> {
+    let db = state.db.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let a = load_assessment(&db, pid)?;
+        let g = db.lock().map_err(e)?;
+        let c = g.as_ref().ok_or("No data pack loaded")?;
+        dev::potential(c, &a, &use_id)
+    })
+    .await
+    .map_err(e)?
+}
+
+/// Contours need internet the first time; results are cached per lot for offline use.
+#[tauri::command]
+async fn contours(app: AppHandle, state: State<'_, AppState>, pid: i64) -> Result<serde_json::Value, String> {
+    let cache = dir(&app, "contours")?.join(format!("{pid}.json"));
+    if let Ok(s) = fs::read_to_string(&cache) {
+        if let Ok(v) = serde_json::from_str(&s) {
+            return Ok(v);
+        }
+    }
+    let p = with_db(&state, |c| data::parcel(c, pid))?;
+    let v = dev::contours(&p).await?;
+    let _ = fs::write(&cache, v.to_string());
+    Ok(v)
+}
+
+/// AI-drafted DA Form 1 answers (streamed).
+#[tauri::command]
+async fn draft_form(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    pid: i64,
+    use_id: String,
+    proposal: String,
+    on_token: Channel<String>,
+) -> Result<(), String> {
+    let cfg = load_settings(&app);
+    let model = active_model(&app)?;
+    let db = state.db.clone();
+    let (a, dev_facts) = tauri::async_runtime::spawn_blocking(move || -> Result<_, String> {
+        let a = load_assessment(&db, pid)?;
+        let g = db.lock().map_err(e)?;
+        let c = g.as_ref().ok_or("No data pack loaded")?;
+        let pot = dev::potential(c, &a, &use_id)?;
+        Ok((a, dev::facts(&pot)))
+    })
+    .await
+    .map_err(e)??;
+    let (sys, user) = rules::form_prompt(&a, &dev_facts, &proposal);
+    let sink: ai::Sink = Arc::new(move |t: &str| {
+        let _ = on_token.send(t.to_string());
+    });
+    ai::generate(&cfg, model, state.llm.clone(), vec![("system".into(), sys), ("user".into(), user)], 1400, sink).await
+}
+
 fn load_assessment(db: &Arc<Mutex<Option<rusqlite::Connection>>>, pid: i64) -> Result<rules::Assessment, String> {
     let g = db.lock().map_err(e)?;
     let c = g.as_ref().ok_or("No data pack loaded")?;
@@ -200,19 +258,29 @@ async fn generate_report(
     state: State<'_, AppState>,
     pid: i64,
     question: String,
+    use_id: String,
     on_event: Channel<ReportEvent>,
 ) -> Result<(), String> {
     let cfg = load_settings(&app);
     let model = active_model(&app)?;
     let db = state.db.clone();
-    let a = tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)??;
+    let uid = use_id.clone();
+    let (a, dev_facts) = tauri::async_runtime::spawn_blocking(move || -> Result<_, String> {
+        let a = load_assessment(&db, pid)?;
+        let g = db.lock().map_err(e)?;
+        let c = g.as_ref().ok_or("No data pack loaded")?;
+        let pot = dev::potential(c, &a, &uid)?;
+        Ok((a, dev::facts(&pot)))
+    })
+    .await
+    .map_err(e)??;
     state.llm.cancel.store(false, Ordering::SeqCst);
     for (key, title) in rules::sections(&a) {
         if state.llm.cancel.load(Ordering::SeqCst) {
             break;
         }
         let _ = on_event.send(ReportEvent { section: key.into(), title: title.into(), text: String::new() });
-        let (sys, user) = rules::section_prompt(&a, key, &question);
+        let (sys, user) = if key == "potential" { rules::potential_prompt(&a, &dev_facts, &question) } else { rules::section_prompt(&a, key, &question) };
         let ch = on_event.clone();
         let sink: ai::Sink = Arc::new(move |t: &str| {
             let _ = ch.send(ReportEvent { section: key.into(), title: title.into(), text: t.to_string() });
@@ -359,6 +427,9 @@ pub fn run() {
             search,
             assess,
             flood_map,
+            potential,
+            contours,
+            draft_form,
             generate_report,
             chat,
             cancel_report,

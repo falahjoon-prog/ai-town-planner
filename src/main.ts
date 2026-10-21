@@ -270,7 +270,12 @@ async function loadSite(pid: number) {
   renderChat();
   $("saveBtn").hidden = true;
   $("pdfBtn").hidden = true;
+  $("formOut").innerHTML = "";
+  $("formCopy").hidden = true;
+  subOn = false; contOn = false;
+  toolUi("subBtn", false); toolUi("contBtn", false);
   drawMap(a);
+  loadPotential();
 }
 
 function bounds(geom: any): [number, number, number, number] {
@@ -285,6 +290,151 @@ function bounds(geom: any): [number, number, number, number] {
 }
 
 let floodOn = false;
+
+// ---- Development potential, forms, map tools ----
+type Pot = {
+  area_m2: number; frontage_m: number | null; depth_m: number | null;
+  edges: { length_m: number; mid: [number, number]; frontage: boolean | null }[];
+  provisions: { title: string; items: { label: string; value: string; source: string; url: string; verify: boolean }[] } | null;
+  subdivision: string[]; lots_by_area: number | null; sketch: { area_m2: number; geom: any }[];
+  use_fit: { use_def: { name: string; term: string; checks: string[]; sources: { name: string; url: string }[] }; zone_ok: boolean | null; note: string } | null;
+  forms: { form: { name: string; to: string; when: string; url: string; lodge: string; lodge_url: string }; reason: string }[];
+  pda: boolean;
+};
+let pot: Pot | null = null;
+let dimMarkers: maplibregl.Marker[] = [];
+let dimOn = true;
+let subOn = false;
+let contOn = false;
+const useId = () => ($("useSel") as HTMLSelectElement).value;
+const link = (url: string, text: string) => (url ? `<a href="#" data-url="${esc(url)}" data-title="${esc(text)}">${esc(text)}</a>` : esc(text));
+
+async function loadPotential() {
+  if (!current) return;
+  try {
+    pot = await invoke<Pot>("potential", { pid: current.parcel.pid, useId: useId() });
+  } catch (e) {
+    $("pot").innerHTML = `<p class="err">${esc(e)}</p>`;
+    return;
+  }
+  renderPotential();
+  drawDims();
+  if (subOn) drawSketch();
+}
+
+function renderPotential() {
+  if (!pot) return;
+  const p = pot;
+  const facts = [
+    `<b>${Math.round(p.area_m2).toLocaleString()} m²</b> lot area`,
+    p.frontage_m != null ? `<b>${p.frontage_m} m</b> open boundary / frontage` : `frontage: needs the latest data pack`,
+    p.depth_m != null ? `≈ <b>${p.depth_m} m</b> depth` : "",
+  ].filter(Boolean).join(" · ");
+  const prov = p.provisions
+    ? `<table class="ptable"><tr><th colspan="2">${esc(p.provisions.title)}</th><th>Source</th></tr>${p.provisions.items
+        .map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ` <span class="pill warn">verify</span>` : ""}</td><td class="meta">${link(i.url, i.source)}</td></tr>`)
+        .join("")}</table>`
+    : `<p class="meta">${p.pda ? "PDA site: limits come from the PDA development scheme (EDQ)." : "No sourced numeric provisions for this zone in the app yet. The AI report names the City Plan codes that set them."}</p>`;
+  const fit = p.use_fit
+    ? `<div class="${p.use_fit.zone_ok === false ? "flag" : "zone"}"><span class="auth">Proposal</span> <b>${esc(p.use_fit.use_def.name)}</b>
+       <div class="meta">Planning use term: ${esc(p.use_fit.use_def.term)}</div><p>${esc(p.use_fit.note)}</p>
+       <ul>${p.use_fit.use_def.checks.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
+       ${(p.use_fit.use_def.sources ?? []).length ? `<div class="meta">Sources: ${p.use_fit.use_def.sources.map((x) => link(x.url, x.name)).join(" · ")}</div>` : ""}</div>`
+    : "";
+  $("pot").innerHTML = `<p>${facts}</p>${prov}<h4>Subdivision</h4><ul>${p.subdivision.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+    ${p.sketch.length ? `<p class="meta">Indicative split: ${p.sketch.map((s) => `${Math.round(s.area_m2)} m²`).join(" + ")}. Concept only; a surveyor confirms the layout.</p>` : ""}${fit}`;
+  $("forms").innerHTML = p.forms
+    .map((f) => `<div class="mapitem"><div><b>${esc(f.form.name)}</b><div class="meta">To: ${esc(f.form.to)} · ${esc(f.reason)}</div>
+      <div class="meta">Lodge: ${f.form.lodge_url ? link(f.form.lodge_url, f.form.lodge) : esc(f.form.lodge)}</div></div>
+      <button type="button" class="ghost" data-url="${esc(f.form.url)}" data-title="${esc(f.form.name)}">Get form</button></div>`)
+    .join("");
+}
+
+$("useSel").addEventListener("change", loadPotential);
+// Links inside the potential/forms panels open in an in-app window.
+document.querySelector(".pot-box")!.addEventListener("click", (ev) => {
+  const el = (ev.target as HTMLElement).closest("[data-url]") as HTMLElement | null;
+  if (!el) return;
+  ev.preventDefault();
+  openMap(el.dataset.url!, el.dataset.title!);
+});
+
+function drawDims() {
+  dimMarkers.forEach((m) => m.remove());
+  dimMarkers = [];
+  if (!map || !pot || !dimOn) return;
+  for (const e of pot.edges) {
+    if (e.length_m < 2) continue;
+    const el = document.createElement("div");
+    el.className = `dim ${e.frontage ? "front" : ""}`;
+    el.textContent = `${e.length_m} m`;
+    dimMarkers.push(new maplibregl.Marker({ element: el }).setLngLat(e.mid).addTo(map));
+  }
+}
+
+function drawSketch() {
+  if (!map) return;
+  if (map.getLayer("sub")) { map.removeLayer("sub"); map.removeLayer("sub-fill"); map.removeSource("sub"); }
+  if (!subOn || !pot?.sketch.length) return;
+  map.addSource("sub", { type: "geojson", data: { type: "FeatureCollection", features: pot.sketch.map((s) => ({ type: "Feature", properties: {}, geometry: s.geom })) } });
+  map.addLayer({ id: "sub-fill", type: "fill", source: "sub", paint: { "fill-color": "#f59e0b", "fill-opacity": 0.15 } });
+  map.addLayer({ id: "sub", type: "line", source: "sub", paint: { "line-color": "#b45309", "line-width": 2, "line-dasharray": [2, 1] } });
+}
+
+function toolUi(id: string, on: boolean) {
+  $(id).classList.toggle("on", on);
+}
+
+$("dimBtn").addEventListener("click", () => { dimOn = !dimOn; toolUi("dimBtn", dimOn); drawDims(); });
+$("subBtn").addEventListener("click", () => {
+  subOn = !subOn;
+  toolUi("subBtn", subOn);
+  if (subOn && !pot?.sketch.length) setFloodUi(floodOn, `<b>No subdivision sketch</b><div class="meta">The lot is below the minimum area for 2 lots, or the zone's minimum lot size isn't recorded.</div>`);
+  drawSketch();
+});
+$("contBtn").addEventListener("click", async () => {
+  if (!current || !map) return;
+  const m = map;
+  contOn = !contOn;
+  toolUi("contBtn", contOn);
+  if (!contOn) {
+    if (m.getLayer("cont")) { m.removeLayer("cont"); m.removeSource("cont"); }
+    return setFloodUi(floodOn);
+  }
+  $("contBtn").textContent = "Loading…";
+  try {
+    const c = await invoke<{ source: string; stats: { min_m: number; max_m: number; fall_m: number; approx_slope_pct: number } | null; features: any[] }>("contours", { pid: current.parcel.pid });
+    m.addSource("cont", { type: "geojson", data: { type: "FeatureCollection", features: c.features } });
+    m.addLayer({ id: "cont", type: "line", source: "cont", paint: { "line-color": "#7c5e3c", "line-width": 1, "line-opacity": 0.8 } }, "lot");
+    const st = c.stats;
+    setFloodUi(floodOn, `<b>${esc(c.source)}</b>${st ? `<div>Lot elevation ${st.min_m}–${st.max_m} m AHD · fall ${st.fall_m} m · ≈${st.approx_slope_pct}% slope</div>` : ""}<div class="meta">© State of Queensland. Saved for offline use.</div>`);
+  } catch (e) {
+    contOn = false;
+    toolUi("contBtn", false);
+    alertMsg(e);
+  }
+  $("contBtn").textContent = "Contours";
+});
+
+$("formBtn").addEventListener("click", async () => {
+  if (!current) return;
+  const b = $("formBtn") as HTMLButtonElement;
+  b.disabled = true;
+  b.textContent = "Drafting…";
+  let text = "";
+  const ch = new Channel<string>();
+  ch.onmessage = (t) => { text += t; $("formOut").innerHTML = marked.parse(text) as string; };
+  try {
+    await invoke("draft_form", { pid: current.parcel.pid, useId: useId(), proposal: val("question"), onToken: ch });
+    $("formCopy").hidden = !text;
+    ($("formCopy") as HTMLElement).dataset.text = text;
+  } catch (e) {
+    $("formOut").innerHTML = `<p class="err">${esc(e)}</p>`;
+  }
+  b.disabled = false;
+  b.textContent = "Draft DA Form 1 answers with AI";
+});
+$("formCopy").addEventListener("click", () => navigator.clipboard.writeText(($("formCopy") as HTMLElement).dataset.text ?? ""));
 const FLOOD_COLORS = ["#1d4ed8", "#0891b2", "#7c3aed", "#0369a1", "#4f46e5", "#0e7490", "#2563eb", "#6d28d9"];
 
 function fitTo(geoms: any[]) {
@@ -411,7 +561,7 @@ $("genBtn").addEventListener("click", async () => {
     renderReport();
   };
   try {
-    await invoke("generate_report", { pid: current.parcel.pid, question: val("question"), onEvent: ch });
+    await invoke("generate_report", { pid: current.parcel.pid, question: val("question"), useId: useId(), onEvent: ch });
     if (sections.length) activeTab = sections[0].key;
     renderReport();
     $("saveBtn").hidden = !sections.length;

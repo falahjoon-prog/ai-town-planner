@@ -119,12 +119,12 @@ pub struct OverlayHit {
     pub geom: Value,
 }
 
-fn to_geo(s: &str) -> Result<Geometry<f64>, String> {
+pub(crate) fn to_geo(s: &str) -> Result<Geometry<f64>, String> {
     let g: geojson::Geometry = s.parse().map_err(e)?;
     Geometry::<f64>::try_from(g.value).map_err(e)
 }
 
-fn polys(g: &Geometry<f64>) -> Option<MultiPolygon<f64>> {
+pub(crate) fn polys(g: &Geometry<f64>) -> Option<MultiPolygon<f64>> {
     match g {
         Geometry::Polygon(p) => Some(MultiPolygon(vec![p.clone()])),
         Geometry::MultiPolygon(m) => Some(m.clone()),
@@ -136,7 +136,7 @@ fn polys(g: &Geometry<f64>) -> Option<MultiPolygon<f64>> {
     }
 }
 
-fn geo_json(m: &MultiPolygon<f64>) -> Value {
+pub(crate) fn geo_json(m: &MultiPolygon<f64>) -> Value {
     serde_json::to_value(geojson::Geometry::new(geojson::Value::from(m))).unwrap_or(Value::Null)
 }
 
@@ -165,15 +165,15 @@ pub fn parcel(c: &Connection, pid: i64) -> Result<Parcel, String> {
 const NEAR_M: f64 = 25.0;
 
 /// Local equirectangular projection to metres (accurate enough at lot scale).
-struct Proj {
-    kx: f64,
-    ky: f64,
+pub(crate) struct Proj {
+    pub kx: f64,
+    pub ky: f64,
 }
 impl Proj {
-    fn new(lat: f64) -> Self {
+    pub fn new(lat: f64) -> Self {
         Proj { kx: 111_320.0 * lat.to_radians().cos(), ky: 110_540.0 }
     }
-    fn xy(&self, c: geo::Coord<f64>) -> (f64, f64) {
+    pub fn xy(&self, c: geo::Coord<f64>) -> (f64, f64) {
         (c.x * self.kx, c.y * self.ky)
     }
 }

@@ -1,0 +1,294 @@
+[
+ {
+  "zone": [
+   "low density residential"
+  ],
+  "precinct": [],
+  "title": "Low density residential",
+  "items": [
+   {
+    "label": "Minimum lot size – front lot",
+    "value": "450 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_front",
+    "n": 450
+   },
+   {
+    "label": "Minimum lot size – rear lot",
+    "value": "600 m² (excluding access handle)",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_rear",
+    "n": 600
+   },
+   {
+    "label": "Small lot option near centres",
+    "value": "300 m² lots within 300 m walking distance of a centre (plus slope, frontage and shape criteria)",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": true,
+    "key": "min_front_centre",
+    "n": 300
+   },
+   {
+    "label": "Dwellings",
+    "value": "Dwelling house, plus one secondary dwelling (e.g. granny flat)",
+    "source": "BCC fact sheet: Residential development in suburban zones",
+    "url": "https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones",
+    "verify": false
+   },
+   {
+    "label": "Height",
+    "value": "Dwelling house over 9.5 m needs code assessment",
+    "source": "BCC fact sheet: Residential development in suburban zones",
+    "url": "https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones",
+    "verify": false
+   }
+  ]
+ },
+ {
+  "zone": [
+   "character residential"
+  ],
+  "precinct": [
+   "infill"
+  ],
+  "title": "Character residential – Infill housing",
+  "items": [
+   {
+    "label": "Minimum lot size – front lot",
+    "value": "300 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_front",
+    "n": 300
+   },
+   {
+    "label": "Minimum lot size – rear lot",
+    "value": "450 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_rear",
+    "n": 450
+   }
+  ]
+ },
+ {
+  "zone": [
+   "character residential"
+  ],
+  "precinct": [],
+  "title": "Character residential",
+  "items": [
+   {
+    "label": "Minimum lot size – front lot",
+    "value": "450 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_front",
+    "n": 450
+   },
+   {
+    "label": "Minimum lot size – rear lot",
+    "value": "600 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_rear",
+    "n": 600
+   }
+  ]
+ },
+ {
+  "zone": [
+   "low medium density residential"
+  ],
+  "precinct": [
+   "3 or 4 storey"
+  ],
+  "title": "Low-medium density residential – 3 or 4 storey mix",
+  "items": [
+   {
+    "label": "Small lots",
+    "value": "Minimum 120 m² where design and built-form criteria are met (assessed at subdivision)",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": true,
+    "key": "min_front",
+    "n": 120
+   },
+   {
+    "label": "Dual occupancy",
+    "value": "Minimum lot 400 m² where criteria are met",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": true,
+    "key": "min_dual_occ",
+    "n": 400
+   },
+   {
+    "label": "Height – houses, duplexes, small lots",
+    "value": "Up to 3 storeys and 11.5 m (outside Key Locations)",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": false
+   },
+   {
+    "label": "Multiple dwellings (apartments/townhouses)",
+    "value": "In Key Locations (near centres / frequent public transport): minimum site 800 m², up to 4 storeys and 14 m",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": true,
+    "key": "min_site_md",
+    "n": 800
+   },
+   {
+    "label": "Site cover",
+    "value": "55% for lots under 180 m²",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": false
+   },
+   {
+    "label": "Impervious area",
+    "value": "Maximum 70%",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": false
+   }
+  ]
+ },
+ {
+  "zone": [
+   "low medium density residential"
+  ],
+  "precinct": [
+   "2 storey mix"
+  ],
+  "title": "Low-medium density residential – 2 storey mix",
+  "items": [
+   {
+    "label": "Minimum lot size – front lot",
+    "value": "260 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_front",
+    "n": 260
+   },
+   {
+    "label": "Minimum lot size – rear lot",
+    "value": "350 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_rear",
+    "n": 350
+   },
+   {
+    "label": "Height",
+    "value": "2 storeys (precinct name)",
+    "source": "Zone precinct name",
+    "url": "",
+    "verify": false
+   }
+  ]
+ },
+ {
+  "zone": [
+   "low medium density residential"
+  ],
+  "precinct": [
+   "2 or 3 storey",
+   "up to 3 storeys"
+  ],
+  "title": "Low-medium density residential (pre-v37 precinct)",
+  "items": [
+   {
+    "label": "Note",
+    "value": "This precinct was merged into '3 or 4 storey mix' by amendment v37 (18 Sep 2026). The data may predate the change, so check current mapping.",
+    "source": "City Plan amendment v37.00/2026 (in effect 18 Sep 2026) – BCC summary page",
+    "url": "https://www.brisbane.qld.gov.au/building-and-planning/planning-and-design/city-plan-amendments/low-medium-density-residential-design",
+    "verify": false
+   },
+   {
+    "label": "Minimum lot size – front lot (pre-v37)",
+    "value": "260 m² (2 or 3 storey mix) / 180 m² (up to 3 storeys)",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_front",
+    "n": 260
+   },
+   {
+    "label": "Minimum lot size – rear lot (pre-v37)",
+    "value": "350 m²",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_rear",
+    "n": 350
+   }
+  ]
+ },
+ {
+  "zone": [
+   "high density residential"
+  ],
+  "precinct": [
+   "15 storeys"
+  ],
+  "title": "High density residential – Up to 15 storeys",
+  "items": [
+   {
+    "label": "Height",
+    "value": "Up to 15 storeys (precinct name)",
+    "source": "Zone precinct name",
+    "url": "",
+    "verify": false
+   }
+  ]
+ },
+ {
+  "zone": [
+   "high density residential"
+  ],
+  "precinct": [
+   "8 storeys"
+  ],
+  "title": "High density residential – Up to 8 storeys",
+  "items": [
+   {
+    "label": "Height",
+    "value": "Up to 8 storeys (precinct name)",
+    "source": "Zone precinct name",
+    "url": "",
+    "verify": false
+   }
+  ]
+ },
+ {
+  "zone": [
+   "rural residential"
+  ],
+  "precinct": [],
+  "title": "Rural residential",
+  "items": [
+   {
+    "label": "Minimum lot size",
+    "value": "10,000 m² (1 ha)",
+    "source": "BCC 'Subdividing land' fact sheet (2017) – check current Subdivision code",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/subdividing-land-fact-sheet.pdf.coredownload.pdf",
+    "verify": true,
+    "key": "min_front",
+    "n": 10000
+   }
+  ]
+ }
+]
