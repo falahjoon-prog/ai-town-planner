@@ -27,12 +27,12 @@
   },
   {
    "name": "EPBC Protected Matters Search",
-   "url": "http://www.environment.gov.au/epbc/pmst/index.html",
+   "url": "https://pmst.dcceew.gov.au/",
    "desc": "Federal environmental matters"
   },
   {
    "name": "QSpatial data catalogue",
-   "url": "https://qldspatial.information.qld.gov.au/catalogue/custom/index.page",
+   "url": "https://qldspatial.information.qld.gov.au/",
    "desc": "Queensland spatial datasets"
   },
   {

@@ -29,7 +29,7 @@ PARCEL_FIELDS = ["OBJECTID", "LOT", "PLAN_", "LOTPLAN", "LOT_AREA", "HOUSE_NUMBE
                  "PROPERTY_NAME_1"]
 DROP_PROPS = {"geo_point_2d", "geo_shape", "objectid", "shape_area", "shape_length",
               "shape__area", "shape__length"}
-UA = {"User-Agent": "ai-town-planner-datapack/1.0"}
+UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) ai-town-planner-datapack/1.0", "Accept": "application/json,*/*"}
 QLD = "https://spatial-gis.information.qld.gov.au/arcgis/rest/services"
 BNE_BBOX = "152.66,-27.77,153.47,-27.02"  # Brisbane LGA envelope (WGS84)
 # (authority, MapServer, layer-name prefixes). Layers are resolved by name, so ID changes don't break the build.
@@ -250,7 +250,7 @@ def load_state_layers(db, start_lid):
         try:
             meta = json.loads(get(svc, {"f": "json"}))
         except Exception as e:  # noqa: BLE001
-            failed.append(svc); print(f"  FAILED {svc}: {e}", flush=True); continue
+            failed.append(svc); print(f"::warning title=Data pack layer failed::{svc}: {e}", flush=True); continue
         layers = meta.get("layers", [])
         by_id = {l["id"]: l for l in layers}
 
@@ -264,7 +264,7 @@ def load_state_layers(db, start_lid):
             # Leaf layers of a group keep the group name so rules can still recognise them.
             targets = [(x, x["name"] if x is l else f"{l['name']} — {x['name']}") for l in match for x in leaves(l)]
             if not targets:
-                failed.append(w); print(f"  NOT FOUND {w}", flush=True)
+                failed.append(w); print(f"::warning title=Data pack layer not found::{w}", flush=True)
             for layer, name in targets:
                 lid += 1
                 if not load_one(db, svc, layer, name, authority, lid, SEQ_BBOX if authority == "infra" else BNE_BBOX):
@@ -286,7 +286,7 @@ def load_one(db, svc, layer, name, authority, lid, bbox):
         print(f"  [{authority}] {name}: {n}", flush=True)
         return True
     except Exception as e:  # noqa: BLE001
-        print(f"  FAILED {name}: {e}", flush=True)
+        print(f"::warning title=Data pack layer failed::{name}: {e}", flush=True)
         return False
 
 
