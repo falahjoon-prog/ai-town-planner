@@ -820,10 +820,35 @@ $("pdfBtn").addEventListener("click", () => {
   window.print();
 });
 
-// ---- Queensland maps (open in an in-app window) ----
-function openMap(url: string, title: string) {
-  new WebviewWindow(`map-${Date.now()}`, { url, title, width: 1280, height: 860 });
+// ---- Queensland maps (open in the default browser) ----
+type StateMap = { name: string; url: string; desc: string; at?: string };
+const STATE_MAPS = MAPS.state as StateMap[];
+const MAP_KEY = "mapSource";
+
+function chosenMap(): StateMap {
+  let name = "";
+  try { name = localStorage.getItem(MAP_KEY) ?? ""; } catch { /* storage unavailable */ }
+  return STATE_MAPS.find((m) => m.name === name) ?? STATE_MAPS[0];
 }
+
+// With an address loaded and an address-URL template on the map, centre on the lot; otherwise the general map.
+function mapUrlFor(m: StateMap): string {
+  if (!m.at || !current) return m.url;
+  const [x0, y0, x1, y1] = bounds(current.parcel.geom);
+  return m.at.replace("{lat}", ((y0 + y1) / 2).toFixed(6)).replace("{lng}", ((x0 + x1) / 2).toFixed(6));
+}
+
+function openExternal(url: string) {
+  invoke("open_external", { url }).catch(alertMsg);
+}
+
+const mapPick = $("mapPick") as HTMLSelectElement;
+mapPick.innerHTML = STATE_MAPS.map((m) => `<option value="${esc(m.name)}">${esc(m.name)}</option>`).join("");
+mapPick.value = chosenMap().name;
+mapPick.addEventListener("change", () => {
+  try { localStorage.setItem(MAP_KEY, mapPick.value); } catch { /* storage unavailable */ }
+});
+$("myMapBtn").addEventListener("click", () => openExternal(mapUrlFor(chosenMap())));
 
 function renderMaps() {
   const f = val("mapsFilter").toLowerCase();
@@ -849,7 +874,7 @@ $("mapsBtn").addEventListener("click", () => {
 $("mapsFilter").addEventListener("input", renderMaps);
 $("mapsDlg").addEventListener("click", (ev) => {
   const b = (ev.target as HTMLElement).closest("button[data-url]") as HTMLElement | null;
-  if (b) openMap(b.dataset.url!, b.dataset.title!);
+  if (b) openExternal(b.dataset.url!);
 });
 
 refreshStatus().then((s) => {

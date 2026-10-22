@@ -578,6 +578,21 @@ fn save_text(path: String, content: String) -> Result<(), String> {
     fs::write(path, content).map_err(e)
 }
 
+/// Opens a web link in the person's default browser (no in-app window).
+#[tauri::command]
+fn open_external(url: String) -> Result<(), String> {
+    if !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err("Only web links can be opened".into());
+    }
+    #[cfg(target_os = "windows")]
+    let child = std::process::Command::new("explorer").arg(&url).spawn();
+    #[cfg(target_os = "macos")]
+    let child = std::process::Command::new("open").arg(&url).spawn();
+    #[cfg(all(unix, not(target_os = "macos")))]
+    let child = std::process::Command::new("xdg-open").arg(&url).spawn();
+    child.map(|_| ()).map_err(e)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -590,6 +605,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             status,
+            open_external,
             import_datapack,
             download_datapack,
             search,

@@ -11,6 +11,7 @@
       <div class="pack" id="packInfo">No data pack</div>
       <button class="ghost" id="themeBtn" title="Switch light / dark">◐</button>
       <button class="ghost" id="cmpBtn">Compare</button>
+      <button class="ghost" id="myMapBtn" title="Open the chosen map for this address (opens in your browser)">Open map</button>
       <button class="ghost" id="mapsBtn">Maps</button>
       <button class="ghost" id="settingsBtn">Settings</button>
     </header>
@@ -131,6 +132,9 @@
         <input id="brandBy" placeholder="Prepared by (your name)" />
         <div class="report-bar"><label class="ghost-file">Logo image <input id="brandLogo" type="file" accept="image/png,image/jpeg,image/svg+xml" /></label>
           <img id="brandLogoPrev" class="logo-prev" alt="" hidden /><button type="button" class="ghost" id="brandClear">Remove logo</button></div>
+        <h3>Map</h3>
+        <select id="mapPick"></select>
+        <p class="meta">Opens in your browser. With an address loaded, the map opens for that address; otherwise it opens the general map.</p>
         <h3>Address search</h3>
         <input id="googleKey" type="password" placeholder="Google Places API key (optional – better address search)" autocomplete="off" />
         <p class="meta" id="googleHint"></p>
