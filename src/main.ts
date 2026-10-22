@@ -545,14 +545,14 @@ function renderLetter(text: string): string {
 }
 
 let docText = "";
-async function draft(letter: boolean) {
+async function draft(letter: boolean, prelodge = false) {
   if (!current) return;
-  const btn = $(letter ? "letterBtn" : "formBtn") as HTMLButtonElement;
+  const btn = $(prelodge ? "prelodgeBtn" : letter ? "letterBtn" : "formBtn") as HTMLButtonElement;
   const label = btn.textContent;
   btn.disabled = true;
   btn.textContent = "Drafting…";
   docText = "";
-  $("docTitle").textContent = letter ? "Cover letter" : "DA Form 1 – Development application details";
+  $("docTitle").textContent = prelodge ? "Pre-lodgement meeting request" : letter ? "Cover letter" : "DA Form 1 – Development application details";
   $("docBody").innerHTML = `<p class="meta">Drafting…</p>`;
   ($("docDlg") as HTMLDialogElement).showModal();
   const ch = new Channel<string>();
@@ -561,7 +561,8 @@ async function draft(letter: boolean) {
     $("docBody").innerHTML = letter ? renderLetter(docText) : renderForm(docText, false);
   };
   try {
-    await invoke("draft_form", { pid: current.parcel.pid, useId: useId(), proposal: val("question"), letter, onToken: ch });
+    const proposal = prelodge ? `Request a pre-lodgement meeting with council about: ${val("question") || "the proposal on this site"}` : val("question");
+    await invoke("draft_form", { pid: current.parcel.pid, useId: useId(), proposal, letter, onToken: ch });
     if (!letter) $("docBody").innerHTML = renderForm(docText, true);
   } catch (e) {
     $("docBody").innerHTML = `<p class="err">${esc(e)}</p>`;
@@ -571,6 +572,7 @@ async function draft(letter: boolean) {
 }
 $("formBtn").addEventListener("click", () => draft(false));
 $("letterBtn").addEventListener("click", () => draft(true));
+$("prelodgeBtn").addEventListener("click", () => draft(true, true));
 
 function docPlain(): string {
   const body = $("docBody");
