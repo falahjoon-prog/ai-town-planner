@@ -895,7 +895,7 @@ function renderAppr() {
   $("apprList").innerHTML = list
     .map((c) => {
       const da = (c as { da?: string }).da;
-      return `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${da ? "DA register" : "Council website only"}</div></div><div class="model-act">${da ? `<button type="button" data-url="${esc(da)}">DA register</button>` : ""}<button type="button" class="ghost" data-url="${esc(c.website)}">Website</button></div></div>`;
+      return `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${da ? "Development applications" : "No application page found"}</div></div><div class="model-act">${da ? `<button type="button" data-url="${esc(da)}">DA applications</button>` : ""}<button type="button" class="ghost" data-url="${esc(c.website)}">Website</button></div></div>`;
     })
     .join("");
 }
