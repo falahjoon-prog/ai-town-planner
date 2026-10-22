@@ -3,7 +3,6 @@ import { open, save } from "@tauri-apps/plugin-dialog";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { marked } from "marked";
-import { WebviewWindow } from "@tauri-apps/api/webviewWindow";
 import MAPS from "./maps.json";
 import "./style.css";
 
@@ -444,7 +443,7 @@ document.querySelector(".pot-box")!.addEventListener("click", (ev) => {
   const el = (ev.target as HTMLElement).closest("[data-url]") as HTMLElement | null;
   if (!el) return;
   ev.preventDefault();
-  openMap(el.dataset.url!, el.dataset.title!);
+  openExternal(el.dataset.url!);
 });
 
 function drawDims() {
@@ -822,11 +821,6 @@ $("pdfBtn").addEventListener("click", () => {
   window.print();
 });
 
-// ---- In-app windows (forms and reference links) ----
-function openMap(url: string, title: string) {
-  new WebviewWindow(`map-${Date.now()}`, { url, title, width: 1280, height: 860 });
-}
-
 // ---- Queensland maps (open in the default browser) ----
 type StateMap = { name: string; url: string; desc: string; at?: string };
 const STATE_MAPS = MAPS.state as StateMap[];
@@ -961,7 +955,7 @@ $("titleLinks").addEventListener("click", (ev) => {
   if (!a) return;
   ev.preventDefault();
   if (current) navigator.clipboard.writeText(current.parcel.lotplan).catch(() => {});
-  new WebviewWindow(`ext-${Date.now()}`, { url: a.dataset.url!, title: a.dataset.title ?? "Title search", width: 1100, height: 800 });
+  openExternal(a.dataset.url!);
 });
 $("titleBtn").addEventListener("click", async () => {
   if (!current) return;
@@ -1030,7 +1024,7 @@ function chargeEstimate(p: any): string {
 $("daRegBtn").addEventListener("click", () => {
   if (!current) return;
   navigator.clipboard.writeText(current.parcel.address || current.parcel.lotplan).catch(() => {});
-  new WebviewWindow(`ext-${Date.now()}`, { url: "https://developmenti.brisbane.qld.gov.au/", title: "Development.i – nearby applications", width: 1200, height: 850 });
+  openExternal("https://developmenti.brisbane.qld.gov.au/");
 });
 
 // ---- Report branding (Settings) ----
