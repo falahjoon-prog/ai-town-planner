@@ -13,6 +13,7 @@
       <button class="ghost" id="cmpBtn">Compare</button>
       <button class="ghost" id="myMapBtn" title="Open the chosen map for this address (opens in your browser)">Open map</button>
       <button class="ghost" id="mapsBtn">Maps</button>
+      <button class="ghost" id="apprBtn" title="Development and building approvals by council">Approvals</button>
       <button class="ghost" id="settingsBtn">Settings</button>
     </header>
     <div class="layout">
@@ -181,6 +182,14 @@
         <div id="cmpPick" class="maplist"></div>
         <div class="report-bar"><button type="button" id="cmpGo">Compare</button></div>
         <div id="cmpOut"></div>
+      </form>
+    </dialog>
+    <dialog id="apprDlg" class="wide">
+      <form method="dialog" class="dlg">
+        <div class="dlg-top"><div class="dlg-row"><h2>Approvals by council</h2><button class="x" aria-label="Close" title="Close">✕</button></div></div>
+        <div class="report-bar"><select id="apprCouncil"></select><select id="apprCat"></select><button type="button" class="ghost" id="apprCopy">Copy search term</button></div>
+        <p class="meta">Council registers can't be filtered from the app. Copy the category and paste it into the register's search. Only Brisbane has a register link so far.</p>
+        <div id="apprList" class="maplist"></div>
       </form>
     </dialog>
     <dialog id="mapsDlg" class="wide">

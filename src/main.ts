@@ -820,6 +820,11 @@ $("pdfBtn").addEventListener("click", () => {
   window.print();
 });
 
+// ---- In-app windows (forms and reference links) ----
+function openMap(url: string, title: string) {
+  new WebviewWindow(`map-${Date.now()}`, { url, title, width: 1280, height: 860 });
+}
+
 // ---- Queensland maps (open in the default browser) ----
 type StateMap = { name: string; url: string; desc: string; at?: string };
 const STATE_MAPS = MAPS.state as StateMap[];
@@ -875,6 +880,37 @@ $("mapsFilter").addEventListener("input", renderMaps);
 $("mapsDlg").addEventListener("click", (ev) => {
   const b = (ev.target as HTMLElement).closest("button[data-url]") as HTMLElement | null;
   if (b) openExternal(b.dataset.url!);
+});
+
+// ---- Approvals by council: DA register link where known, category copied as a search term ----
+const APPR_CATS = ["Development application", "New house", "Dual occupancy", "Multiple dwelling", "Commercial", "Industrial", "Subdivision", "Shed or pool"];
+const apprCouncil = $("apprCouncil") as HTMLSelectElement;
+const apprCat = $("apprCat") as HTMLSelectElement;
+apprCouncil.innerHTML = `<option value="__all__">All councils</option>` + MAPS.councils.map((c) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("");
+apprCat.innerHTML = APPR_CATS.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+
+function renderAppr() {
+  const pick = apprCouncil.value;
+  const list = MAPS.councils.filter((c) => pick === "__all__" || c.name === pick);
+  $("apprList").innerHTML = list
+    .map((c) => {
+      const da = (c as { da?: string }).da;
+      return `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${da ? "DA register" : "Council website only"}</div></div><div class="model-act">${da ? `<button type="button" data-url="${esc(da)}">DA register</button>` : ""}<button type="button" class="ghost" data-url="${esc(c.website)}">Website</button></div></div>`;
+    })
+    .join("");
+}
+
+apprCouncil.addEventListener("change", renderAppr);
+$("apprBtn").addEventListener("click", () => {
+  renderAppr();
+  ($("apprDlg") as HTMLDialogElement).showModal();
+});
+$("apprList").addEventListener("click", (ev) => {
+  const b = (ev.target as HTMLElement).closest("button[data-url]") as HTMLElement | null;
+  if (b) openExternal(b.dataset.url!);
+});
+$("apprCopy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(apprCat.value); } catch (e) { alertMsg(e); }
 });
 
 refreshStatus().then((s) => {
