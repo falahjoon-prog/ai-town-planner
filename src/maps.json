@@ -95,7 +95,8 @@
   {
    "name": "Brisbane",
    "website": "https://www.brisbane.qld.gov.au/",
-   "map": "https://cityplan.brisbane.qld.gov.au/eplan/"
+   "map": "https://cityplan.brisbane.qld.gov.au/eplan/",
+   "da": "https://developmenti.brisbane.qld.gov.au/"
   },
   {
    "name": "Bulloo",
@@ -105,7 +106,8 @@
   {
    "name": "Bundaberg",
    "website": "https://www.bundaberg.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.bundaberg.qld.gov.au/Planning-and-building/The-application-process/PD-Online"
   },
   {
    "name": "Burdekin",
@@ -120,7 +122,8 @@
   {
    "name": "Cairns",
    "website": "https://www.cairns.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.cairns.qld.gov.au/property-and-business/development"
   },
   {
    "name": "Carpentaria",
@@ -130,7 +133,8 @@
   {
    "name": "Cassowary Coast",
    "website": "https://www.cassowarycoast.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.cassowarycoast.qld.gov.au/Development"
   },
   {
    "name": "Central Highlands",
@@ -190,12 +194,14 @@
   {
    "name": "Fraser Coast",
    "website": "https://www.frasercoast.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://frasercoast.qld.gov.au/planning-information-tools"
   },
   {
    "name": "Gladstone",
    "website": "https://www.gladstone.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.gladstone.qld.gov.au/Build-and-Develop/Development-Application-Tracking"
   },
   {
    "name": "Gold Coast",
@@ -210,7 +216,8 @@
   {
    "name": "Gympie",
    "website": "https://www.gympie.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.gympie.qld.gov.au/Development/Development-Applications"
   },
   {
    "name": "Hinchinbrook",
@@ -225,12 +232,14 @@
   {
    "name": "Ipswich",
    "website": "https://www.ipswich.qld.gov.au/",
-   "map": "https://ipswich.qld.gov.au/residents/planning-and-development"
+   "map": "https://ipswich.qld.gov.au/residents/planning-and-development",
+   "da": "https://developmenti.ipswich.qld.gov.au/"
   },
   {
    "name": "Isaac",
    "website": "https://www.isaac.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.isaac.qld.gov.au/Residents/Planning-and-Development/Current-Development-in-Isaac"
   },
   {
    "name": "Kowanyama",
@@ -240,7 +249,8 @@
   {
    "name": "Livingstone",
    "website": "https://www.livingstone.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.livingstone.qld.gov.au/Doing-Business/Building-and-Development/Development-Assessment"
   },
   {
    "name": "Lockhart River",
@@ -250,12 +260,14 @@
   {
    "name": "Lockyer Valley",
    "website": "https://www.lockyervalley.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://lvrc.qld.gov.au/our-services/development-services/applications"
   },
   {
    "name": "Logan",
    "website": "https://www.logan.qld.gov.au/",
-   "map": "https://www.logan.qld.gov.au/planning-and-building/planning-and-development/logan-planning-scheme/logan-eplan"
+   "map": "https://www.logan.qld.gov.au/planning-and-building/planning-and-development/logan-planning-scheme/logan-eplan",
+   "da": "https://www.logan.qld.gov.au/planning-and-development/pd-online"
   },
   {
    "name": "Longreach",
@@ -265,7 +277,8 @@
   {
    "name": "Mackay",
    "website": "https://www.mackay.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.mackay.qld.gov.au/business/planning_and_development/development_applications_and_assessment"
   },
   {
    "name": "Mapoon",
@@ -300,7 +313,8 @@
   {
    "name": "Mount Isa",
    "website": "https://www.mountisa.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.mountisa.qld.gov.au/Development-and-Land-Use/Development/Development-in-Mount-Isa"
   },
   {
    "name": "Murweh",
@@ -315,7 +329,8 @@
   {
    "name": "Noosa",
    "website": "https://www.noosa.qld.gov.au/",
-   "map": "https://www.noosa.qld.gov.au/Community/Mapping"
+   "map": "https://www.noosa.qld.gov.au/Community/Mapping",
+   "da": "https://www.noosa.qld.gov.au/Planning-and-Development/Development-tools-and-guidelines/Planning-online"
   },
   {
    "name": "North Burnett",
@@ -350,7 +365,8 @@
   {
    "name": "Redland",
    "website": "https://www.redland.qld.gov.au/",
-   "map": "https://redland.qld.gov.au/CityPlanDocuments"
+   "map": "https://redland.qld.gov.au/CityPlanDocuments",
+   "da": "https://developmenti.redland.qld.gov.au/"
   },
   {
    "name": "Richmond",
@@ -360,7 +376,8 @@
   {
    "name": "Rockhampton",
    "website": "https://www.rockhamptonregion.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.rockhamptonregion.qld.gov.au/Development-Advice/Rock-e-Plan"
   },
   {
    "name": "Scenic Rim",
@@ -375,17 +392,20 @@
   {
    "name": "South Burnett",
    "website": "https://www.southburnett.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.southburnett.qld.gov.au/Business/Building-and-development/Planning-and-development/Development-applications"
   },
   {
    "name": "Southern Downs",
    "website": "https://www.sdrc.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://www.sdrc.qld.gov.au/payments-services/online-services/development-application-tracking-service"
   },
   {
    "name": "Sunshine Coast",
    "website": "https://www.sunshinecoast.qld.gov.au/",
-   "map": "https://www.sunshinecoast.qld.gov.au/Development/Development-Tools-and-Guidelines/sunshine-coast-mapping-mymaps"
+   "map": "https://www.sunshinecoast.qld.gov.au/Development/Development-Tools-and-Guidelines/sunshine-coast-mapping-mymaps",
+   "da": "https://www.sunshinecoast.qld.gov.au/development-advice/development-i"
   },
   {
    "name": "Tablelands",
@@ -395,7 +415,8 @@
   {
    "name": "Toowoomba",
    "website": "https://www.tr.qld.gov.au/",
-   "map": "https://www.tr.qld.gov.au/Council/Mapping/Online-mapping"
+   "map": "https://www.tr.qld.gov.au/Council/Mapping/Online-mapping",
+   "da": "https://developmenti.tr.qld.gov.au/"
   },
   {
    "name": "Torres",
@@ -420,7 +441,8 @@
   {
    "name": "Western Downs",
    "website": "https://www.wdrc.qld.gov.au/",
-   "map": null
+   "map": null,
+   "da": "https://developmenti.wdrc.qld.gov.au/"
   },
   {
    "name": "Whitsunday",

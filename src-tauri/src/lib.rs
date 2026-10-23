@@ -485,6 +485,31 @@ async fn chat(
 }
 
 #[tauri::command]
+async fn assistant(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    pid: Option<i64>,
+    history: Vec<ChatIn>,
+    on_token: Channel<String>,
+) -> Result<(), String> {
+    let cfg = load_settings(&app);
+    let model = active_model(&app)?;
+    let a = match pid {
+        Some(pid) => {
+            let db = state.db.clone();
+            Some(tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)??)
+        }
+        None => None,
+    };
+    let hist: Vec<rules::ChatMsg> = history.into_iter().map(|m| rules::ChatMsg { role: m.role, content: m.content }).collect();
+    let msgs = rules::assistant_messages(a.as_ref(), &hist);
+    let sink: ai::Sink = Arc::new(move |t: &str| {
+        let _ = on_token.send(t.to_string());
+    });
+    ai::generate(&cfg, model, state.llm.clone(), msgs, 900, sink).await
+}
+
+#[tauri::command]
 fn save_ai_settings(app: AppHandle, settings: ai::AiSettings) -> Result<(), String> {
     let mut s = settings;
     s.model = load_settings(&app).model; // built-in model choice is managed by set_model
@@ -578,6 +603,51 @@ fn save_text(path: String, content: String) -> Result<(), String> {
     fs::write(path, content).map_err(e)
 }
 
+/// Reads a backup file (.json only, max 20 MB).
+#[tauri::command]
+fn read_backup(path: String) -> Result<String, String> {
+    let p = PathBuf::from(&path);
+    if p.extension().and_then(|x| x.to_str()).map(|x| x.eq_ignore_ascii_case("json")) != Some(true) {
+        return Err("Only .json backup files can be restored".into());
+    }
+    if fs::metadata(&p).map_err(e)?.len() > 20_000_000 {
+        return Err("Backup file is too large".into());
+    }
+    fs::read_to_string(p).map_err(e)
+}
+
+// -- Batch check: read a user-picked .csv/.txt list of addresses --
+#[tauri::command]
+fn read_text_file(path: String) -> Result<String, String> {
+    let ok = PathBuf::from(&path)
+        .extension()
+        .and_then(|x| x.to_str())
+        .map(|x| matches!(x.to_ascii_lowercase().as_str(), "csv" | "txt"))
+        .unwrap_or(false);
+    if !ok {
+        return Err("Only .csv and .txt files can be read".into());
+    }
+    if fs::metadata(&path).map_err(e)?.len() > 2_000_000 {
+        return Err("File is too large".into());
+    }
+    fs::read_to_string(path).map_err(e)
+}
+
+/// Opens a web link in the person's default browser (no in-app window).
+#[tauri::command]
+fn open_external(url: String) -> Result<(), String> {
+    if !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err("Only web links can be opened".into());
+    }
+    #[cfg(target_os = "windows")]
+    let child = std::process::Command::new("explorer").arg(&url).spawn();
+    #[cfg(target_os = "macos")]
+    let child = std::process::Command::new("open").arg(&url).spawn();
+    #[cfg(all(unix, not(target_os = "macos")))]
+    let child = std::process::Command::new("xdg-open").arg(&url).spawn();
+    child.map(|_| ()).map_err(e)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -590,6 +660,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             status,
+            assistant,
+            open_external,
             import_datapack,
             download_datapack,
             search,
@@ -613,7 +685,9 @@ pub fn run() {
             import_model,
             set_model,
             delete_model,
-            save_text
+            save_text,
+            read_backup,
+            read_text_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running AI Town Planner");
