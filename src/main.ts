@@ -1829,3 +1829,46 @@ document.querySelectorAll<HTMLDialogElement>("dialog").forEach((d) => d.addEvent
 // ---- Assistant chat window ----
 $("botBtn").addEventListener("click", () => { ($("botWin") as HTMLElement).hidden = false; ($("botBtn") as HTMLElement).hidden = true; renderChat(); $("chatInput").focus(); });
 $("botClose").addEventListener("click", () => { ($("botWin") as HTMLElement).hidden = true; ($("botBtn") as HTMLElement).hidden = false; });
+
+// ---- Top menu bar and status bar ----
+function openSettings(sec?: string) {
+  refreshStatus();
+  const d = $("settings") as HTMLDialogElement;
+  if (!d.open) d.showModal();
+  if (sec) requestAnimationFrame(() => document.getElementById(sec)?.scrollIntoView({ block: "start" }));
+}
+const clickId = (id: string) => () => $(id).click();
+const setBaseTo = (k: string) => () => { ($("baseSel") as HTMLSelectElement).value = k; $("baseSel").dispatchEvent(new Event("change")); syncBase(); };
+type MI = [string, () => void] | "-";
+const MENUS: [string, MI[]][] = [
+  ["File", [["Back up my data…", () => openSettings("sset-backup")], ["Restore from backup…", () => openSettings("sset-backup")], "-", ["Batch check…", clickId("batchBtn")], ["Client PDF", clickId("footPdf")], "-", ["Report branding…", () => openSettings("sset-brand")], ["Data pack…", () => openSettings("sset-data")], ["Address search key…", () => openSettings("sset-search")]]],
+  ["AI", [["AI engine…", () => openSettings("sset-ai")], ["Built-in models…", () => openSettings("sset-models")], "-", ["Generate AI report", clickId("footReport")], ["Ask the assistant", () => { if (!($("botBtn") as HTMLElement).hidden) $("botBtn").click(); }]]],
+  ["Forms", [["Open DA forms", clickId("formsBtn")], ["Approvals", clickId("apprBtn")]]],
+  ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
+  ["Window", [["Full map on/off", () => setFull(!app.classList.contains("fullmap"))], "-", ["Plain map", setBaseTo("plain")], ["Street map", setBaseTo("street")], ["Aerial photo", setBaseTo("sat")], "-", ["Light / dark", clickId("themeBtn")], ["Reset panel widths", () => { ["--left", "--right"].forEach((v) => document.documentElement.style.removeProperty(v)); try { localStorage.removeItem("colLeft"); localStorage.removeItem("colRight"); } catch { /* storage unavailable */ } resizeMap(); }], "-", ["Settings…", () => openSettings()]]],
+];
+const mbar = $("menubar");
+MENUS.forEach(([name, items]) => {
+  const w = document.createElement("div"); w.className = "mn";
+  const b = document.createElement("button"); b.type = "button"; b.textContent = name;
+  const dd = document.createElement("div"); dd.className = "mdrop";
+  items.forEach((it) => {
+    if (it === "-") { dd.appendChild(document.createElement("hr")); return; }
+    const x = document.createElement("button"); x.type = "button"; x.textContent = it[0];
+    x.addEventListener("click", () => { closeMenus(); it[1](); });
+    dd.appendChild(x);
+  });
+  b.addEventListener("click", (e) => { e.stopPropagation(); const was = w.classList.contains("open"); closeMenus(); if (!was) w.classList.add("open"); });
+  b.addEventListener("mouseenter", () => { if (mbar.querySelector(".mn.open") && !w.classList.contains("open")) { closeMenus(); w.classList.add("open"); } });
+  w.append(b, dd); mbar.appendChild(w);
+});
+function closeMenus() { mbar.querySelectorAll(".mn.open").forEach((n) => n.classList.remove("open")); }
+document.addEventListener("click", closeMenus);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenus(); });
+function updateStatusBar() {
+  $("stSite").textContent = current ? `${current.parcel.address} · ${current.parcel.lotplan}` : "No site selected";
+  $("stPack").textContent = $("packInfo").textContent ?? "";
+}
+new MutationObserver(updateStatusBar).observe($("packInfo"), { childList: true, characterData: true, subtree: true });
+setInterval(updateStatusBar, 1500);
+updateStatusBar();

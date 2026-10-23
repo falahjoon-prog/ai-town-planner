@@ -6,6 +6,7 @@
     <title>PlanLens</title>
   </head>
   <body>
+    <nav class="menubar" id="menubar" aria-label="Main menu"></nav>
     <div class="app" id="app">
       <!-- Left column: name, logo and tools stacked -->
       <aside class="leftcol">
@@ -241,22 +242,22 @@
     <dialog id="settings">
       <form method="dialog" class="dlg">
         <div class="dlg-top"><h2>Settings</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
-        <h3>Data pack</h3>
+        <h3 id="sset-data">Data pack</h3>
         <p id="packDetail" class="meta"></p>
         <button type="button" id="downloadPack">Download data pack (about 400 MB)</button>
         <button type="button" id="importPack">Import data pack (.sqlite or .sqlite.gz)</button>
-        <h3>Report branding</h3>
+        <h3 id="sset-brand">Report branding</h3>
         <input id="brandCompany" placeholder="Company name (shown on the PDF report)" />
         <input id="brandBy" placeholder="Prepared by (your name)" />
         <div class="report-bar"><label class="ghost-file">Logo image <input id="brandLogo" type="file" accept="image/png,image/jpeg,image/svg+xml" /></label>
           <img id="brandLogoPrev" class="logo-prev" alt="" hidden /><button type="button" class="ghost" id="brandClear">Remove logo</button></div>
-        <h3>Map</h3>
+        <h3 id="sset-map">Map</h3>
         <select id="mapPick"></select>
         <p class="meta">Opens in your browser. With an address loaded, the map opens for that address; otherwise it opens the general map.</p>
-        <h3>Address search</h3>
+        <h3 id="sset-search">Address search</h3>
         <input id="googleKey" type="password" placeholder="Google Places API key (optional – better address search)" autocomplete="off" />
         <p class="meta" id="googleHint"></p>
-        <h3>AI engine</h3>
+        <h3 id="sset-ai">AI engine</h3>
         <div class="engine">
           <label><input type="radio" name="provider" value="builtin" /> Built-in model (offline)</label>
           <label><input type="radio" name="provider" value="ollama" /> Ollama on this PC (offline)</label>
@@ -279,10 +280,10 @@
         </div>
         <button type="button" id="saveAi">Save AI settings</button>
         <p class="meta" id="aiMsg"></p>
-        <h3>Backup</h3>
+        <h3 id="sset-backup">Backup</h3>
         <div class="row"><button type="button" class="ghost" id="backupBtn">Back up my data</button><button type="button" class="ghost" id="restoreBtn">Restore from backup</button></div>
         <p class="meta" id="backupMsg">Saves your sites, notes, branding, map choices and DA forms to one file.</p>
-        <h3>Built-in models</h3>
+        <h3 id="sset-models">Built-in models</h3>
         <div id="models"></div>
         <button type="button" class="ghost" id="importModel">Import a .gguf model file</button>
         <p class="meta">Models are downloaded once, then everything runs offline.</p>
@@ -340,5 +341,6 @@
     </dialog>
     <div id="printArea"></div>
     <script type="module" src="/src/main.ts"></script>
+    <footer class="statusbar" id="statusbar"><span id="stSite">No site selected</span><span id="stPack"></span></footer>
   </body>
 </html>
