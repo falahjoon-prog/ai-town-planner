@@ -439,6 +439,30 @@ function renderPotential() {
       <div class="meta">Lodge: ${f.form.lodge_url ? link(f.form.lodge_url, f.form.lodge) : esc(f.form.lodge)}</div></div>
       <button type="button" class="ghost" data-url="${esc(f.form.url)}" data-title="${esc(f.form.name)}">Open form</button></div>`)
     .join("");
+  renderChecklist(p);
+}
+
+// ---- Lodgement checklist (thread C): ticks are the user's own, saved per lot ----
+function renderChecklist(p: Pot) {
+  if (!current) return;
+  const pid = current.parcel.pid;
+  const key = `checklist:${pid}`;
+  const items = [
+    ...p.forms.map((f) => `Form: ${f.form.name}`),
+    "Site plan",
+    "Planning report",
+    "Owner's consent (if applicable)",
+    "Applicant details",
+  ];
+  let ticked: string[] = [];
+  try { ticked = JSON.parse(localStorage.getItem(key) ?? "[]"); } catch { /* ignore */ }
+  $("checklist").innerHTML = items
+    .map((t, i) => `<label class="mapitem"><span><input type="checkbox" data-i="${i}" ${ticked.includes(t) ? "checked" : ""}> ${esc(t)}</span></label>`)
+    .join("");
+  $("checklist").onchange = () => {
+    const on = [...document.querySelectorAll<HTMLInputElement>("#checklist input:checked")].map((el) => items[Number(el.dataset.i)]);
+    try { localStorage.setItem(key, JSON.stringify(on)); } catch { /* ignore */ }
+  };
 }
 
 $("useSel").addEventListener("change", loadPotential);
@@ -1139,6 +1163,55 @@ $("cmpGo").addEventListener("click", async () => {
     <tr><td>Level of assessment</td>${cell((r) => esc(r.p.use_fit?.rule?.level ?? "Choose a proposal type"))}</tr>
     <tr><td>Constraints</td>${cell((r) => r.a.flags.map((f) => `<span class="auth">${esc(f.rule.authority)}</span> ${esc(f.rule.title)}`).join("<br>") || "None mapped")}</tr>
   </tbody></table>`;
+});
+
+// ---- Batch address check (thread C) ----
+let batchCsv = "";
+const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+$("batchBtn").addEventListener("click", () => ($("batchDlg") as HTMLDialogElement).showModal());
+$("batchPick").addEventListener("click", async () => {
+  const path = await open({ multiple: false, filters: [{ name: "Address list", extensions: ["csv", "txt"] }] });
+  if (typeof path !== "string") return;
+  const out = $("batchOut");
+  let lines: string[];
+  try {
+    lines = (await invoke<string>("read_text_file", { path }))
+      .split(/\r?\n/)
+      .map((l) => l.trim().replace(/^"(.*)"$/, "$1").trim())
+      .filter(Boolean);
+  } catch (e) {
+    out.innerHTML = `<p class="err">${esc(e)}</p>`;
+    return;
+  }
+  if (lines.length && /^(input|address|lot ?\/? ?plan)\b/i.test(lines[0])) lines.shift();
+  if (!lines.length) { out.innerHTML = `<p class="meta">No lines found in that file.</p>`; return; }
+  ($("batchSave") as HTMLButtonElement).disabled = true;
+  const rows: string[][] = [["input", "matched address", "lot/plan", "area m2", "zone(s)", "number of constraints", "constraint titles"]];
+  const shown: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    out.innerHTML = `<p class="meta">Checking ${i + 1} of ${lines.length}…</p>${shown.join("")}`;
+    const q = lines[i];
+    try {
+      const h = (await invoke<Hit[]>("search", { q }))[0];
+      if (!h) throw new Error("no match");
+      const a = await invoke<Assessment>("assess", { pid: h.pid });
+      rows.push([q, a.parcel.address, a.parcel.lotplan, a.parcel.area_m2 != null ? String(Math.round(a.parcel.area_m2)) : "",
+        a.zones.map((z) => z.zone.name).join("; "), String(a.flags.length), a.flags.map((f) => f.rule.title).join("; ")]);
+      shown.push(`<div class="mapitem"><span><b>${esc(a.parcel.address || a.parcel.lotplan)}</b> <span class="meta">${esc(q)}</span></span><span class="meta">${a.flags.length} constraint(s)</span></div>`);
+    } catch {
+      rows.push([q, "", "", "", "", "", ""]);
+      shown.push(`<div class="mapitem"><span>${esc(q)}</span><span class="meta">no match</span></div>`);
+    }
+  }
+  batchCsv = rows.map((r) => r.map(csvCell).join(",")).join("\r\n") + "\r\n";
+  out.innerHTML = `<p class="meta">Done: ${lines.length} line(s) checked.</p>${shown.join("")}`;
+  ($("batchSave") as HTMLButtonElement).disabled = false;
+});
+$("batchSave").addEventListener("click", async () => {
+  if (!batchCsv) return;
+  const path = await save({ defaultPath: "Batch_address_check.csv", filters: [{ name: "CSV", extensions: ["csv"] }] });
+  if (!path) return;
+  try { await invoke("save_text", { path, content: batchCsv }); } catch (e) { alertMsg(e); }
 });
 
 // ---- Setbacks: rows come from knowledge/setbacks.json, only for zones and lot sizes it covers ----

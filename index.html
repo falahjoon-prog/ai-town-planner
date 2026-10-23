@@ -32,6 +32,7 @@
           <button id="mapsBtn">Maps</button>
           <button id="myMapBtn" title="Open the chosen map for this address (opens in your browser)">Open map</button>
           <button id="cmpBtn">Compare</button>
+          <button id="batchBtn" title="Check a list of addresses from a CSV or text file">Batch check</button>
           <button id="settingsBtn">Settings</button>
           <div class="tlabel railonly">Map style</div>
           <div class="seg railseg">
@@ -120,6 +121,7 @@
               <a href="#s-constraints">Constraints</a>
               <a href="#s-potential">Potential</a>
               <a href="#s-approvals">Approvals</a>
+              <a href="#s-checklist">Checklist</a>
               <a href="#s-forms">Forms</a>
             </nav>
           </header>
@@ -172,6 +174,14 @@
               <div class="sbody">
                 <div class="report-bar"><button type="button" class="ghost" id="daRegBtn">Open Council DA register (Development.i)</button></div>
                 <div class="meta">The address is copied. Paste it into Development.i's search to see applications and decisions on this lot and next door.</div>
+              </div>
+            </details>
+            <!-- Lodgement checklist (thread C) -->
+            <details class="sec" id="s-checklist">
+              <summary>Lodgement checklist</summary>
+              <div class="sbody">
+                <div id="checklist"></div>
+                <p class="meta">Tick items yourself as you prepare them. Nothing is ticked automatically. Saved per lot on this computer.</p>
               </div>
             </details>
             <details class="sec" id="s-forms">
@@ -297,6 +307,17 @@
         <div id="cmpPick" class="maplist"></div>
         <div class="report-bar"><button type="button" id="cmpGo">Compare</button></div>
         <div id="cmpOut"></div>
+      </form>
+    </dialog>
+    <!-- Batch check dialog (thread C) -->
+    <dialog id="batchDlg" class="wide">
+      <form method="dialog" class="dlg">
+        <div class="dlg-top">
+          <div class="dlg-row"><h2>Batch address check</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
+          <div class="report-bar"><button type="button" id="batchPick">Choose CSV or text file</button><button type="button" class="ghost" id="batchSave" disabled>Save results as CSV</button></div>
+          <p class="meta">One address or lot/plan per line (.csv or .txt). Each line is looked up in the data pack on this computer.</p>
+        </div>
+        <div id="batchOut"></div>
       </form>
     </dialog>
     <dialog id="apprDlg" class="wide">
