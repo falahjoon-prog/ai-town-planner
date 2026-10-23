@@ -353,6 +353,7 @@ async function loadSite(pid: number) {
   subOn = false; contOn = false; powerOn = false;
   toolUi("subBtn", false); toolUi("contBtn", false); toolUi("powerBtn", false);
   envOn = false; toolUi("envBtn", false);
+  resetSetbackTool();
   $("suburbOut").innerHTML = "";
   drawMap(a);
   loadPotential();
@@ -1217,12 +1218,18 @@ $("batchSave").addEventListener("click", async () => {
 // ---- Setbacks: rows come from knowledge/setbacks.json, only for zones and lot sizes it covers ----
 type SetbackSet = { title: string; min_area_m2: number; note: string; source: string; rows: { label: string; value: string; ref: string }[]; check: string };
 const SETBACKS = SETBACKS_DATA as Record<string, SetbackSet>;
+/** The setback set for this lot, only when its zone is covered and the lot is at least the set's minimum area. */
+function setbackSet(a: Assessment): SetbackSet | undefined {
+  const set = a.zones.map((z) => SETBACKS[z.zone.name]).find(Boolean);
+  const area = a.parcel.area_m2;
+  return set && area != null && area >= set.min_area_m2 ? set : undefined;
+}
 function renderSetbacks(a: Assessment) {
   const zones = a.zones.map((z) => z.zone.name);
-  const set = zones.map((z) => SETBACKS[z]).find(Boolean);
+  const set = setbackSet(a);
   const area = a.parcel.area_m2;
   const fact = `<button type="button" class="ghost" data-url="https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones">Open the City Plan fact sheet</button>`;
-  if (!set || area == null || area < set.min_area_m2) {
+  if (!set) {
     $("setbacks").innerHTML = `<div class="card"><div class="meta">Zone: ${esc(zones.join(", ") || "not identified")}${area != null ? ` · ${Math.round(area)} m²` : ""}</div>
       <p>Setback distances for this zone and lot size aren't in the app yet, so none are shown. Check with council.</p>${fact}</div>`;
     return;
@@ -1232,6 +1239,132 @@ function renderSetbacks(a: Assessment) {
     <p class="meta">${esc(set.note)}</p><p class="meta">${esc(set.check)}</p>
     <button type="button" class="ghost" data-url="${esc(set.source)}">Open the code</button> ${fact}</div>`;
 }
+
+// ==== Setbacks tool: buildable area inset from the lot by the ground-floor setbacks (indicative only) ====
+let setbackOn = false;
+let setbackMarkers: maplibregl.Marker[] = [];
+type XY = [number, number];
+const SETBACK_ROWS = { front: "Front, primary frontage (building wall)", side: "Side, ground floor or wall up to 4.5 m", rear: "Rear, ground floor or wall up to 4.5 m" };
+
+function clearSetbackLayer() {
+  setbackMarkers.forEach((m) => m.remove());
+  setbackMarkers = [];
+  if (map?.getLayer("setb")) { map.removeLayer("setb"); map.removeSource("setb"); }
+}
+function resetSetbackTool() {
+  setbackOn = false;
+  toolUi("setbackBtn", false);
+  setbackMarkers = []; // the map is rebuilt on a new site, which removes the layer
+}
+
+/** Buildable polygon (lon/lat ring) and labels, or a reason it can't be drawn. */
+function setbackEnvelope(a: Assessment, p: Pot): { ring: XY[]; labels: { ll: XY; text: string }[] } | string {
+  const set = setbackSet(a);
+  if (!set) return "Setback distances for this zone and lot size aren't in the app.";
+  const val = (label: string) => parseFloat(set.rows.find((r) => r.label === label)?.value ?? "");
+  const txt = (label: string) => set.rows.find((r) => r.label === label)?.value ?? "";
+  const d = { front: val(SETBACK_ROWS.front), side: val(SETBACK_ROWS.side), rear: val(SETBACK_ROWS.rear) };
+  if (!isFinite(d.front) || !isFinite(d.side) || !isFinite(d.rear)) return "The setback rows needed aren't in the data.";
+  const g = a.parcel.geom;
+  const polys: XY[][][] = g.type === "Polygon" ? [g.coordinates] : g.type === "MultiPolygon" ? g.coordinates : [];
+  const shoe = (r: XY[]) => r.reduce((t, c, i) => t + (r[(i + 1) % r.length][0] - c[0]) * (r[(i + 1) % r.length][1] + c[1]), 0) / 2;
+  const outer = polys.map((q) => q[0]).sort((x, y) => Math.abs(shoe(y)) - Math.abs(shoe(x)))[0];
+  if (!outer || outer.length < 4) return "No lot outline.";
+  const lat0 = (Math.min(...outer.map((c) => c[1])) + Math.max(...outer.map((c) => c[1]))) / 2;
+  const lon0 = (Math.min(...outer.map((c) => c[0])) + Math.max(...outer.map((c) => c[0]))) / 2;
+  const kx = Math.cos((lat0 * Math.PI) / 180) * 111320, ky = 111320;
+  const toM = (c: XY): XY => [(c[0] - lon0) * kx, (c[1] - lat0) * ky];
+  const toLL = (c: XY): XY => [lon0 + c[0] / kx, lat0 + c[1] / ky];
+  // Merge near-collinear segments exactly as dev.rs sides() does, so the edges line up with pot.edges.
+  const ring = outer.map(toM);
+  const sides: [XY, XY][] = [];
+  for (let i = 0; i + 1 < ring.length; i++) {
+    const [s0, s1] = [ring[i], ring[i + 1]];
+    if (Math.hypot(s1[0] - s0[0], s1[1] - s0[1]) < 0.05) continue;
+    const last = sides[sides.length - 1];
+    if (last) {
+      let diff = Math.abs(Math.atan2(last[1][0] - last[0][0], last[1][1] - last[0][1]) - Math.atan2(s1[0] - s0[0], s1[1] - s0[1]));
+      if (diff > Math.PI) diff = 2 * Math.PI - diff;
+      if (diff < (12 * Math.PI) / 180) { last[1] = s1; continue; }
+    }
+    sides.push([s0, s1]);
+  }
+  const n = sides.length;
+  if (n < 3 || n !== p.edges.length) return "The lot outline doesn't match the measured sides.";
+  for (let i = 0; i < n; i++) {
+    const m = toM(p.edges[i].mid), len = Math.hypot(sides[i][1][0] - sides[i][0][0], sides[i][1][1] - sides[i][0][1]);
+    if (Math.hypot(m[0] - (sides[i][0][0] + sides[i][1][0]) / 2, m[1] - (sides[i][0][1] + sides[i][1][1]) / 2) > 1.5 || Math.abs(len - p.edges[i].length_m) > 0.3) return "The lot outline doesn't match the measured sides.";
+  }
+  if (p.edges.some((e) => e.frontage == null)) return "The street frontage couldn't be identified.";
+  const fronts = p.edges.map((e, i) => (e.frontage ? i : -1)).filter((i) => i >= 0);
+  if (fronts.length !== 1) return "The front edge couldn't be identified reliably (corner lot or no clear street edge).";
+  const fi = fronts[0];
+  const cross = (i: number) => {
+    const u = [sides[i][1][0] - sides[i][0][0], sides[i][1][1] - sides[i][0][1]], v = [sides[(i + 1) % n][1][0] - sides[(i + 1) % n][0][0], sides[(i + 1) % n][1][1] - sides[(i + 1) % n][0][1]];
+    return u[0] * v[1] - u[1] * v[0];
+  };
+  const cs = sides.map((_, i) => cross(i));
+  if (!(cs.every((c) => c >= -1e-6) || cs.every((c) => c <= 1e-6))) return "The lot isn't a simple convex shape.";
+  const ccw = shoe(sides.map((sd) => sd[0])) < 0; // shoe() is the (x2-x1)(y2+y1) form: negative = counter-clockwise
+  const dirOf = (i: number): XY => { const l = Math.hypot(sides[i][1][0] - sides[i][0][0], sides[i][1][1] - sides[i][0][1]); return [(sides[i][1][0] - sides[i][0][0]) / l, (sides[i][1][1] - sides[i][0][1]) / l]; };
+  const normal = (i: number): XY => { const u = dirOf(i); return ccw ? [-u[1], u[0]] : [u[1], -u[0]]; }; // pointing into the lot
+  const fn = normal(fi);
+  const fa = sides[fi][0];
+  const depthOf = (i: number) => { const m: XY = [(sides[i][0][0] + sides[i][1][0]) / 2, (sides[i][0][1] + sides[i][1][1]) / 2]; return (m[0] - fa[0]) * fn[0] + (m[1] - fa[1]) * fn[1]; };
+  let ri = -1;
+  for (let i = 0; i < n; i++) if (i !== fi && (ri < 0 || depthOf(i) > depthOf(ri))) ri = i;
+  const fd = dirOf(fi), rd = dirOf(ri);
+  if (Math.abs(fd[0] * rd[0] + fd[1] * rd[1]) < Math.cos((30 * Math.PI) / 180)) return "No clear rear edge opposite the front.";
+  // Intersect the half-planes: clip the lot by each edge moved inward by its setback.
+  let poly: XY[] = sides.map((sd) => sd[0]);
+  const lines: { a: XY; nrm: XY; off: number }[] = [];
+  for (let i = 0; i < n; i++) {
+    const off = i === fi ? d.front : i === ri ? d.rear : d.side;
+    const nrm = normal(i);
+    lines.push({ a: sides[i][0], nrm, off });
+    const f = (q: XY) => (q[0] - sides[i][0][0]) * nrm[0] + (q[1] - sides[i][0][1]) * nrm[1] - off;
+    const out: XY[] = [];
+    for (let k = 0; k < poly.length; k++) {
+      const [c, nx] = [poly[k], poly[(k + 1) % poly.length]];
+      const [fc, fnx] = [f(c), f(nx)];
+      if (fc >= 0) out.push(c);
+      if ((fc >= 0) !== (fnx >= 0)) { const t = fc / (fc - fnx); out.push([c[0] + (nx[0] - c[0]) * t, c[1] + (nx[1] - c[1]) * t]); }
+    }
+    poly = out;
+    if (poly.length < 3) return "The setbacks leave no buildable area on this lot.";
+  }
+  if (Math.abs(shoe(poly)) < 1) return "The setbacks leave no buildable area on this lot.";
+  const labels: { ll: XY; text: string }[] = [];
+  lines.forEach((ln, i) => {
+    const on = poly.filter((q) => Math.abs((q[0] - ln.a[0]) * ln.nrm[0] + (q[1] - ln.a[1]) * ln.nrm[1] - ln.off) < 0.01);
+    if (on.length < 2) return;
+    const u = dirOf(i), t = (q: XY) => q[0] * u[0] + q[1] * u[1];
+    const [lo, hi] = [on.reduce((x, y) => (t(y) < t(x) ? y : x)), on.reduce((x, y) => (t(y) > t(x) ? y : x))];
+    if (Math.hypot(hi[0] - lo[0], hi[1] - lo[1]) < 1) return;
+    const kind = i === fi ? "front" : i === ri ? "rear" : "side";
+    labels.push({ ll: toLL([(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2]), text: `${kind} ${txt(SETBACK_ROWS[kind])}` });
+  });
+  return { ring: [...poly, poly[0]].map(toLL), labels };
+}
+
+function drawSetbacks() {
+  if (!map) return;
+  clearSetbackLayer();
+  if (!setbackOn) return setFloodUi(floodOn);
+  const res = current && pot ? setbackEnvelope(current, pot) : "Lot measurements aren't loaded yet.";
+  if (typeof res === "string") return setFloodUi(floodOn, `<b>Can't draw setbacks for this lot</b><div class="meta">${esc(res)}</div>`);
+  map.addSource("setb", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: res.ring } } });
+  map.addLayer({ id: "setb", type: "line", source: "setb", paint: { "line-color": "#0f5e4b", "line-width": 2, "line-dasharray": [3, 2] } });
+  for (const l of res.labels) {
+    const el = document.createElement("div");
+    el.className = "dim front";
+    el.textContent = l.text;
+    setbackMarkers.push(new maplibregl.Marker({ element: el }).setLngLat(l.ll).addTo(map));
+  }
+  setFloodUi(floodOn, `<b>Setbacks (indicative)</b><div class="meta">Ground-floor building wall setbacks from the Queensland Housing Code, applied to the measured lot. Verify with council before designing.</div>`);
+}
+$("setbackBtn").addEventListener("click", () => { setbackOn = !setbackOn; toolUi("setbackBtn", setbackOn); drawSetbacks(); });
+// ==== end Setbacks tool ====
 
 // ---- Layout: full map, map styles, side column resizing ----
 const app = $("app");
