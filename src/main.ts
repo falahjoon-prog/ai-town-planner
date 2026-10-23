@@ -708,8 +708,73 @@ function drawMap(a: Assessment) {
     m.addLayer({ id: "lot", type: "line", source: "lot", paint: { "line-color": "#111827", "line-width": 2.5 } });
     const b = bounds(a.parcel.geom);
     m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 40, duration: 0 });
+    m.on("click", (e) => measClick([e.lngLat.lng, e.lngLat.lat]));
+    m.on("contextmenu", (e) => { e.preventDefault(); measUndo(); });
   });
 }
+
+// ---- Measure distance / area ----
+let measMode: "" | "d" | "a" = "";
+let measPts: [number, number][] = [];
+let measMarks: maplibregl.Marker[] = [];
+const toM = (a: [number, number], b: [number, number]) => {
+  const R = 6371008.8, r = Math.PI / 180;
+  const dLat = (b[1] - a[1]) * r, dLon = (b[0] - a[0]) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a[1] * r) * Math.cos(b[1] * r) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+};
+function measArea(p: [number, number][]) {
+  const r = Math.PI / 180, R = 6371008.8, lat0 = p[0][1] * r;
+  const xy = p.map(([x, y]) => [(x - p[0][0]) * r * Math.cos(lat0) * R, (y - p[0][1]) * r * R]);
+  let s = 0;
+  xy.forEach((q, i) => { const n = xy[(i + 1) % xy.length]; s += q[0] * n[1] - n[0] * q[1]; });
+  return Math.abs(s) / 2;
+}
+function measDraw() {
+  const m = map; if (!m || !m.isStyleLoaded()) return;
+  measMarks.forEach((k) => k.remove()); measMarks = [];
+  const closed = measMode === "a" && measPts.length > 2;
+  const coords = closed ? [...measPts, measPts[0]] : measPts;
+  const data: any = { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: coords } };
+  if (m.getSource("meas")) (m.getSource("meas") as maplibregl.GeoJSONSource).setData(data);
+  else {
+    m.addSource("meas", { type: "geojson", data });
+    m.addLayer({ id: "meas", type: "line", source: "meas", paint: { "line-color": "#e11d48", "line-width": 3 } });
+    m.addSource("measp", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+    m.addLayer({ id: "measp", type: "circle", source: "measp", paint: { "circle-color": "#fff", "circle-stroke-color": "#e11d48", "circle-stroke-width": 2, "circle-radius": 4 } });
+  }
+  (m.getSource("measp") as maplibregl.GeoJSONSource).setData({ type: "FeatureCollection", features: measPts.map((c) => ({ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: c } })) });
+  let total = 0;
+  for (let i = 1; i < coords.length; i++) {
+    const d = toM(coords[i - 1], coords[i]); total += d;
+    const el = document.createElement("div"); el.className = "measlbl"; el.textContent = d.toFixed(2) + " m";
+    measMarks.push(new maplibregl.Marker({ element: el }).setLngLat([(coords[i - 1][0] + coords[i][0]) / 2, (coords[i - 1][1] + coords[i][1]) / 2]).addTo(m));
+  }
+  const out = $("measTxt");
+  out.textContent = !measPts.length ? (measMode === "a" ? "Click the corners of the area" : "Click points to measure")
+    : measMode === "a" ? (closed ? `Area ${measArea(measPts).toFixed(1)} m² · Perimeter ${total.toFixed(2)} m` : `Perimeter so far ${total.toFixed(2)} m`)
+    : `Total ${total.toFixed(2)} m`;
+}
+function measClick(ll: [number, number]) { if (!measMode) return; measPts.push(ll); measDraw(); }
+function measUndo() { if (!measMode) return; measPts.pop(); measDraw(); }
+function measReset() {
+  measPts = [];
+  measMarks.forEach((k) => k.remove()); measMarks = [];
+  if (map?.getLayer("measp")) { map.removeLayer("measp"); map.removeSource("measp"); }
+  if (map?.getLayer("meas")) { map.removeLayer("meas"); map.removeSource("meas"); }
+}
+function measSet(mode: "" | "d" | "a") {
+  measMode = measMode === mode ? "" : mode;
+  toolUi("measDBtn", measMode === "d"); toolUi("measABtn", measMode === "a");
+  measReset();
+  ($("measOut") as HTMLElement).hidden = !measMode;
+  document.querySelector(".maplibregl-canvas")?.classList.toggle("meas", !!measMode);
+  if (measMode) measDraw();
+}
+$("measDBtn").addEventListener("click", () => measSet("d"));
+$("measABtn").addEventListener("click", () => measSet("a"));
+$("measUndo").addEventListener("click", measUndo);
+$("measClear").addEventListener("click", () => { measPts = []; measDraw(); });
 
 // ---- Report (one tab per authority) ----
 function renderReport() {
@@ -1252,6 +1317,7 @@ function clearSetbackLayer() {
   if (map?.getLayer("setb")) { map.removeLayer("setb"); map.removeSource("setb"); }
 }
 function resetSetbackTool() {
+  measMode = ""; measPts = []; measMarks = []; toolUi("measDBtn", false); toolUi("measABtn", false); ($("measOut") as HTMLElement).hidden = true;
   setbackOn = false;
   toolUi("setbackBtn", false);
   setbackMarkers = []; // the map is rebuilt on a new site, which removes the layer

@@ -21,6 +21,8 @@
         <nav class="toolstack">
           <div class="tlabel">Map tools</div>
           <button id="dimBtn">Dimensions</button>
+          <button id="measDBtn" title="Click points on the map to measure a distance">Measure distance</button>
+          <button id="measABtn" title="Click points on the map to measure an area">Measure area</button>
           <button id="subBtn">Subdivision sketch</button>
           <button id="setbackBtn" title="Indicative buildable area from the setbacks">Setbacks</button>
           <button id="contBtn">Contours</button>
@@ -61,6 +63,7 @@
         </section>
         <div id="map" class="map"></div>
         <div id="legend" class="legend" hidden></div>
+        <div id="measOut" class="measout" hidden><span id="measTxt"></span> <button id="measUndo" type="button">Undo</button> <button id="measClear" type="button">Clear</button></div>
         <div class="bottombar">
           <div class="seg">
             <button data-base="plain" class="on">Plain</button>
