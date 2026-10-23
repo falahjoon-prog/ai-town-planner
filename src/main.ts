@@ -1492,3 +1492,6 @@ $("fvPrint").addEventListener("click", printForm);
 // Side panel footer shortcuts
 $("footReport").addEventListener("click", () => $("genBtn").click());
 $("footPdf").addEventListener("click", () => $("pdfBtn").click());
+
+// Clicking outside a window (on the dimmed backdrop) closes it.
+document.querySelectorAll<HTMLDialogElement>("dialog").forEach((d) => d.addEventListener("click", (ev) => { if (ev.target === d) d.close(); }));
