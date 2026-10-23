@@ -37,3 +37,9 @@ Common rules for every thread
 - Approval likelihood, timeframes, activity by company: needs approvals files from the owner (Gold Coast 12-month file is the candidate).
 - Infrastructure charges for all councils: research package, start after T3.
 - Watch service: needs a hosting and cost decision from the owner.
+
+### T1 report
+1) Files changed: src/main.ts (removed duplicate `let poly` in setbacks buildable-area code, TS2451); handoffs/threads.md.
+2) Work completed: fixed the only `tsc` error on feature/map-picker v0.4.2 head 678bd88. Targeted code review of rail/handles/autosave/PDF was not done in depth.
+3) Tests: `npx tsc --noEmit` clean; `npx vite build` OK. Cargo/Windows build left to CI.
+4) Remaining: CI result on the new head pending; Rust side and the UI items (rail, handles, autosave, focus text, PDF) not manually verified.

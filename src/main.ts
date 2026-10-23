@@ -1386,8 +1386,6 @@ function setbackEnvelope(a: Assessment, p: Pot, ov: Record<number, number> = {})
   for (let i = 0; i < n; i++) if (!fronts.includes(i) && (ri < 0 || depthOf(i) > depthOf(ri))) ri = i;
   const fd = dirOf(fi), rd = dirOf(ri);
   if (Math.abs(fd[0] * rd[0] + fd[1] * rd[1]) < Math.cos((30 * Math.PI) / 180)) return "No clear rear edge opposite the front.";
-  // Intersect the half-planes: clip the lot by each edge moved inward by its setback.
-  let poly: XY[] = sides.map((sd) => sd[0]);
   const kindOf = (i: number) => (fronts.includes(i) ? "front" : i === ri ? "rear" : "side");
   const std = (i: number) => (fronts.includes(i) ? d.front : i === ri ? d.rear : d.side);
   // Clip the lot by every edge moved inward by its setback.
