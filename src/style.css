@@ -1,7 +1,7 @@
 :root {
   --bg: #f7f5f0; --panel: #ffffff; --ink: #1c1f23; --muted: #6b6f76; --line: #e3dfd6;
   --accent: #0f5e4b; --accent-ink: #ffffff; --warn: #9a3412; --chip: #eef3f1;
-  --map: #eee9de; --left: clamp(180px, 14vw, 240px); --right: clamp(300px, 24vw, 420px);
+  --map: #eee9de; --left: clamp(140px, 10vw, 180px); --right: clamp(250px, 19vw, 330px);
   font: 13px/1.45 "Segoe UI", system-ui, -apple-system, sans-serif; color: var(--ink); background: var(--bg);
 }
 @media (prefers-color-scheme: dark) {
@@ -25,7 +25,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
 /* ---- Layout: left tools, map in the middle, right panel. Sides adapt to the window ---- */
 .app { position: fixed; inset: 0; }
-.leftcol { position: absolute; top: 12px; left: 12px; bottom: 12px; width: var(--left); z-index: 5; display: flex; flex-direction: column; gap: 10px; }
+.leftcol { position: absolute; top: 6px; left: 6px; bottom: 6px; width: var(--left); z-index: 5; display: flex; flex-direction: column; gap: 10px; }
 .logo { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; display: flex; align-items: center; gap: 10px; }
 .logo svg { width: 30px; height: 30px; flex: none; }
 .ltext b { font-size: 15px; letter-spacing: -.01em; display: block; }
@@ -38,7 +38,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .packinfo { color: var(--muted); font-size: 11.5px; padding: 0 4px; }
 .seg.railseg, .railonly { display: none; }
 
-.mapstage { position: absolute; top: 12px; left: calc(var(--left) + 24px); right: calc(var(--right) + 24px); bottom: 12px; min-width: 0; }
+.mapstage { position: absolute; top: 6px; left: calc(var(--left) + 20px); right: calc(var(--right) + 20px); bottom: 6px; min-width: 0; }
 .map { position: absolute; inset: 0; background: var(--map); overflow: hidden; border: 1px solid var(--line); border-radius: 12px; }
 .empty { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 20px; z-index: 1; }
 .empty h1 { color: var(--ink); font-size: 26px; letter-spacing: -.02em; margin: 0 0 8px; }
@@ -54,7 +54,9 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .seg button.on { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
 .fullbtn { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); font-weight: 600; border-radius: 10px; padding: 7px 12px; }
 
-.rightcol { position: absolute; top: 12px; right: 12px; bottom: 12px; width: var(--right); z-index: 6; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.rightcol { position: absolute; top: 6px; right: 6px; bottom: 6px; width: var(--right); z-index: 6; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.searchrow { display: flex; gap: 6px; align-items: center; }
+#themeBtn { flex: none; width: auto; padding: 6px 10px; font-size: 15px; line-height: 1; }
 .search { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; position: relative; }
 .results { list-style: none; margin: 8px 0 0; padding: 0; max-height: 40vh; overflow: auto; }
 .results:empty { display: none; }
@@ -83,11 +85,11 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .wrapbar { flex-wrap: wrap; }
 
 .grip { position: absolute; top: 50%; width: 6px; height: 56px; transform: translateY(-50%); border-radius: 4px; background: var(--line); cursor: col-resize; z-index: 7; }
-.grip.l { left: calc(var(--left) + 16px); }
-.grip.r { right: calc(var(--right) + 16px); }
+.grip.l { left: calc(var(--left) + 9px); }
+.grip.r { right: calc(var(--right) + 9px); }
 
 /* Full map: side panel hides, the tools become a slim rail, the map fills the rest */
-.app.fullmap .mapstage { left: 88px; right: 12px; top: 12px; bottom: 12px; }
+.app.fullmap .mapstage { left: 76px; right: 6px; top: 6px; bottom: 6px; }
 .app.fullmap .leftcol { width: 64px; }
 .app.fullmap .logo { background: transparent; border: 0; padding: 0; justify-content: center; }
 .app.fullmap .ltext, .app.fullmap .packinfo, .app.fullmap .toolstack > button:not(.railonly), .app.fullmap .tlabel:not(.railonly) { display: none; }
@@ -103,7 +105,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
 /* Forms page: takes the map and right column area; the left tools stay visible */
 .app.formsmode .rightcol, .app.formsmode .grip { display: none; }
-.app.formsmode .mapstage { right: 12px; }
+.app.formsmode .mapstage { right: 6px; }
 .app.formsmode #map, .app.formsmode .bottombar, .app.formsmode .legend, .app.formsmode .empty { display: none; }
 .formsview { position: absolute; inset: 0; display: grid; grid-template-columns: 290px minmax(0, 1fr) 320px; gap: 12px; }
 .fv-col { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-height: 0; display: flex; flex-direction: column; }
@@ -180,7 +182,6 @@ details summary { cursor: pointer; color: var(--muted); }
 .maplist { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 @media (max-width: 700px) { .maplist { grid-template-columns: 1fr; } }
 #cmpPick .mapitem { cursor: pointer; }
-#themeBtn { font-size: 13px; }
 
 /* Engine and AI settings */
 .engine { display: flex; flex-direction: column; gap: 4px; }
@@ -222,7 +223,7 @@ dialog.wide { width: min(820px, 94vw); }
 
 /* Narrow windows: keep both sides usable */
 @media (max-width: 900px) {
-  :root { --left: 150px; --right: 270px; }
+  :root { --left: 130px; --right: 240px; }
   .formsview { grid-template-columns: 240px minmax(0, 1fr); }
   .fv-help { display: none; }
 }

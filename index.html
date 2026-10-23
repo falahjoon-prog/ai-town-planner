@@ -33,7 +33,6 @@
           <button id="myMapBtn" title="Open the chosen map for this address (opens in your browser)">Open map</button>
           <button id="cmpBtn">Compare</button>
           <button id="settingsBtn">Settings</button>
-          <button id="themeBtn" title="Switch light / dark">◐ Light / dark</button>
           <div class="tlabel railonly">Map style</div>
           <div class="seg railseg">
             <button data-base="plain" class="on">Plain</button>
@@ -103,7 +102,10 @@
       <!-- Right column: address bar and side panel share the same edges -->
       <section class="rightcol">
         <div class="search">
-          <input id="q" type="search" placeholder="Address or lot/plan, e.g. 12 Smith Street Paddington" autocomplete="off" />
+          <div class="searchrow">
+            <input id="q" type="search" placeholder="Address or lot/plan, e.g. 12 Smith Street Paddington" autocomplete="off" />
+            <button type="button" class="ghost" id="themeBtn" title="Switch light / dark">◐</button>
+          </div>
           <ul id="results" class="results"></ul>
           <p class="hint" id="hint">Search runs fully offline against the installed data pack.</p>
         </div>

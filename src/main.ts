@@ -1187,7 +1187,7 @@ function drag(el: HTMLElement, side: "l" | "r") {
     e.preventDefault();
     el.setPointerCapture(e.pointerId);
     const move = (ev: PointerEvent) => {
-      const px = side === "l" ? clampN(ev.clientX - 12, 150, 360) : clampN(innerWidth - ev.clientX - 12, 260, 560);
+      const px = side === "l" ? clampN(ev.clientX - 6, 120, 320) : clampN(innerWidth - ev.clientX - 6, 220, 520);
       document.documentElement.style.setProperty(side === "l" ? "--left" : "--right", `${px}px`);
       resizeMap();
     };
