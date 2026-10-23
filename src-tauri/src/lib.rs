@@ -578,6 +578,23 @@ fn save_text(path: String, content: String) -> Result<(), String> {
     fs::write(path, content).map_err(e)
 }
 
+// -- Batch check: read a user-picked .csv/.txt list of addresses --
+#[tauri::command]
+fn read_text_file(path: String) -> Result<String, String> {
+    let ok = PathBuf::from(&path)
+        .extension()
+        .and_then(|x| x.to_str())
+        .map(|x| matches!(x.to_ascii_lowercase().as_str(), "csv" | "txt"))
+        .unwrap_or(false);
+    if !ok {
+        return Err("Only .csv and .txt files can be read".into());
+    }
+    if fs::metadata(&path).map_err(e)?.len() > 2_000_000 {
+        return Err("File is too large".into());
+    }
+    fs::read_to_string(path).map_err(e)
+}
+
 /// Opens a web link in the person's default browser (no in-app window).
 #[tauri::command]
 fn open_external(url: String) -> Result<(), String> {
@@ -629,7 +646,8 @@ pub fn run() {
             import_model,
             set_model,
             delete_model,
-            save_text
+            save_text,
+            read_text_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running AI Town Planner");
