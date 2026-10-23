@@ -3,127 +3,232 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Town Planner</title>
+    <title>PlanLens</title>
   </head>
   <body>
-    <header class="top">
-      <div class="brand"><span class="mark">◩</span> AI Town Planner <small>Brisbane</small></div>
-      <div class="pack" id="packInfo">No data pack</div>
-      <button class="ghost" id="themeBtn" title="Switch light / dark">◐</button>
-      <button class="ghost" id="cmpBtn">Compare</button>
-      <button class="ghost" id="myMapBtn" title="Open the chosen map for this address (opens in your browser)">Open map</button>
-      <button class="ghost" id="mapsBtn">Maps</button>
-      <button class="ghost" id="apprBtn" title="Development and building approvals by council">Approvals</button>
-      <button class="ghost" id="settingsBtn">Settings</button>
-    </header>
-    <div class="layout">
-      <aside class="side">
-        <input id="q" type="search" placeholder="Address or lot/plan, e.g. 12 Smith Street Paddington" autocomplete="off" />
-        <ul id="results" class="results"></ul>
-        <p class="hint" id="hint">Search runs fully offline against the installed data pack.</p>
+    <div class="app" id="app">
+      <!-- Left column: name, logo and tools stacked -->
+      <aside class="leftcol">
+        <div class="logo">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <rect width="120" height="120" rx="26" fill="#0f5e4b" />
+            <path d="M60 18 C40 18 28 32 28 50 C28 72 60 102 60 102 C60 102 92 72 92 50 C92 32 80 18 60 18 Z" fill="#3fb592" />
+            <path d="M46 56 L60 44 L74 56 L74 70 L46 70 Z" fill="#0f5e4b" />
+            <rect x="56" y="60" width="8" height="10" fill="#3fb592" />
+          </svg>
+          <div class="ltext"><b>PlanLens</b><small>Brisbane planning</small></div>
+        </div>
+        <nav class="toolstack">
+          <div class="tlabel">Map tools</div>
+          <button id="dimBtn">Dimensions</button>
+          <button id="subBtn">Subdivision sketch</button>
+          <button id="contBtn">Contours</button>
+          <button id="floodBtn">Flood map</button>
+          <button id="powerBtn">Power</button>
+          <button id="envBtn">3D envelope</button>
+          <div class="tlabel">Tools</div>
+          <button id="formsBtn" title="Fill in and download DA forms">Forms</button>
+          <button id="apprBtn" title="Development and building approvals by council">Approvals</button>
+          <button id="mapsBtn">Maps</button>
+          <button id="myMapBtn" title="Open the chosen map for this address (opens in your browser)">Open map</button>
+          <button id="cmpBtn">Compare</button>
+          <button id="settingsBtn">Settings</button>
+          <button id="themeBtn" title="Switch light / dark">◐ Light / dark</button>
+          <div class="tlabel railonly">Map style</div>
+          <div class="seg railseg">
+            <button data-base="plain" class="on">Plain</button>
+            <button data-base="street">Street</button>
+            <button data-base="sat">Aerial</button>
+          </div>
+          <button class="railonly fullbtn" id="fullBtnRail">Exit full map</button>
+        </nav>
+        <div class="packinfo" id="packInfo">No data pack</div>
       </aside>
-      <main class="main" id="main">
+
+      <!-- Map area: map in the middle, map styles and full-map toggle under it -->
+      <main class="mapstage" id="main">
         <section class="empty" id="empty">
-          <h1>Desktop planning assessment, offline</h1>
-          <ol class="steps">
-            <li><b>Search</b> for a Brisbane address or lot on plan.</li>
-            <li><b>Check</b> the zoning, overlays and constraints for that site.</li>
-            <li><b>Generate</b> an AI planner's report, or export a client PDF.</li>
-          </ol>
-          <p class="meta">Needs the data pack, which you can download in Settings.</p>
+          <div>
+            <h1>Desktop planning assessment, offline</h1>
+            <ol class="steps">
+              <li><b>Search</b> for a Brisbane address or lot on plan.</li>
+              <li><b>Check</b> the zoning, overlays and constraints for that site.</li>
+              <li><b>Generate</b> an AI planner's report, or export a client PDF.</li>
+            </ol>
+            <p class="meta">Needs the data pack, which you can download in Settings.</p>
+          </div>
         </section>
-        <section id="site" hidden>
-          <div class="site-head">
-            <div>
-              <h2 id="siteAddr"></h2>
-              <div class="meta" id="siteMeta"></div>
-              <button type="button" class="ghost" id="starBtn">☆ Save</button>
+        <div id="map" class="map"></div>
+        <div id="legend" class="legend" hidden></div>
+        <div class="bottombar">
+          <div class="seg">
+            <button data-base="plain" class="on">Plain</button>
+            <button data-base="street">Street</button>
+            <button data-base="sat">Aerial</button>
+          </div>
+          <button class="fullbtn" id="fullBtn" title="Hide the panels and show the map full screen">Full map</button>
+        </div>
+        <select id="baseSel" hidden>
+          <option value="plain">Plain map</option>
+          <option value="street">Street map</option>
+          <option value="sat">Aerial photo</option>
+        </select>
+
+        <!-- Forms page: replaces the map and panel while open -->
+        <section id="formsView" class="formsview" hidden>
+          <div class="fv-col fv-list">
+            <div class="fv-head"><b>Forms for this site</b><div class="meta">Download, fill in, then lodge with council</div></div>
+            <div class="fv-scroll" id="formList"></div>
+          </div>
+          <div class="fv-col fv-form">
+            <div class="fv-head"><b id="fvTitle">DA Form 1 – Development application details</b><div class="meta" id="fvMeta"></div></div>
+            <div class="fv-scroll" id="fvBody"></div>
+            <div class="fv-foot">
+              <button class="ghost" id="fvBack">Back to map</button>
+              <button class="ghost" id="fvPrint">Download filled form (PDF)</button>
             </div>
           </div>
-          <div class="grid">
-            <div class="map-wrap">
-              <div id="map" class="map"></div>
-              <select id="baseSel" class="base-sel" title="Base map">
-                <option value="plain">Plain map</option>
-                <option value="street">Street map</option>
-                <option value="sat">Aerial photo</option>
-              </select>
-              <div class="map-tools">
-                <button type="button" class="map-btn on" id="dimBtn">Dimensions</button>
-                <button type="button" class="map-btn" id="subBtn">Subdivision sketch</button>
-                <button type="button" class="map-btn" id="contBtn">Contours</button>
-                <button type="button" class="map-btn" id="powerBtn">Power</button>
-                <button type="button" class="map-btn" id="floodBtn">Flood map</button>
-                <button type="button" class="map-btn" id="envBtn">3D envelope</button>
-              </div>
-              <div id="legend" class="legend" hidden></div>
-            </div>
-            <div class="facts">
-              <h3>Zoning</h3>
-              <div id="zones"></div>
-              <h3>Constraints</h3>
-              <div id="flags"></div>
-              <details>
-                <summary id="ovSummary">All mapped overlays</summary>
-                <ul id="overlays" class="ovlist"></ul>
-              </details>
-            </div>
-          </div>
-          <div class="report-box pot-box">
-            <div class="pot-head">
-              <h3>Development potential</h3>
-              <label class="meta">Proposal type
-                <select id="useSel">
-                  <option value="general">General assessment</option>
-                  <option value="house">Dwelling house / secondary dwelling</option>
-                  <option value="dual">Dual occupancy (duplex)</option>
-                  <option value="md">Multiple dwellings (townhouses / apartments)</option>
-                  <option value="rol">Subdivision (reconfiguring a lot)</option>
-                  <option value="commercial">Shop / office / food and drink</option>
-                  <option value="industry">Industry / warehouse</option>
-                  <option value="datacentre">Data centre</option>
-                </select>
-              </label>
-            </div>
-            <div id="pot"></div>
-            <h3>Suburb report</h3>
-            <div class="report-bar"><button type="button" class="ghost" id="suburbBtn">Show suburb report</button></div>
-            <div id="suburbOut"></div>
-            <h3>Nearby approvals</h3>
-            <div class="report-bar"><button type="button" class="ghost" id="daRegBtn">Open Council DA register (Development.i)</button></div>
-            <div class="meta">The address is copied – paste it into Development.i's search to see applications and decisions on this lot and next door.</div>
-            <h3>Title &amp; notes</h3>
-            <div class="meta" id="titleLinks"></div>
-            <div class="meta">Buy the title search (the lot/plan is copied for you), then attach the PDF. The AI summarises easements, covenants and mortgages.</div>
-            <div class="report-bar"><button type="button" id="titleBtn">Attach title search PDF</button></div>
-            <article id="titleOut" class="report"></article>
-            <textarea id="siteNote" rows="3" placeholder="Your notes for this lot (saved on this PC)"></textarea>
-            <h3>Forms &amp; lodgement</h3>
-            <div id="forms"></div>
-            <div class="report-bar"><button type="button" id="formBtn">Draft DA Form 1 with AI</button><button type="button" id="letterBtn" class="ghost">Draft cover letter with AI</button><button type="button" id="prelodgeBtn" class="ghost">Pre-lodgement request with AI</button></div>
-          </div>
-          <div class="report-box">
-            <div class="report-bar">
-              <input id="question" placeholder="Optional: describe the proposal, e.g. 'dual occupancy' or '6-unit townhouse development'" />
-              <button id="genBtn">Generate planner report</button>
-              <button class="ghost" id="stopBtn" hidden>Stop</button>
-              <button class="ghost" id="pdfBtn" hidden>Save as PDF</button>
-              <button class="ghost" id="saveBtn" hidden>Save HTML</button>
-            </div>
-            <nav class="tabs" id="tabs"></nav>
-            <article id="report" class="report"></article>
-            <p class="disclaimer" id="disclaimer"></p>
-          </div>
-          <div class="chat-box">
-            <h3>Ask the planner</h3>
-            <div id="chatLog" class="chat-log"><p class="meta">Ask follow-up questions or test options, e.g. "What if I reduce it to 2 storeys?" or "How do I avoid the SARA referral?"</p></div>
-            <form id="chatForm" class="report-bar">
-              <input id="chatInput" placeholder="Type a question…" autocomplete="off" />
-              <button id="chatBtn">Send</button>
+          <div class="fv-col fv-help">
+            <div class="fv-head"><b>Form helper</b><div class="meta">Knows the part and question you are on</div></div>
+            <div class="where" id="fvWhere"></div>
+            <div class="chat-log fv-scroll" id="fvChat"><p class="meta">Ask about the question you are on, or what a term means. The helper doesn't tick declarations or fill in council's part.</p></div>
+            <form id="fvForm" class="fv-composer">
+              <input id="fvInput" placeholder="Ask about this question or part" autocomplete="off" />
+              <button id="fvSend">Send</button>
             </form>
           </div>
         </section>
       </main>
+
+      <!-- Right column: address bar and side panel share the same edges -->
+      <section class="rightcol">
+        <div class="search">
+          <input id="q" type="search" placeholder="Address or lot/plan, e.g. 12 Smith Street Paddington" autocomplete="off" />
+          <ul id="results" class="results"></ul>
+          <p class="hint" id="hint">Search runs fully offline against the installed data pack.</p>
+        </div>
+        <aside class="panel" id="site" hidden>
+          <header class="phead">
+            <h2 id="siteAddr"></h2>
+            <div class="meta" id="siteMeta"></div>
+            <button type="button" class="ghost" id="starBtn">☆ Save</button>
+            <nav class="jump">
+              <a href="#s-zoning">Zoning</a>
+              <a href="#s-setbacks">Setbacks</a>
+              <a href="#s-constraints">Constraints</a>
+              <a href="#s-potential">Potential</a>
+              <a href="#s-approvals">Approvals</a>
+              <a href="#s-forms">Forms</a>
+            </nav>
+          </header>
+          <div class="pbody">
+            <details class="sec" id="s-zoning" open>
+              <summary>Zoning</summary>
+              <div class="sbody" id="zones"></div>
+            </details>
+            <details class="sec" id="s-setbacks" open>
+              <summary>Setbacks</summary>
+              <div class="sbody" id="setbacks"></div>
+            </details>
+            <details class="sec" id="s-constraints" open>
+              <summary>Constraints</summary>
+              <div class="sbody">
+                <div id="flags"></div>
+                <details>
+                  <summary id="ovSummary">All mapped overlays</summary>
+                  <ul id="overlays" class="ovlist"></ul>
+                </details>
+              </div>
+            </details>
+            <details class="sec" id="s-potential" open>
+              <summary>Development potential</summary>
+              <div class="sbody">
+                <label class="meta">Proposal type
+                  <select id="useSel">
+                    <option value="general">General assessment</option>
+                    <option value="house">Dwelling house / secondary dwelling</option>
+                    <option value="dual">Dual occupancy (duplex)</option>
+                    <option value="md">Multiple dwellings (townhouses / apartments)</option>
+                    <option value="rol">Subdivision (reconfiguring a lot)</option>
+                    <option value="commercial">Shop / office / food and drink</option>
+                    <option value="industry">Industry / warehouse</option>
+                    <option value="datacentre">Data centre</option>
+                  </select>
+                </label>
+                <div id="pot"></div>
+              </div>
+            </details>
+            <details class="sec" id="s-suburb">
+              <summary>Suburb report</summary>
+              <div class="sbody">
+                <div class="report-bar"><button type="button" class="ghost" id="suburbBtn">Show suburb report</button></div>
+                <div id="suburbOut"></div>
+              </div>
+            </details>
+            <details class="sec" id="s-approvals">
+              <summary>Approvals nearby</summary>
+              <div class="sbody">
+                <div class="report-bar"><button type="button" class="ghost" id="daRegBtn">Open Council DA register (Development.i)</button></div>
+                <div class="meta">The address is copied. Paste it into Development.i's search to see applications and decisions on this lot and next door.</div>
+              </div>
+            </details>
+            <details class="sec" id="s-forms">
+              <summary>Forms &amp; lodgement</summary>
+              <div class="sbody">
+                <div id="forms"></div>
+                <div class="report-bar wrapbar">
+                  <button type="button" id="openFormBtn">Fill in DA Form 1</button>
+                  <button type="button" id="formBtn" class="ghost">Draft DA Form 1 with AI</button>
+                  <button type="button" id="letterBtn" class="ghost">Cover letter with AI</button>
+                  <button type="button" id="prelodgeBtn" class="ghost">Pre-lodgement request with AI</button>
+                </div>
+              </div>
+            </details>
+            <details class="sec" id="s-title">
+              <summary>Title &amp; notes</summary>
+              <div class="sbody">
+                <div class="meta" id="titleLinks"></div>
+                <div class="meta">Buy the title search (the lot/plan is copied for you), then attach the PDF. The AI summarises easements, covenants and mortgages.</div>
+                <div class="report-bar"><button type="button" id="titleBtn">Attach title search PDF</button></div>
+                <article id="titleOut" class="report"></article>
+                <textarea id="siteNote" rows="3" placeholder="Your notes for this lot (saved on this PC)"></textarea>
+              </div>
+            </details>
+            <details class="sec" id="s-report">
+              <summary>AI planner report</summary>
+              <div class="sbody">
+                <input id="question" placeholder="Optional: describe the proposal, e.g. 'dual occupancy' or '6-unit townhouse development'" />
+                <div class="report-bar">
+                  <button id="genBtn">Generate planner report</button>
+                  <button class="ghost" id="stopBtn" hidden>Stop</button>
+                  <button class="ghost" id="pdfBtn" hidden>Save as PDF</button>
+                  <button class="ghost" id="saveBtn" hidden>Save HTML</button>
+                </div>
+                <nav class="tabs" id="tabs"></nav>
+                <article id="report" class="report"></article>
+                <p class="disclaimer" id="disclaimer"></p>
+              </div>
+            </details>
+            <details class="sec" id="s-chat">
+              <summary>Ask the planner</summary>
+              <div class="sbody">
+                <div id="chatLog" class="chat-log"><p class="meta">Ask follow-up questions or test options, e.g. "What if I reduce it to 2 storeys?" or "How do I avoid the SARA referral?"</p></div>
+                <form id="chatForm" class="report-bar">
+                  <input id="chatInput" placeholder="Type a question…" autocomplete="off" />
+                  <button id="chatBtn">Send</button>
+                </form>
+              </div>
+            </details>
+          </div>
+          <div class="panelfoot">
+            <button type="button" class="primary" id="footReport">Generate AI report</button>
+            <button type="button" class="ghost" id="footPdf">Client PDF</button>
+          </div>
+        </aside>
+      </section>
+
+      <div class="grip l" id="gripL" title="Drag to resize the left column"></div>
+      <div class="grip r" id="gripR" title="Drag to resize the right panel"></div>
     </div>
 
     <dialog id="settings">
@@ -207,7 +312,7 @@
         <div id="stateMaps" class="maplist"></div>
         <h3>Councils</h3>
         <div id="councilMaps" class="maplist"></div>
-        <p class="meta">Opens inside the app (needs internet). "Website" links go to the council's site where its planning scheme and mapping are listed.</p>
+        <p class="meta">Opens in your browser. "Website" links go to the council's site where its planning scheme and mapping are listed.</p>
       </form>
     </dialog>
     <div id="printArea"></div>

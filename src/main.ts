@@ -4,6 +4,7 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { marked } from "marked";
 import MAPS from "./maps.json";
+import FORMS from "../src-tauri/knowledge/forms.json";
 import "./style.css";
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string };
@@ -332,6 +333,7 @@ async function loadSite(pid: number) {
         .map((f) => `<div class="flag"><span class="auth">${esc(AUTH[f.rule.authority] ?? f.rule.authority)}</span> <b>${esc(f.rule.title)}</b><div class="meta">${esc(f.rule.code)}</div><p>${esc(f.rule.note)}</p></div>`)
         .join("")
     : `<p class="meta">No overlay constraints mapped on this lot.</p>`;
+  renderSetbacks(a);
   $("ovSummary").textContent = `All mapped layers (${a.overlays.length})`;
   $("overlays").innerHTML = a.overlays
     .map(
@@ -438,8 +440,8 @@ function renderPotential() {
 }
 
 $("useSel").addEventListener("change", loadPotential);
-// Links inside the potential/forms panels open in an in-app window.
-document.querySelector(".pot-box")!.addEventListener("click", (ev) => {
+// Every link in the side panel opens in the browser.
+document.querySelector(".panel")!.addEventListener("click", (ev) => {
   const el = (ev.target as HTMLElement).closest("[data-url]") as HTMLElement | null;
   if (!el) return;
   ev.preventDefault();
@@ -1132,3 +1134,350 @@ $("cmpGo").addEventListener("click", async () => {
     <tr><td>Constraints</td>${cell((r) => r.a.flags.map((f) => `<span class="auth">${esc(f.rule.authority)}</span> ${esc(f.rule.title)}`).join("<br>") || "None mapped")}</tr>
   </tbody></table>`;
 });
+
+// ---- Setbacks: shown only when the zone's distances are in the data. None are loaded yet. ----
+function renderSetbacks(a: Assessment) {
+  const zones = a.zones.map((z) => z.zone.name).join(", ") || "not identified";
+  $("setbacks").innerHTML = `<div class="card"><div class="meta">Zone: ${esc(zones)}</div>
+    <p>Setback distances for this zone aren't in the app yet, so none are shown.</p>
+    <p class="meta">Check the dwelling house and zone provisions in City Plan before you design.</p>
+    <button type="button" class="ghost" data-url="https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones">Open the City Plan fact sheet</button></div>`;
+}
+
+// ---- Layout: full map, map styles, side column resizing ----
+const app = $("app");
+const clampN = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+function resizeMap() {
+  requestAnimationFrame(() => map?.resize());
+}
+function setFull(on: boolean) {
+  app.classList.toggle("fullmap", on);
+  resizeMap();
+}
+$("fullBtn").addEventListener("click", () => setFull(true));
+$("fullBtnRail").addEventListener("click", () => setFull(false));
+window.addEventListener("resize", resizeMap);
+
+function syncBase() {
+  document.querySelectorAll<HTMLElement>(".seg [data-base]").forEach((b) => b.classList.toggle("on", b.dataset.base === baseKind()));
+}
+document.querySelectorAll<HTMLElement>(".seg [data-base]").forEach((b) =>
+  b.addEventListener("click", () => {
+    const sel = $("baseSel") as HTMLSelectElement;
+    sel.value = b.dataset.base!;
+    sel.dispatchEvent(new Event("change"));
+    syncBase();
+  })
+);
+syncBase();
+
+function drag(el: HTMLElement, side: "l" | "r") {
+  el.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    const move = (ev: PointerEvent) => {
+      const px = side === "l" ? clampN(ev.clientX - 12, 150, 360) : clampN(innerWidth - ev.clientX - 12, 260, 560);
+      document.documentElement.style.setProperty(side === "l" ? "--left" : "--right", `${px}px`);
+      resizeMap();
+    };
+    el.addEventListener("pointermove", move);
+    el.addEventListener("pointerup", () => el.removeEventListener("pointermove", move), { once: true });
+  });
+}
+drag($("gripL"), "l");
+drag($("gripR"), "r");
+
+// ---- Forms page: DA Form 1 (Queensland, version 1.3), numbered as on the PDF ----
+type FItem = { id: string; n: string; q: string; t: "text" | "area" | "radio" | "check" | "note"; o?: string[] };
+const FORM_PARTS: { title: string; items: FItem[] }[] = [
+  { title: "Applicant details", items: [
+    { id: "ap_name", n: "1)", q: "Applicant name(s) (individual or company full name)", t: "text" },
+    { id: "ap_contact", n: "1)", q: "Contact name (companies only)", t: "text" },
+    { id: "ap_postal", n: "1)", q: "Postal address (PO Box or street address)", t: "text" },
+    { id: "ap_suburb", n: "1)", q: "Suburb", t: "text" },
+    { id: "ap_postcode", n: "1)", q: "Postcode", t: "text" },
+    { id: "ap_phone", n: "1)", q: "Contact number", t: "text" },
+    { id: "ap_email", n: "1)", q: "Email address (optional)", t: "text" },
+    { id: "ap_mobile", n: "1)", q: "Mobile number (optional)", t: "text" },
+    { id: "ap_ref", n: "1)", q: "Applicant's reference number (if applicable)", t: "text" },
+    { id: "own", n: "2.1)", q: "Is written consent of the owner required for this application?", t: "radio", o: ["Yes – consent attached", "No – go to Part 2"] },
+  ] },
+  { title: "Location details", items: [
+    { id: "loc_no", n: "3.1)", q: "Street number", t: "text" },
+    { id: "loc_unit", n: "3.1)", q: "Unit number (if any)", t: "text" },
+    { id: "loc_street", n: "3.1)", q: "Street name and type", t: "text" },
+    { id: "loc_suburb", n: "3.1)", q: "Suburb", t: "text" },
+    { id: "loc_postcode", n: "3.1)", q: "Postcode", t: "text" },
+    { id: "loc_lot", n: "3.1)", q: "Lot number", t: "text" },
+    { id: "loc_plan", n: "3.1)", q: "Plan type and number (e.g. SP, RP)", t: "text" },
+    { id: "loc_lga", n: "3.1)", q: "Local government area", t: "text" },
+    { id: "n32", n: "3.2)", q: "Coordinates: only for remote sites or land over water. Leave blank for most lots.", t: "note" },
+    { id: "addl", n: "3.3)", q: "Additional premises", t: "radio", o: ["Not required", "Attached in a schedule"] },
+    { id: "n4", n: "4)", q: "Water body, port land, tidal area, airport, EMR or CLR. Check each item against the PDF form. Nothing is pre-ticked.", t: "note" },
+    { id: "ease", n: "5)", q: "Existing easements over the premises?", t: "radio", o: ["Yes – all easement plans attached", "No"] },
+  ] },
+  { title: "Development details", items: [
+    { id: "t1", n: "6.1)", q: "a) Type of development (tick one)", t: "radio", o: ["Material change of use", "Reconfiguring a lot", "Operational work", "Building work"] },
+    { id: "ap1", n: "6.1)", q: "b) Approval type (tick one)", t: "radio", o: ["Development permit", "Preliminary approval", "Preliminary approval that includes a variation approval"] },
+    { id: "lv1", n: "6.1)", q: "c) Level of assessment (check the zone's assessment table)", t: "radio", o: ["Code assessment", "Impact assessment (requires public notification)"] },
+    { id: "desc1", n: "6.1)", q: "d) Brief description of the proposal", t: "area" },
+    { id: "plans1", n: "6.1)", q: "e) Relevant plans of the proposed development are attached", t: "check" },
+    { id: "n62", n: "6.2–6.3)", q: "Second aspect and additional aspects: leave blank unless there is more than one type of development.", t: "note" },
+    { id: "q7_mcu", n: "7)", q: "Material change of use (complete Division 1)", t: "check" },
+    { id: "q7_rol", n: "7)", q: "Reconfiguring a lot (complete Division 2)", t: "check" },
+    { id: "q7_ops", n: "7)", q: "Operational work (complete Division 3)", t: "check" },
+    { id: "q7_bw", n: "7)", q: "Building work (complete DA Form 2 – Building work details)", t: "check" },
+    { id: "mcu_desc", n: "8.1)", q: "Division 1: describe the proposed use, its planning scheme definition, dwelling units and gross floor area (m²)", t: "area" },
+    { id: "mcu_exist", n: "8.2)", q: "Does the proposed use involve existing buildings on the premises?", t: "radio", o: ["Yes", "No"] },
+    { id: "ex_lots", n: "9.1)", q: "Division 2: total number of existing lots making up the premises", t: "text" },
+    { id: "rol_sub", n: "9.2)", q: "Subdivision (complete question 10)", t: "check" },
+    { id: "rol_agr", n: "9.2)", q: "Dividing land into parts by agreement (complete question 11)", t: "check" },
+    { id: "rol_bnd", n: "9.2)", q: "Boundary realignment (complete question 12)", t: "check" },
+    { id: "rol_acc", n: "9.2)", q: "Creating or changing an easement giving access from a constructed road (complete question 13)", t: "check" },
+    { id: "sub_res", n: "10.1)", q: "Number of residential lots created", t: "text" },
+    { id: "sub_com", n: "10.1)", q: "Number of commercial lots created", t: "text" },
+    { id: "sub_ind", n: "10.1)", q: "Number of industrial lots created", t: "text" },
+    { id: "sub_oth", n: "10.1)", q: "Other lots created (specify use and number)", t: "text" },
+    { id: "staged", n: "10.2)", q: "Will the subdivision be staged?", t: "radio", o: ["Yes – give stage details", "No"] },
+    { id: "stages", n: "10.2)", q: "If staged: how many stages, and which stage(s) this application covers", t: "text" },
+    { id: "bnd_area", n: "12)", q: "Boundary realignment: current and proposed lot areas (m²) and the reason", t: "area" },
+    { id: "easem", n: "13)", q: "Easements changed or proposed: existing or proposed, width (m), length (m), purpose, and the lot(s) benefited (attach a schedule if more than two)", t: "area" },
+    { id: "ops_nature", n: "14.1)", q: "Division 3: nature of the operational work (e.g. road, drainage, stormwater, landscaping)", t: "text" },
+    { id: "ops_lots", n: "14.2)", q: "Is the operational work necessary to create new lots?", t: "radio", o: ["Yes", "No"] },
+    { id: "ops_lot_n", n: "14.2)", q: "If yes: number of new lots", t: "text" },
+    { id: "ops_value", n: "14.3)", q: "Monetary value of the operational work, including GST, materials and labour ($)", t: "text" },
+  ] },
+  { title: "Assessment manager details", items: [
+    { id: "assessor", n: "15)", q: "Assessment manager", t: "text" },
+    { id: "superseded", n: "16)", q: "Has council agreed to apply a superseded planning scheme?", t: "radio", o: ["Yes – decision notice attached", "No"] },
+  ] },
+  { title: "Referral details", items: [
+    { id: "referral", n: "17)", q: "Does the application include aspects with referral requirements? (check the map layers, then confirm)", t: "radio", o: ["No – no referral requirements, go to Part 6", "Yes – tick the referral matters on the PDF form"] },
+    { id: "ref_resp", n: "18)", q: "Has any referral agency provided a referral response?", t: "radio", o: ["Yes – responses attached", "No"] },
+  ] },
+  { title: "Information request", items: [
+    { id: "info", n: "19)", q: "Information request under Part 3 of the DA Rules", t: "radio", o: ["I agree to receive an information request if needed", "I do not agree"] },
+  ] },
+  { title: "Further details", items: [
+    { id: "assoc", n: "20)", q: "Are there associated development applications or current approvals?", t: "radio", o: ["Yes – give details", "No"] },
+    { id: "ql", n: "21)", q: "Portable long service leave levy (building or operational work over $150,000 excluding GST)", t: "radio", o: ["Paid – receipt attached", "Will be paid before approval", "Not applicable (under $150,000 excl GST)"] },
+    { id: "show", n: "22)", q: "Is this application in response to a show cause or enforcement notice?", t: "radio", o: ["Yes – notice attached", "No"] },
+    { id: "n23", n: "23)", q: "Further legislative requirements: 16 yes/no questions (environmentally relevant activities, hazardous chemicals, native vegetation, offsets, koala habitat, water, waterways, marine, quarry, referable dams, tidal works, heritage, brothels, state roads, walkable neighbourhoods). Answer each one on the PDF form. Most house and subdivision applications answer No.", t: "note" },
+  ] },
+  { title: "Checklist and applicant declaration", items: [
+    { id: "c_assess", n: "24)", q: "Assessment manager identified (question 15)", t: "radio", o: ["Yes", "No"] },
+    { id: "c_bw", n: "24)", q: "Building work parts of DA Form 2 completed", t: "radio", o: ["Yes", "Not applicable"] },
+    { id: "c_report", n: "24)", q: "Supporting information and planning report attached", t: "radio", o: ["Yes", "No"] },
+    { id: "c_plans", n: "24)", q: "Relevant plans attached", t: "radio", o: ["Yes", "No"] },
+    { id: "c_ql", n: "24)", q: "QLeave levy paid, or to be paid before a development permit is issued", t: "radio", o: ["Yes", "Not applicable"] },
+    { id: "decl1", n: "25)", q: "I declare that all information in this development application is true and correct", t: "check" },
+    { id: "decl2", n: "25)", q: "I consent to receive electronic communications from council and referral agencies (Electronic Transactions Act 2001)", t: "check" },
+    { id: "n25", n: "25)", q: "You tick the declaration yourself. The app never ticks it.", t: "note" },
+  ] },
+  { title: "For council use only", items: [
+    { id: "n9", n: "Part 9", q: "Leave blank. Council completes this part.", t: "note" },
+  ] },
+];
+
+// Values filled from the site and proposal. Anything the user has answered overrides these.
+function prefill(): Record<string, string> {
+  const rol = val("useSel") === "rol";
+  const out: Record<string, string> = {
+    t1: rol ? "Reconfiguring a lot" : "Material change of use",
+    ap1: "Development permit",
+    q7_rol: rol ? "1" : "",
+    q7_mcu: rol ? "" : "1",
+    rol_sub: rol ? "1" : "",
+    ex_lots: "1",
+    own: "No",
+    addl: "Not required",
+    ease: "No",
+    staged: "No",
+    assessor: "Brisbane City Council",
+    loc_lga: "Brisbane City Council",
+    superseded: "No",
+    ref_resp: "No",
+    assoc: "No",
+    ql: "Not applicable (under $150,000 excl GST)",
+    show: "No",
+    c_assess: "Yes",
+    c_bw: "Not applicable",
+    c_ql: "Not applicable",
+    desc1: val("question"),
+  };
+  const p = current?.parcel;
+  if (p) {
+    const m = /^(\S+)\s+(.+?),\s*(.+?)\s+QLD\s+(\d{4})/.exec(p.address ?? "");
+    if (m) Object.assign(out, { loc_no: m[1], loc_street: m[2], loc_suburb: m[3], loc_postcode: m[4] });
+    const lp = /^(\d+)([A-Z]+\d+)$/.exec(p.lotplan ?? "");
+    if (lp) Object.assign(out, { loc_lot: lp[1], loc_plan: lp[2] });
+  }
+  return out;
+}
+
+let formPid = 0;
+let formVals: Record<string, string> = {};
+let fvCtx = { part: "", n: "", q: "" };
+let fvHistory: { role: string; content: string }[] = [];
+const formKey = (pid: number) => `daform1:${pid}`;
+
+function fieldHtml(it: FItem): string {
+  const v = formVals[it.id] ?? "";
+  const head = it.t === "check" || it.t === "note" ? "" : `<div class="fq"><span>${esc(it.n)}</span>${esc(it.q)}</div>`;
+  let body = "";
+  if (it.t === "text") body = `<input type="text" data-k="${it.id}" value="${esc(v)}" />`;
+  else if (it.t === "area") body = `<textarea data-k="${it.id}">${esc(v)}</textarea>`;
+  else if (it.t === "radio")
+    body = `<div class="fopts">${(it.o ?? []).map((o) => `<label><input type="radio" name="${it.id}" data-k="${it.id}" value="${esc(o)}" ${v === o ? "checked" : ""} /> ${esc(o)}</label>`).join("")}</div>`;
+  else if (it.t === "check")
+    body = `<label><input type="checkbox" data-k="${it.id}" ${v === "1" ? "checked" : ""} /><span class="fq" style="margin:0"><span>${esc(it.n)}</span></span> ${esc(it.q)}</label>`;
+  else body = `<div class="fnote">${esc(it.q)}</div>`;
+  return `<div class="ff" data-n="${esc(it.n)}" data-q="${esc(it.q)}">${head}${body}</div>`;
+}
+
+function renderFormPage() {
+  if (!current) {
+    $("fvMeta").textContent = "";
+    $("fvBody").innerHTML = `<p class="meta">Search for an address first. The form is saved against that lot.</p>`;
+    return;
+  }
+  formPid = current.parcel.pid;
+  let saved: Record<string, string> = {};
+  try { saved = JSON.parse(localStorage.getItem(formKey(formPid)) ?? "null") ?? {}; } catch { /* storage unavailable */ }
+  formVals = { ...prefill(), ...saved };
+  $("fvMeta").textContent = `${current.parcel.address || current.parcel.lotplan} · Saved on this PC · version 1.3`;
+  $("fvBody").innerHTML =
+    FORM_PARTS.map((p, i) => `<h3 class="fpart-h">Part ${i + 1} – ${esc(p.title)}</h3>` + p.items.map(fieldHtml).join("")).join("") +
+    `<p class="fdone">Autosaved on this PC. Nothing is sent to council from here.</p>`;
+}
+
+function setWhere(ff: HTMLElement) {
+  let part = ff.previousElementSibling;
+  while (part && !part.classList.contains("fpart-h")) part = part.previousElementSibling;
+  fvCtx = { part: part?.textContent ?? "", n: ff.dataset.n ?? "", q: ff.dataset.q ?? "" };
+  $("fvWhere").innerHTML = `You are on <b>${esc(fvCtx.part)}</b>, question <b>${esc(fvCtx.n)}</b>: ${esc(fvCtx.q)}`;
+}
+
+function saveField(ev: Event) {
+  const el = ev.target as HTMLInputElement | HTMLTextAreaElement;
+  const k = el.dataset.k;
+  if (!k) return;
+  formVals[k] = el instanceof HTMLInputElement && el.type === "checkbox" ? (el.checked ? "1" : "") : el.value;
+  try { localStorage.setItem(formKey(formPid), JSON.stringify(formVals)); } catch { /* storage unavailable */ }
+}
+$("fvBody").addEventListener("input", saveField);
+$("fvBody").addEventListener("change", saveField);
+$("fvBody").addEventListener("focusin", (ev) => {
+  const ff = (ev.target as HTMLElement).closest(".ff") as HTMLElement | null;
+  if (!ff) return;
+  document.querySelectorAll(".ff.focused").forEach((x) => x.classList.remove("focused"));
+  ff.classList.add("focused");
+  setWhere(ff);
+});
+
+function fvRender() {
+  const log = $("fvChat");
+  if (!fvHistory.length) {
+    log.innerHTML = `<p class="meta">Ask about the question you are on, or what a term means. The helper doesn't tick declarations or fill in council's part.</p>`;
+    return;
+  }
+  log.innerHTML = fvHistory.map((m) => `<div class="msg ${m.role}">${m.role === "user" ? esc(m.content) : (marked.parse(m.content || "…") as string)}</div>`).join("");
+  log.scrollTop = log.scrollHeight;
+}
+
+function formContext(): string {
+  const answers = FORM_PARTS.flatMap((p) => p.items)
+    .filter((it) => it.t !== "note" && formVals[it.id])
+    .map((it) => `${it.n} ${it.q}: ${it.t === "check" ? "ticked" : formVals[it.id]}`);
+  return [
+    "TASK: Help the applicant complete the Queensland DA Form 1 (version 1.3). Explain questions in plain words, say what to check with council or City Plan, and suggest wording when asked. Do not tick declarations, do not fill in Part 9, and do not say an answer is correct.",
+    `SITE: ${current?.parcel.address ?? ""} · ${current?.parcel.lotplan ?? ""}${current?.parcel.area_m2 ? ` · ${Math.round(current.parcel.area_m2)} m²` : ""}`,
+    `ZONES: ${current?.zones.map((z) => z.zone.name).join(", ") || "not identified"}`,
+    `CURRENT QUESTION: ${fvCtx.n} ${fvCtx.q} (${fvCtx.part})`,
+    "ANSWERS SO FAR:",
+    ...(answers.length ? answers : ["(none yet)"]),
+  ].join("\n");
+}
+
+$("fvForm").addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const input = $("fvInput") as HTMLInputElement;
+  const q = input.value.trim();
+  if (!q || !current) return;
+  input.value = "";
+  fvHistory.push({ role: "user", content: q });
+  const reply = { role: "assistant", content: "" };
+  fvHistory.push(reply);
+  fvRender();
+  const ch = new Channel<string>();
+  ch.onmessage = (t) => {
+    reply.content += t;
+    fvRender();
+  };
+  try {
+    await invoke("chat", { pid: current.parcel.pid, report: formContext(), history: fvHistory.slice(0, -1), onToken: ch });
+  } catch (e) {
+    reply.content = `**Error:** ${String(e)}`;
+    fvRender();
+  }
+});
+
+function renderFormList() {
+  const cards = (FORMS as { id: string; name: string; to?: string; when?: string; url?: string }[]).map(
+    (f) => `<div class="fv-item ${f.id === "daform1" ? "active" : ""}"><h3>${esc(f.name)}</h3>
+      <div class="meta">To: ${esc(f.to ?? "")}</div><div class="meta">${esc(f.when ?? "")}</div>
+      <div class="btnrow">${f.id === "daform1" ? `<button type="button" data-fill="1">Open and fill in</button>` : ""}${f.url ? `<button type="button" class="ghost" data-url="${esc(f.url)}">Download blank</button>` : ""}</div></div>`
+  );
+  cards.push(
+    `<div class="fv-item"><h3>Cover letter</h3><div class="meta">Drafted by AI from this site's details.</div><div class="btnrow"><button type="button" class="ghost" data-draft="letter">Draft with AI</button></div></div>`,
+    `<div class="fv-item"><h3>Pre-lodgement meeting request</h3><div class="meta">To: council planning team, before you lodge.</div><div class="btnrow"><button type="button" class="ghost" data-draft="prelodge">Draft with AI</button></div></div>`
+  );
+  $("formList").innerHTML = cards.join("");
+}
+$("formList").addEventListener("click", (ev) => {
+  const b = (ev.target as HTMLElement).closest("button") as HTMLButtonElement | null;
+  if (!b) return;
+  if (b.dataset.fill) renderFormPage();
+  else if (b.dataset.draft) draft(true, b.dataset.draft === "prelodge");
+  else if (b.dataset.url) openExternal(b.dataset.url);
+});
+
+function openFormView() {
+  app.classList.add("formsmode");
+  $("formsView").hidden = false;
+  renderFormList();
+  renderFormPage();
+  fvCtx = { part: "", n: "", q: "" };
+  $("fvWhere").innerHTML = `Click a question to get help on it.`;
+  fvHistory = [];
+  fvRender();
+  resizeMap();
+}
+function closeFormView() {
+  app.classList.remove("formsmode");
+  $("formsView").hidden = true;
+  resizeMap();
+}
+$("formsBtn").addEventListener("click", openFormView);
+$("openFormBtn").addEventListener("click", openFormView);
+$("fvBack").addEventListener("click", closeFormView);
+
+function printForm() {
+  if (!current) return;
+  const rows = FORM_PARTS.map(
+    (p, i) =>
+      `<h3 class="fpart">Part ${i + 1} – ${esc(p.title)}</h3>` +
+      p.items
+        .filter((it) => it.t !== "note")
+        .map((it) => `<div class="frow"><label>${esc(it.n)} ${esc(it.q)}</label><div class="fans">${esc(it.t === "check" ? (formVals[it.id] === "1" ? "Ticked" : "Not ticked") : formVals[it.id] ?? "")}</div></div>`)
+        .join("")
+  ).join("");
+  $("printArea").innerHTML =
+    `<h1>DA Form 1 – Answer sheet</h1><p class="meta">${esc(current.parcel.address || current.parcel.lotplan)}. Answers for the official DA Form 1 (version 1.3). Copy these onto the official form, or lodge the official form, and check it before you lodge.</p>` + rows;
+  window.print();
+}
+$("fvPrint").addEventListener("click", printForm);
+
+// Side panel footer shortcuts
+$("footReport").addEventListener("click", () => $("genBtn").click());
+$("footPdf").addEventListener("click", () => $("pdfBtn").click());
