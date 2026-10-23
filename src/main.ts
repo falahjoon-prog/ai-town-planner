@@ -1080,15 +1080,15 @@ const BASES: Record<string, { tiles: string[]; attribution: string; maxzoom: num
   plain: null,
   street: { tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], attribution: "© OpenStreetMap contributors", maxzoom: 19 },
   sat: {
-    tiles: ["https://spatial-img.information.qld.gov.au/arcgis/rest/services/Basemaps/LatestStateProgram_AllUsers/ImageServer/exportImage?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=jpg&f=image"],
-    attribution: "Imagery © State of Queensland; © Planet Labs",
-    maxzoom: 20,
+    tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+    attribution: "Imagery © Esri, Maxar, Earthstar Geographics",
+    maxzoom: 19,
   },
 };
 function baseKind(): string {
   let k: string | null = null;
   try { k = localStorage.getItem("base"); } catch { /* storage unavailable */ }
-  return k && k in BASES ? k : "plain";
+  return k && k in BASES ? k : "sat";
 }
 function setBase(kind: string) {
   const m = map;
@@ -1308,6 +1308,7 @@ function renderSetbacks(a: Assessment) {
 // ==== Setbacks tool: buildable area inset from the lot by the ground-floor setbacks (indicative only) ====
 let setbackOn = false;
 let setbackMarkers: maplibregl.Marker[] = [];
+let setbackNote = "";
 type XY = [number, number];
 const SETBACK_ROWS = { front: "Front, primary frontage (building wall)", side: "Side, ground floor or wall up to 4.5 m", rear: "Rear, ground floor or wall up to 4.5 m" };
 
@@ -1363,8 +1364,10 @@ function setbackEnvelope(a: Assessment, p: Pot): { ring: XY[]; labels: { ll: XY;
   }
   if (p.edges.some((e) => e.frontage == null)) return "The street frontage couldn't be identified.";
   const fronts = p.edges.map((e, i) => (e.frontage ? i : -1)).filter((i) => i >= 0);
-  if (fronts.length !== 1) return "The front edge couldn't be identified reliably (corner lot or no clear street edge).";
-  const fi = fronts[0];
+  if (!fronts.length) return "No street edge could be identified for this lot.";
+  const flen = (i: number) => p.edges[i].length_m;
+  const fi = fronts.reduce((x, y) => (flen(y) < flen(x) ? y : x)); // corner lot: the shorter street edge is treated as the primary frontage
+  const corner = fronts.length > 1;
   const cross = (i: number) => {
     const u = [sides[i][1][0] - sides[i][0][0], sides[i][1][1] - sides[i][0][1]], v = [sides[(i + 1) % n][1][0] - sides[(i + 1) % n][0][0], sides[(i + 1) % n][1][1] - sides[(i + 1) % n][0][1]];
     return u[0] * v[1] - u[1] * v[0];
@@ -1378,14 +1381,14 @@ function setbackEnvelope(a: Assessment, p: Pot): { ring: XY[]; labels: { ll: XY;
   const fa = sides[fi][0];
   const depthOf = (i: number) => { const m: XY = [(sides[i][0][0] + sides[i][1][0]) / 2, (sides[i][0][1] + sides[i][1][1]) / 2]; return (m[0] - fa[0]) * fn[0] + (m[1] - fa[1]) * fn[1]; };
   let ri = -1;
-  for (let i = 0; i < n; i++) if (i !== fi && (ri < 0 || depthOf(i) > depthOf(ri))) ri = i;
+  for (let i = 0; i < n; i++) if (!fronts.includes(i) && (ri < 0 || depthOf(i) > depthOf(ri))) ri = i;
   const fd = dirOf(fi), rd = dirOf(ri);
   if (Math.abs(fd[0] * rd[0] + fd[1] * rd[1]) < Math.cos((30 * Math.PI) / 180)) return "No clear rear edge opposite the front.";
   // Intersect the half-planes: clip the lot by each edge moved inward by its setback.
   let poly: XY[] = sides.map((sd) => sd[0]);
   const lines: { a: XY; nrm: XY; off: number }[] = [];
   for (let i = 0; i < n; i++) {
-    const off = i === fi ? d.front : i === ri ? d.rear : d.side;
+    const off = fronts.includes(i) ? d.front : i === ri ? d.rear : d.side;
     const nrm = normal(i);
     lines.push({ a: sides[i][0], nrm, off });
     const f = (q: XY) => (q[0] - sides[i][0][0]) * nrm[0] + (q[1] - sides[i][0][1]) * nrm[1] - off;
@@ -1407,9 +1410,10 @@ function setbackEnvelope(a: Assessment, p: Pot): { ring: XY[]; labels: { ll: XY;
     const u = dirOf(i), t = (q: XY) => q[0] * u[0] + q[1] * u[1];
     const [lo, hi] = [on.reduce((x, y) => (t(y) < t(x) ? y : x)), on.reduce((x, y) => (t(y) > t(x) ? y : x))];
     if (Math.hypot(hi[0] - lo[0], hi[1] - lo[1]) < 1) return;
-    const kind = i === fi ? "front" : i === ri ? "rear" : "side";
+    const kind = fronts.includes(i) ? "front" : i === ri ? "rear" : "side";
     labels.push({ ll: toLL([(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2]), text: `${kind} ${txt(SETBACK_ROWS[kind])}` });
   });
+  setbackNote = corner ? " Corner lot: both street edges use the front setback; a secondary frontage may need less, so check." : "";
   return { ring: [...poly, poly[0]].map(toLL), labels };
 }
 
@@ -1427,7 +1431,7 @@ function drawSetbacks() {
     el.textContent = l.text;
     setbackMarkers.push(new maplibregl.Marker({ element: el }).setLngLat(l.ll).addTo(map));
   }
-  setFloodUi(floodOn, `<b>Setbacks (indicative)</b><div class="meta">Ground-floor building wall setbacks from the Queensland Housing Code, applied to the measured lot. Verify with council before designing.</div>`);
+  setFloodUi(floodOn, `<b>Setbacks (indicative)</b><div class="meta">Ground-floor building wall setbacks from the Queensland Housing Code, applied to the measured lot. Verify with council before designing.${setbackNote}</div>`);
 }
 $("setbackBtn").addEventListener("click", () => { setbackOn = !setbackOn; toolUi("setbackBtn", setbackOn); drawSetbacks(); });
 // ==== end Setbacks tool ====
