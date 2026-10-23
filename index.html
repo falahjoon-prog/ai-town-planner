@@ -98,31 +98,39 @@
       </main>
 
       <!-- Right column: address bar and side panel share the same edges -->
-      <section class="rightcol">
-        <div class="search">
-          <div class="searchrow">
-            <input id="q" type="search" placeholder="Address or lot/plan, e.g. 12 Smith Street Paddington" autocomplete="off" />
-            <button type="button" class="ghost" id="botBtn" title="Ask the assistant">💬 Ask</button>
-            <button type="button" class="ghost themebtn" id="themeBtn" title="Switch light / dark">◐</button>
+      <section class="rightcol" id="rightcol">
+        <nav class="rail" id="rail" aria-label="Site sections">
+          <button type="button" data-sec="zoning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-6 9 6v11H3z"/><path d="M9 20v-6h6v6"/></svg>Zoning</button>
+          <button type="button" data-sec="setbacks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="8" y="8" width="8" height="8"/></svg>Setbacks</button>
+          <button type="button" data-sec="constraints"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg>Constraints</button>
+          <button type="button" data-sec="potential"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Potential</button>
+          <button type="button" data-sec="approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><path d="M9 12l2 2 4-4"/></svg>Approvals</button>
+          <button type="button" data-sec="checklist"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>Checklist</button>
+          <button type="button" data-sec="forms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 12h7M9 16h7"/></svg>Forms</button>
+          <span class="railgap"></span>
+          <button type="button" data-sec="assistant" id="botBtn" title="Ask the assistant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Assistant</button>
+        </nav>
+        <div class="rcontent">
+          <div class="search">
+            <div class="searchrow">
+              <input id="q" type="search" placeholder="Address or lot/plan, e.g. 12 Smith Street" autocomplete="off" />
+              <button type="button" class="ghost sqbtn" id="recentBtn" title="Saved and recent addresses" aria-label="Saved and recent addresses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+              <button type="button" class="ghost sqbtn" id="starBtn" title="Save this address" aria-label="Save this address">☆</button>
+              <button type="button" class="ghost sqbtn themebtn" id="themeBtn" title="Switch light / dark" aria-label="Switch light / dark">◐</button>
+            </div>
+            <ul id="results" class="results"></ul>
+            <p class="hint" id="hint">Search runs fully offline against the installed data pack.</p>
           </div>
-          <ul id="results" class="results"></ul>
-          <p class="hint" id="hint">Search runs fully offline against the installed data pack.</p>
-        </div>
-        <aside class="panel" id="site" hidden>
-          <header class="phead">
-            <h2 id="siteAddr"></h2>
-            <div class="meta" id="siteMeta"></div>
-            <button type="button" class="ghost" id="starBtn">☆ Save</button>
-            <nav class="jump">
-              <a href="#s-zoning">Zoning</a>
-              <a href="#s-setbacks">Setbacks</a>
-              <a href="#s-constraints">Constraints</a>
-              <a href="#s-potential">Potential</a>
-              <a href="#s-approvals">Approvals</a>
-              <a href="#s-checklist">Checklist</a>
-              <a href="#s-forms">Forms</a>
-            </nav>
-          </header>
+          <div class="sitehead" id="siteHead">
+            <div class="meta" id="siteMeta">No address loaded</div>
+            <div class="tiles">
+              <div class="tile"><small>Lot</small><b id="tLot">–</b></div>
+              <div class="tile"><small>Zone</small><b id="tZone">–</b></div>
+              <div class="tile"><small>Flags</small><b id="tFlags">–</b></div>
+            </div>
+          </div>
+          <aside class="panel" id="site" hidden>
+            <div class="sechead"><b id="secTitle">Zoning</b><span class="meta" id="secSub"></span></div>
           <div class="pbody">
             <details class="sec" id="s-zoning" open>
               <summary>Zoning</summary>
@@ -233,6 +241,7 @@
             <button id="chatBtn">Send</button>
           </form>
         </section>
+        </div>
       </section>
 
       <div class="grip l" id="gripL" title="Drag to resize the left column"></div>
