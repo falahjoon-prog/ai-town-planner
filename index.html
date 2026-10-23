@@ -19,17 +19,7 @@
           <div class="ltext"><b>PlanLens</b><small>Brisbane planning</small></div>
         </div>
         <nav class="toolstack">
-          <div class="tlabel">Map tools</div>
-          <button id="dimBtn">Dimensions</button>
-          <button id="measDBtn" title="Click points on the map to measure a distance">Measure distance</button>
-          <button id="measABtn" title="Click points on the map to measure an area">Measure area</button>
-          <button id="subBtn">Subdivision sketch</button>
-          <button id="setbackBtn" title="Indicative buildable area from the setbacks">Setbacks</button>
-          <button id="contBtn">Contours</button>
-          <button id="floodBtn">Flood map</button>
-          <button id="powerBtn">Power</button>
-          <button id="envBtn">3D envelope</button>
-          <div class="tlabel">Tools</div>
+                    <div class="tlabel">Tools</div>
           <button id="formsBtn" title="Fill in and download DA forms">Forms</button>
           <button id="apprBtn" title="Development and building approvals by council">Approvals</button>
           <button id="mapsBtn">Maps</button>
@@ -61,7 +51,18 @@
             <p class="meta">Needs the data pack, which you can download in Settings.</p>
           </div>
         </section>
+        <div class="maptools" id="mapTools"><button type="button" id="dimBtn" title="Dimensions" aria-label="Dimensions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 8v8M21 8v8"/></svg></button><button type="button" id="subBtn" title="Subdivision sketch" aria-label="Subdivision sketch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16"/><path d="M12 4v16"/></svg></button><button type="button" id="setbackBtn" title="Setbacks (indicative buildable area)" aria-label="Setbacks (indicative buildable area)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18"/><rect x="8" y="8" width="8" height="8" stroke-dasharray="2 2"/></svg></button><button type="button" id="measDBtn" title="Measure distance" aria-label="Measure distance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L20 4"/><circle cx="4" cy="20" r="2"/><circle cx="20" cy="4" r="2"/></svg></button><button type="button" id="measABtn" title="Measure area" aria-label="Measure area"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18l3-12 11 3-2 10z"/></svg></button><button type="button" id="contBtn" title="Contours" aria-label="Contours"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8c3-3 6 3 9 0s6-3 9 0M3 14c3-3 6 3 9 0s6-3 9 0M3 20c3-3 6 3 9 0s6-3 9 0"/></svg></button><button type="button" id="floodBtn" title="Flood map" aria-label="Flood map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg></button><button type="button" id="powerBtn" title="Power" aria-label="Power"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L5 14h6l-1 8 8-12h-6z"/></svg></button><button type="button" id="envBtn" title="3D envelope" aria-label="3D envelope"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v10l-8 4-8-4V7zM12 11v10M12 11L4 7M12 11l8-4"/></svg></button></div>
         <div id="map" class="map"></div>
+        <button type="button" id="botBtn" class="botbtn" title="Ask the assistant">💬 Ask</button>
+        <div id="botWin" class="botwin" hidden>
+          <div class="bothead"><b>PlanLens assistant</b><button type="button" class="x" id="botClose" aria-label="Close">✕</button></div>
+          <div id="chatLog" class="chat-log"></div>
+          <form id="chatForm" class="report-bar">
+            <input id="chatInput" placeholder="Ask about the app, this site, or anything…" autocomplete="off" />
+            <button id="chatBtn">Send</button>
+          </form>
+        </div>
+        
         <div id="legend" class="legend" hidden></div>
         <div id="measOut" class="measout" hidden><span id="measTxt"></span> <button id="measUndo" type="button">Undo</button> <button id="measClear" type="button">Clear</button></div>
         <div class="bottombar">
@@ -223,16 +224,6 @@
                 <nav class="tabs" id="tabs"></nav>
                 <article id="report" class="report"></article>
                 <p class="disclaimer" id="disclaimer"></p>
-              </div>
-            </details>
-            <details class="sec" id="s-chat">
-              <summary>Ask the planner</summary>
-              <div class="sbody">
-                <div id="chatLog" class="chat-log"><p class="meta">Ask follow-up questions or test options, e.g. "What if I reduce it to 2 storeys?" or "How do I avoid the SARA referral?"</p></div>
-                <form id="chatForm" class="report-bar">
-                  <input id="chatInput" placeholder="Type a question…" autocomplete="off" />
-                  <button id="chatBtn">Send</button>
-                </form>
               </div>
             </details>
           </div>

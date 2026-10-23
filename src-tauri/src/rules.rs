@@ -315,3 +315,24 @@ and be honest when the data cannot answer something.\n\nSITE: {}\nFINDINGS BY AU
     }
     msgs
 }
+
+const APP_GUIDE: &str = "ABOUT THE APP: PlanLens (AI Town Planner) is an offline Windows desktop app for Brisbane planning. Left column: Forms (DA Form 1 v1.3 editable, autosaved per lot, downloadable list), Approvals (council approval records), Maps, Open map, Compare (sites side by side), Batch check (many addresses at once), Settings (AI provider, branding, backup/restore). Map toolbar at the top of the map: Dimensions, Subdivision sketch, Setbacks (indicative buildable area), Measure distance, Measure area, Contours, Flood map, Power, 3D envelope. Map styles Plain, Street, Aerial; Full map. Right column: address search, then Zoning, Setbacks, Constraints, Potential, Suburb, Approvals, Forms, Title, Report, Checklist sections, plus Generate AI report and Client PDF. Setback numbers are Queensland Housing Code defaults flagged verify; Brisbane City Plan may still use older QDC MP 1.1/1.2 rules, so they are indicative only.";
+
+pub fn assistant_messages(a: Option<&Assessment>, history: &[ChatMsg]) -> Vec<(String, String)> {
+    let site = match a {
+        Some(a) => format!("CURRENT SITE: {}", site_facts(a)),
+        None => "No site is selected yet.".to_string(),
+    };
+    let system = format!(
+        "You are the PlanLens assistant inside the app. Answer any question the user asks: how to use the app, Queensland and Brisbane town planning, or anything else. \
+Be concise and friendly. For planning facts use the site data below; if the data cannot answer, say so and do not invent numbers or rules. Name the authority (council, SARA, EDQ) a point relates to. \
+Suggest a registered planner for decisions.\n{APP_GUIDE}\n{site}"
+    );
+    let mut msgs = vec![("system".to_string(), system)];
+    let start = history.len().saturating_sub(12);
+    for m in &history[start..] {
+        let role = if m.role == "assistant" { "assistant" } else { "user" };
+        msgs.push((role.to_string(), m.content.chars().take(2000).collect()));
+    }
+    msgs
+}

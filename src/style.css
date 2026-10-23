@@ -106,7 +106,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 /* Forms page: takes the map and right column area; the left tools stay visible */
 .app.formsmode .rightcol, .app.formsmode .grip { display: none; }
 .app.formsmode .mapstage { right: 6px; }
-.app.formsmode #map, .app.formsmode .bottombar, .app.formsmode .legend, .app.formsmode .empty { display: none; }
+.app.formsmode #map, .app.formsmode .maptools, .app.formsmode .botbtn, .app.formsmode .botwin, .app.formsmode .bottombar, .app.formsmode .legend, .app.formsmode .empty { display: none; }
 .formsview { position: absolute; inset: 0; display: grid; grid-template-columns: 290px minmax(0, 1fr) 320px; gap: 12px; }
 .fv-col { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; min-height: 0; display: flex; flex-direction: column; }
 .fv-head { padding: 12px 14px; border-bottom: 1px solid var(--line); }
@@ -270,3 +270,18 @@ dialog.wide { width: min(820px, 94vw); }
 .maplibregl-canvas.meas { cursor: crosshair; }
 .fv-headrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .fv-headrow button { flex: none; font-weight: 600; }
+
+.maptools { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 6; display: flex; gap: 2px; padding: 4px 6px; border-radius: 14px; background: color-mix(in srgb, var(--panel) 72%, transparent); backdrop-filter: blur(6px); border: 1px solid color-mix(in srgb, var(--line) 70%, transparent); }
+.maptools button { width: 36px; height: 36px; padding: 0; display: grid; place-items: center; background: transparent; color: var(--ink); border: 0; border-radius: 10px; }
+.maptools button:hover { background: var(--chip); }
+.maptools button.on { background: var(--accent); color: var(--accent-ink); }
+.maptools button.busy { opacity: .5; }
+.maptools svg { width: 20px; height: 20px; }
+.measout { top: 62px; }
+.botbtn { position: absolute; right: 12px; bottom: 64px; z-index: 7; border-radius: 22px; padding: 9px 16px; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+.botwin { position: absolute; right: 12px; bottom: 64px; z-index: 8; width: min(380px, calc(100% - 24px)); height: min(520px, calc(100% - 90px)); background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.3); display: flex; flex-direction: column; padding: 10px; }
+.botwin[hidden] { display: none; }
+.bothead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.botwin .chat-log { flex: 1; max-height: none; min-height: 0; }
+.botwin .report-bar { display: flex; gap: 6px; }
+.botwin .report-bar input { flex: 1; min-width: 0; }

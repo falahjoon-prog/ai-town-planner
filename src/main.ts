@@ -346,7 +346,6 @@ async function loadSite(pid: number) {
   sections = [];
   activeTab = "";
   renderReport();
-  chatHistory = [];
   renderChat();
   $("saveBtn").hidden = true;
   $("pdfBtn").hidden = false; // the client PDF works before an AI report too
@@ -517,7 +516,7 @@ $("contBtn").addEventListener("click", async () => {
     if (m.getLayer("cont")) { m.removeLayer("cont"); m.removeSource("cont"); }
     return setFloodUi(floodOn);
   }
-  $("contBtn").textContent = "Loading…";
+  $("contBtn").classList.add("busy");
   try {
     const c = await invoke<{ source: string; stats: { min_m: number; max_m: number; fall_m: number; approx_slope_pct: number } | null; features: any[] }>("contours", { pid: current.parcel.pid });
     m.addSource("cont", { type: "geojson", data: { type: "FeatureCollection", features: c.features } });
@@ -529,7 +528,7 @@ $("contBtn").addEventListener("click", async () => {
     toolUi("contBtn", false);
     alertMsg(e);
   }
-  $("contBtn").textContent = "Contours";
+  $("contBtn").classList.remove("busy");
 });
 
 $("powerBtn").addEventListener("click", async () => {
@@ -636,8 +635,9 @@ function fitTo(geoms: any[]) {
 
 function setFloodUi(on: boolean, legend = "") {
   floodOn = on;
-  $("floodBtn").textContent = on ? "Hide flood map" : "Flood map";
+  $("floodBtn").title = on ? "Hide flood map" : "Flood map";
   $("floodBtn").classList.toggle("on", on);
+  $("floodBtn").classList.remove("busy");
   $("legend").innerHTML = legend;
   $("legend").hidden = !legend;
 }
@@ -654,7 +654,7 @@ $("floodBtn").addEventListener("click", async () => {
     fitTo([current.parcel.geom]);
     return;
   }
-  $("floodBtn").textContent = "Loading…";
+  $("floodBtn").classList.add("busy");
   let feats: Overlay[];
   try {
     feats = await invoke<Overlay[]>("flood_map", { pid: current.parcel.pid });
@@ -831,7 +831,7 @@ $("genBtn").addEventListener("click", async () => {
 function renderChat() {
   const log = $("chatLog");
   if (!chatHistory.length) {
-    log.innerHTML = `<p class="meta">Ask follow-up questions or test options, e.g. "What if I reduce it to 2 storeys?" or "How do I avoid the SARA referral?"</p>`;
+    log.innerHTML = `<p class="meta">Ask me anything: how the app works, this site, planning rules, or any other question.</p>`;
     return;
   }
   log.innerHTML = chatHistory
@@ -843,7 +843,7 @@ function renderChat() {
 $("chatForm").addEventListener("submit", async (ev) => {
   ev.preventDefault();
   const q = val("chatInput");
-  if (!q || !current) return;
+  if (!q) return;
   setVal("chatInput", "");
   const btn = $("chatBtn") as HTMLButtonElement;
   btn.disabled = true;
@@ -856,9 +856,8 @@ $("chatForm").addEventListener("submit", async (ev) => {
     reply.content += t;
     renderChat();
   };
-  const report = sections.map((x) => `## ${x.title}\n${x.text}`).join("\n\n");
   try {
-    await invoke("chat", { pid: current.parcel.pid, report, history: chatHistory.slice(0, -1), onToken: ch });
+    await invoke("assistant", { pid: current?.parcel.pid ?? null, history: chatHistory.slice(0, -1), onToken: ch });
   } catch (e) {
     reply.content = `**Error:** ${String(e)}`;
     renderChat();
@@ -1800,10 +1799,9 @@ $("fvBack").addEventListener("click", closeFormView);
 $("fvClose").addEventListener("click", closeFormView);
 $("formsView").addEventListener("click", (e) => { if (e.target === $("formsView")) closeFormView(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && app.classList.contains("formsmode") && !document.querySelector("dialog[open]")) closeFormView(); });
-// any map tool or map style button returns to the map
-document.querySelectorAll<HTMLElement>(".toolstack > button").forEach((b) => {
-  if (b.id !== "formsBtn") b.addEventListener("click", () => { if (app.classList.contains("formsmode") && ["dimBtn","subBtn","setbackBtn","measDBtn","measABtn","contBtn","floodBtn","powerBtn","envBtn"].includes(b.id)) closeFormView(); });
-});
+// any map tool returns to the map
+["dimBtn","subBtn","setbackBtn","measDBtn","measABtn","contBtn","floodBtn","powerBtn","envBtn"].forEach((id) =>
+  $(id).addEventListener("click", () => { if (app.classList.contains("formsmode")) closeFormView(); }));
 
 function printForm() {
   if (!current) return;
@@ -1827,3 +1825,7 @@ $("footPdf").addEventListener("click", () => $("pdfBtn").click());
 
 // Clicking outside a window (on the dimmed backdrop) closes it.
 document.querySelectorAll<HTMLDialogElement>("dialog").forEach((d) => d.addEventListener("click", (ev) => { if (ev.target === d) d.close(); }));
+
+// ---- Assistant chat window ----
+$("botBtn").addEventListener("click", () => { ($("botWin") as HTMLElement).hidden = false; ($("botBtn") as HTMLElement).hidden = true; renderChat(); $("chatInput").focus(); });
+$("botClose").addEventListener("click", () => { ($("botWin") as HTMLElement).hidden = true; ($("botBtn") as HTMLElement).hidden = false; });

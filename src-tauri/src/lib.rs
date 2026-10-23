@@ -485,6 +485,31 @@ async fn chat(
 }
 
 #[tauri::command]
+async fn assistant(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    pid: Option<i64>,
+    history: Vec<ChatIn>,
+    on_token: Channel<String>,
+) -> Result<(), String> {
+    let cfg = load_settings(&app);
+    let model = active_model(&app)?;
+    let a = match pid {
+        Some(pid) => {
+            let db = state.db.clone();
+            Some(tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)??)
+        }
+        None => None,
+    };
+    let hist: Vec<rules::ChatMsg> = history.into_iter().map(|m| rules::ChatMsg { role: m.role, content: m.content }).collect();
+    let msgs = rules::assistant_messages(a.as_ref(), &hist);
+    let sink: ai::Sink = Arc::new(move |t: &str| {
+        let _ = on_token.send(t.to_string());
+    });
+    ai::generate(&cfg, model, state.llm.clone(), msgs, 900, sink).await
+}
+
+#[tauri::command]
 fn save_ai_settings(app: AppHandle, settings: ai::AiSettings) -> Result<(), String> {
     let mut s = settings;
     s.model = load_settings(&app).model; // built-in model choice is managed by set_model
@@ -635,6 +660,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             status,
+            assistant,
             open_external,
             import_datapack,
             download_datapack,
