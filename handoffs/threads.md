@@ -43,3 +43,9 @@ Common rules for every thread
 2) Work completed: fixed the only `tsc` error on feature/map-picker v0.4.2 head 678bd88. Targeted code review of rail/handles/autosave/PDF was not done in depth.
 3) Tests: `npx tsc --noEmit` clean; `npx vite build` OK. Cargo/Windows build left to CI.
 4) Remaining: CI result on the new head pending; Rust side and the UI items (rail, handles, autosave, focus text, PDF) not manually verified.
+
+### T4 report – chat docked in right panel
+1) Files: index.html, src/main.ts, src/style.css, handoffs/threads.md.
+2) Done: chat no longer floats over the map. It is now a section of the right column (below the address bar) that replaces the site panel while open; "Ask" button moved next to the address box; same input/Send/close/history; Escape closes; opening it from Full map restores the right column. Old floating-dialog CSS/handlers removed. Chose a docked section, not a tab, because the site panel's tabs are scroll links and the panel is hidden before an address is loaded.
+3) Tests: tsc --noEmit clean; vite build OK; headless Chromium at 375/768/1280, light and dark: no horizontal scroll, chat never overlaps the map at 768/1280 (at 375 the existing desktop layout already collapses the map to 0 width; unchanged). Only console error is Tauri invoke missing in a plain browser (pre-existing).
+4) Remaining: 375 px layout not mobile-responsive (pre-existing); chat not tested with a live AI engine or a loaded site.

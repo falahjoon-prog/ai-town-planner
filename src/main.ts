@@ -1867,9 +1867,16 @@ $("footPdf").addEventListener("click", () => $("pdfBtn").click());
 // Clicking outside a window (on the dimmed backdrop) closes it.
 document.querySelectorAll<HTMLDialogElement>("dialog").forEach((d) => d.addEventListener("click", (ev) => { if (ev.target === d) d.close(); }));
 
-// ---- Assistant chat window ----
-$("botBtn").addEventListener("click", () => { ($("botWin") as HTMLElement).hidden = false; ($("botBtn") as HTMLElement).hidden = true; renderChat(); $("chatInput").focus(); });
-$("botClose").addEventListener("click", () => { ($("botWin") as HTMLElement).hidden = true; ($("botBtn") as HTMLElement).hidden = false; });
+// ---- Assistant chat (docked in the right panel) ----
+function setChat(on: boolean) {
+  if (on && app.classList.contains("fullmap")) setFull(false);
+  ($("botWin") as HTMLElement).hidden = !on;
+  document.querySelector(".rightcol")!.classList.toggle("chatopen", on);
+  if (on) { renderChat(); $("chatInput").focus(); }
+}
+$("botBtn").addEventListener("click", () => setChat(($("botWin") as HTMLElement).hidden));
+$("botClose").addEventListener("click", () => setChat(false));
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !($("botWin") as HTMLElement).hidden && !document.querySelector("dialog[open]")) setChat(false); });
 
 // ---- Top menu bar and status bar ----
 function openSettings(sec?: string) {
@@ -1883,7 +1890,7 @@ const setBaseTo = (k: string) => () => { ($("baseSel") as HTMLSelectElement).val
 type MI = [string, () => void] | "-";
 const MENUS: [string, MI[]][] = [
   ["File", [["Back up my data…", () => openSettings("sset-backup")], ["Restore from backup…", () => openSettings("sset-backup")], "-", ["Batch check…", clickId("batchBtn")], ["Client PDF", clickId("footPdf")], "-", ["Report branding…", () => openSettings("sset-brand")], ["Data pack…", () => openSettings("sset-data")], ["Address search key…", () => openSettings("sset-search")]]],
-  ["AI", [["AI engine…", () => openSettings("sset-ai")], ["Built-in models…", () => openSettings("sset-models")], "-", ["Generate AI report", clickId("footReport")], ["Ask the assistant", () => { if (!($("botBtn") as HTMLElement).hidden) $("botBtn").click(); }]]],
+  ["AI", [["AI engine…", () => openSettings("sset-ai")], ["Built-in models…", () => openSettings("sset-models")], "-", ["Generate AI report", clickId("footReport")], ["Ask the assistant", () => setChat(true)]]],
   ["Forms", [["Open DA forms", clickId("formsBtn")], ["Approvals", clickId("apprBtn")]]],
   ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
   ["Window", [["Full map on/off", () => setFull(!app.classList.contains("fullmap"))], "-", ["Plain map", setBaseTo("plain")], ["Street map", setBaseTo("street")], ["Aerial photo", setBaseTo("sat")], "-", ["Light / dark", clickId("themeBtn")], ["Reset panel widths", () => { ["--left", "--right"].forEach((v) => document.documentElement.style.removeProperty(v)); try { localStorage.removeItem("colLeft"); localStorage.removeItem("colRight"); } catch { /* storage unavailable */ } resizeMap(); }], "-", ["Settings…", () => openSettings()]]],
