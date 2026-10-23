@@ -306,6 +306,18 @@ async function openSaved(li: HTMLElement) {
 // ---- Site ----
 const PALETTE = ["#c2410c", "#0e7490", "#7c3aed", "#b91c1c", "#15803d", "#a16207", "#be185d", "#1d4ed8"];
 
+// Compact finding card: source badge, title, short description; long text collapses behind a chevron.
+function fcard(kind: string, authority: string, title: string, sub: string, text: string) {
+  const long = text.length > 120;
+  return `<div class="fcard ${kind}"><div class="fc-top"><span class="auth">${esc(AUTH[authority] ?? authority)}</span><b>${esc(title)}</b>${long ? `<button type="button" class="chev" aria-expanded="false" aria-label="Show more">▾</button>` : ""}</div>${sub ? `<div class="meta fc-sub">${esc(sub)}</div>` : ""}<p class="fc-text">${esc(text)}</p></div>`;
+}
+$("site").addEventListener("click", (ev) => {
+  const b = (ev.target as HTMLElement).closest<HTMLElement>(".chev");
+  if (!b) return;
+  const open = b.closest(".fcard")!.classList.toggle("open");
+  b.setAttribute("aria-expanded", String(open));
+});
+
 async function loadSite(pid: number) {
   try {
     current = await invoke<Assessment>("assess", { pid });
@@ -318,21 +330,22 @@ async function loadSite(pid: number) {
   renderSiteTools();
   $("empty").hidden = true;
   $("site").hidden = false;
-  $("siteAddr").textContent = a.parcel.address || a.parcel.lotplan;
-  $("siteMeta").textContent = [a.parcel.lotplan, a.parcel.area_m2 ? `${Math.round(a.parcel.area_m2).toLocaleString()} m²` : "", a.parcel.suburb]
-    .filter(Boolean)
-    .join(" · ");
+  ($("q") as HTMLInputElement).value = a.parcel.address || a.parcel.lotplan;
+  $("results").innerHTML = "";
+  $("siteMeta").textContent = [a.parcel.lotplan, a.parcel.suburb].filter(Boolean).join(" · ");
+  $("tLot").textContent = a.parcel.area_m2 ? `${Math.round(a.parcel.area_m2).toLocaleString()} m²` : "–";
+  $("tZone").textContent = a.zones[0]?.zone.name ?? "–";
+  $("tZone").title = a.zones.map((z) => z.zone.name).join(", ");
+  $("tFlags").textContent = String(a.flags.length + a.overlays.length);
+  $("tFlags").title = `${a.flags.length} constraints, ${a.overlays.length} mapped layers`;
   $("zones").innerHTML = a.zones.length
     ? a.zones
-        .map(
-          (z) => `<div class="zone"><span class="auth">${esc(AUTH[z.authority] ?? z.authority)}</span> <b>${esc(z.zone.name)}</b>${z.coverage_pct != null && z.coverage_pct < 99 ? ` <span class="pill">${z.coverage_pct}% of lot</span>` : ""}
-          <p>${esc(z.zone.purpose)}</p></div>`
-        )
+        .map((z) => fcard("zone", z.authority, z.zone.name, z.coverage_pct != null && z.coverage_pct < 99 ? `${z.coverage_pct}% of lot` : "", z.zone.purpose))
         .join("")
     : `<p class="meta">Zone not identified from the data pack. Check the zoning layer attributes below.</p>`;
   $("flags").innerHTML = a.flags.length
     ? a.flags
-        .map((f) => `<div class="flag"><span class="auth">${esc(AUTH[f.rule.authority] ?? f.rule.authority)}</span> <b>${esc(f.rule.title)}</b><div class="meta">${esc(f.rule.code)}</div><p>${esc(f.rule.note)}</p></div>`)
+        .map((f) => fcard("flag", f.rule.authority, f.rule.title, f.rule.code, f.rule.note))
         .join("")
     : `<p class="meta">No overlay constraints mapped on this lot.</p>`;
   renderSetbacks(a);
@@ -1033,7 +1046,7 @@ const TITLE_LINKS = [
 function renderSiteTools() {
   if (!current) return;
   const s = sites()[current.parcel.lotplan];
-  $("starBtn").textContent = s?.star ? "★ Saved" : "☆ Save";
+  $("starBtn").textContent = s?.star ? "★" : "☆";
   ($("siteNote") as HTMLTextAreaElement).value = s?.note ?? "";
   $("titleLinks").innerHTML = TITLE_LINKS.map(([t, u]) => `<a href="${u}" data-url="${u}" data-title="${esc(t)}" class="ext">${esc(t)}</a>`).join(" · ");
   $("titleOut").innerHTML = s?.title ? (marked.parse(s.title) as string) : "";
@@ -1509,7 +1522,7 @@ function drag(el: HTMLElement, side: "l" | "r") {
     e.preventDefault();
     el.setPointerCapture(e.pointerId);
     const move = (ev: PointerEvent) => {
-      const px = side === "l" ? clampN(ev.clientX - 6, 120, 320) : clampN(innerWidth - ev.clientX - 6, 220, 520);
+      const px = side === "l" ? clampN(ev.clientX - 6, 120, 320) : clampN(innerWidth - ev.clientX - 6, 340, 700);
       document.documentElement.style.setProperty(side === "l" ? "--left" : "--right", `${px}px`);
       resizeMap();
     };
@@ -1861,7 +1874,7 @@ function printForm() {
 $("fvPrint").addEventListener("click", printForm);
 
 // Side panel footer shortcuts
-$("footReport").addEventListener("click", () => $("genBtn").click());
+$("footReport").addEventListener("click", () => { showSec("report"); $("genBtn").click(); });
 $("footPdf").addEventListener("click", () => $("pdfBtn").click());
 
 // Clicking outside a window (on the dimmed backdrop) closes it.
@@ -1871,10 +1884,41 @@ document.querySelectorAll<HTMLDialogElement>("dialog").forEach((d) => d.addEvent
 function setChat(on: boolean) {
   if (on && app.classList.contains("fullmap")) setFull(false);
   ($("botWin") as HTMLElement).hidden = !on;
-  document.querySelector(".rightcol")!.classList.toggle("chatopen", on);
+  $("rightcol").classList.toggle("chatopen", on);
+  $("rail").querySelectorAll<HTMLElement>("button").forEach((b) => b.classList.toggle("on", on ? b.dataset.sec === "assistant" : b.dataset.sec === curSec));
   if (on) { renderChat(); $("chatInput").focus(); }
 }
-$("botBtn").addEventListener("click", () => setChat(($("botWin") as HTMLElement).hidden));
+// Right-panel rail: one section group shown at a time
+const SEC_GROUPS: Record<string, [string, string[]]> = {
+  zoning: ["Zoning", ["s-zoning", "s-suburb"]],
+  setbacks: ["Setbacks", ["s-setbacks"]],
+  constraints: ["Constraints", ["s-constraints"]],
+  potential: ["Development potential", ["s-potential"]],
+  approvals: ["Approvals nearby", ["s-approvals"]],
+  checklist: ["Lodgement checklist", ["s-checklist", "s-title"]],
+  forms: ["Forms & lodgement", ["s-forms"]],
+  report: ["AI planner report", ["s-report"]],
+};
+let curSec = "zoning";
+function showSec(k: string) {
+  const g = SEC_GROUPS[k];
+  if (!g) return;
+  curSec = k;
+  if (!($("botWin") as HTMLElement).hidden) setChat(false);
+  document.querySelectorAll<HTMLDetailsElement>(".pbody > .sec").forEach((d) => { d.hidden = !g[1].includes(d.id); d.open = true; });
+  $("secTitle").textContent = g[0];
+  $("secSub").textContent = k === "constraints" ? "Council · State" : "";
+  $("rail").querySelectorAll<HTMLElement>("button").forEach((b) => b.classList.toggle("on", b.dataset.sec === k));
+  $("site").querySelector(".pbody")!.scrollTop = 0;
+}
+$("rail").addEventListener("click", (ev) => {
+  const b = (ev.target as HTMLElement).closest<HTMLElement>("button");
+  if (!b) return;
+  if (b.dataset.sec === "assistant") setChat(($("botWin") as HTMLElement).hidden);
+  else showSec(b.dataset.sec!);
+});
+showSec("zoning");
+$("recentBtn").addEventListener("click", () => { if ($("results").innerHTML) $("results").innerHTML = ""; else showRecents(); });
 $("botClose").addEventListener("click", () => setChat(false));
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !($("botWin") as HTMLElement).hidden && !document.querySelector("dialog[open]")) setChat(false); });
 
