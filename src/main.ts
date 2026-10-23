@@ -5,6 +5,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { marked } from "marked";
 import MAPS from "./maps.json";
 import FORMS from "../src-tauri/knowledge/forms.json";
+import SETBACKS_DATA from "../src-tauri/knowledge/setbacks.json";
 import "./style.css";
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string };
@@ -1135,13 +1136,23 @@ $("cmpGo").addEventListener("click", async () => {
   </tbody></table>`;
 });
 
-// ---- Setbacks: shown only when the zone's distances are in the data. None are loaded yet. ----
+// ---- Setbacks: rows come from knowledge/setbacks.json, only for zones and lot sizes it covers ----
+type SetbackSet = { title: string; min_area_m2: number; note: string; source: string; rows: { label: string; value: string; ref: string }[]; check: string };
+const SETBACKS = SETBACKS_DATA as Record<string, SetbackSet>;
 function renderSetbacks(a: Assessment) {
-  const zones = a.zones.map((z) => z.zone.name).join(", ") || "not identified";
-  $("setbacks").innerHTML = `<div class="card"><div class="meta">Zone: ${esc(zones)}</div>
-    <p>Setback distances for this zone aren't in the app yet, so none are shown.</p>
-    <p class="meta">Check the dwelling house and zone provisions in City Plan before you design.</p>
-    <button type="button" class="ghost" data-url="https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones">Open the City Plan fact sheet</button></div>`;
+  const zones = a.zones.map((z) => z.zone.name);
+  const set = zones.map((z) => SETBACKS[z]).find(Boolean);
+  const area = a.parcel.area_m2;
+  const fact = `<button type="button" class="ghost" data-url="https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones">Open the City Plan fact sheet</button>`;
+  if (!set || area == null || area < set.min_area_m2) {
+    $("setbacks").innerHTML = `<div class="card"><div class="meta">Zone: ${esc(zones.join(", ") || "not identified")}${area != null ? ` · ${Math.round(area)} m²` : ""}</div>
+      <p>Setback distances for this zone and lot size aren't in the app yet, so none are shown. Check with council.</p>${fact}</div>`;
+    return;
+  }
+  $("setbacks").innerHTML = `<div class="card"><div class="meta">${esc(set.title)} · <span class="pill warn">verify</span></div>
+    <table class="ptable"><tbody>${set.rows.map((r) => `<tr><td>${esc(r.label)}<div class="meta">${esc(r.ref)}</div></td><td><b>${esc(r.value)}</b></td></tr>`).join("")}</tbody></table>
+    <p class="meta">${esc(set.note)}</p><p class="meta">${esc(set.check)}</p>
+    <button type="button" class="ghost" data-url="${esc(set.source)}">Open the code</button> ${fact}</div>`;
 }
 
 // ---- Layout: full map, map styles, side column resizing ----

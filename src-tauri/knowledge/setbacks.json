@@ -1,0 +1,21 @@
+{
+  "Low density residential zone": {
+    "title": "Queensland Housing Code, Chapter 2 (lots 450 m² and over)",
+    "min_area_m2": 450,
+    "note": "State default from 1 September 2026. A council can vary it through its planning scheme, and Brisbane's City Plan may differ. Check with council before you design.",
+    "source": "https://www.housing.qld.gov.au/__data/assets/pdf_file/0021/92712/queensland-housing-code-01092026.pdf",
+    "rows": [
+      { "label": "Front, primary frontage (building wall)", "value": "5 m", "ref": "Table 1, A2.1" },
+      { "label": "Front, garage or carport", "value": "5.6 m", "ref": "Table 1, A2.1" },
+      { "label": "Front, garage door, detached laundry or shed", "value": "6 m", "ref": "Table 1, A2.1" },
+      { "label": "Side, ground floor or wall up to 4.5 m", "value": "1.5 m", "ref": "Table 3, A3.1" },
+      { "label": "Side, wall over 4.5 m up to 8.5 m", "value": "1.5 m", "ref": "Table 3, A3.1" },
+      { "label": "Side, wall over 8.5 m", "value": "2.5 m", "ref": "Table 3, A3.1" },
+      { "label": "Rear, ground floor or wall up to 4.5 m", "value": "4 m", "ref": "Table 3, A3.1" },
+      { "label": "Rear, wall over 4.5 m up to 8.5 m", "value": "3 m", "ref": "Table 3, A3.1" },
+      { "label": "Rear, wall over 8.5 m", "value": "3 m", "ref": "Table 3, A3.1" },
+      { "label": "Detached single-storey secondary dwelling (up to 4.5 m): side / rear", "value": "1.5 m / 2 m", "ref": "Table 3, A3.1" }
+    ],
+    "check": "Corner lots (secondary road frontage), laneway lots, lots under 450 m² and special-area lots: check with council."
+  }
+}

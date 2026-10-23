@@ -17,7 +17,7 @@
 ## Completed (cont.)
 - v0.4.2 (PlanLens layout): left tools column with logo; map in the middle with map styles and Full map under it; right column with address bar and collapsible side panel (pinned header, jump links); Full map keeps a slim tool rail; side columns resize by drag.
 - v0.4.2 forms page: DA Form 1 (v1.3) editable and numbered as on the PDF, saved per lot on this PC; form helper that knows the current part and question; download list with blank forms and answer-sheet PDF. Declarations and Part 9 are never ticked or filled by the app.
-- v0.4.2 setbacks section: shows a note and City Plan link only; no distances are shown because none are loaded yet.
+- v0.4.2 setbacks section: rows from knowledge/setbacks.json (Queensland Housing Code Chapter 2, lots 450 m² and over, flagged verify); other lots say check with council.
 
 ## Current issues
 - No package registry access in the cloud workspace: compile and test happen only in GitHub Actions; the app is not run by the developer – the user tests on Windows.
