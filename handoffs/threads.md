@@ -33,6 +33,12 @@ Common rules for every thread
 - Model: Sonnet for the build; Opus briefly only if the code reading needs it.
 - Rule: never invent a number; no source means no row.
 
+### T3 report (blocked, no PR opened)
+1) Files changed: handoffs/threads.md only.
+2) Work: could not verify any setback number. Brisbane pages fetched (rules-boundary-setback, residential-development-in-suburban-zones) contain no setback values; they point to QDC MP 1.2 (lots 450 m2+) and QDC MP 1.1 / City Plan Dwelling house (small lot) code. The Queensland Housing Code PDF and the City Plan fact sheet were blocked (WebFetch permission not answered; curl 403). Existing src-tauri/knowledge/setbacks.json (QHC Table 1 A2.1, Table 3 A3.1; already warns "do not rely") is unverified by this thread and left unchanged.
+3) Tests: none run (no code changed).
+4) Remaining: approve WebFetch for housing.qld.gov.au PDF and the City Plan online dwelling house code / QDC MP 1.2 page, then rerun T3; decide whether to drop the unverified rows meanwhile.
+
 ## Not threads yet (blocked)
 - Approval likelihood, timeframes, activity by company: needs approvals files from the owner (Gold Coast 12-month file is the candidate).
 - Infrastructure charges for all councils: research package, start after T3.
