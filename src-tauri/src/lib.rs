@@ -578,6 +578,19 @@ fn save_text(path: String, content: String) -> Result<(), String> {
     fs::write(path, content).map_err(e)
 }
 
+/// Reads a backup file (.json only, max 20 MB).
+#[tauri::command]
+fn read_backup(path: String) -> Result<String, String> {
+    let p = PathBuf::from(&path);
+    if p.extension().and_then(|x| x.to_str()).map(|x| x.eq_ignore_ascii_case("json")) != Some(true) {
+        return Err("Only .json backup files can be restored".into());
+    }
+    if fs::metadata(&p).map_err(e)?.len() > 20_000_000 {
+        return Err("Backup file is too large".into());
+    }
+    fs::read_to_string(p).map_err(e)
+}
+
 /// Opens a web link in the person's default browser (no in-app window).
 #[tauri::command]
 fn open_external(url: String) -> Result<(), String> {
@@ -629,7 +642,8 @@ pub fn run() {
             import_model,
             set_model,
             delete_model,
-            save_text
+            save_text,
+            read_backup
         ])
         .run(tauri::generate_context!())
         .expect("error while running AI Town Planner");

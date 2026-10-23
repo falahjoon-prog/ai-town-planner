@@ -47,7 +47,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .empty .steps li::before { content: counter(step); position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
 .legend { position: absolute; left: 12px; bottom: 70px; z-index: 2; max-width: 75%; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
 .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; opacity: .7; }
-.bottombar { position: absolute; left: 50%; transform: translateX(-50%); bottom: 12px; z-index: 3; display: flex; gap: 12px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 6px; box-shadow: 0 1px 6px rgba(0,0,0,.12); white-space: nowrap; }
+.bottombar { max-width: calc(100% - 24px); overflow-x: auto; position: absolute; left: 50%; transform: translateX(-50%); bottom: 12px; z-index: 3; display: flex; gap: 12px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 6px; box-shadow: 0 1px 6px rgba(0,0,0,.12); white-space: nowrap; }
 .seg { display: flex; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .seg button { background: transparent; color: var(--ink); border: 0; border-radius: 0; padding: 7px 12px; font-weight: 500; border-right: 1px solid var(--line); }
 .seg button:last-child { border-right: 0; }
@@ -188,7 +188,7 @@ details summary { cursor: pointer; color: var(--muted); }
 .engine label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
 .engine input { width: auto; }
 .pcfg { display: flex; flex-direction: column; gap: 6px; padding: 8px 0 4px 24px; }
-.pcfg .row { display: flex; gap: 6px; }
+.pcfg .row, .dlg > .row { display: flex; gap: 6px; flex-wrap: wrap; }
 select { font: inherit; flex: 1; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--ink); }
 
 /* Draft documents */
@@ -226,6 +226,20 @@ dialog.wide { width: min(820px, 94vw); }
   :root { --left: 130px; --right: 240px; }
   .formsview { grid-template-columns: 240px minmax(0, 1fr); }
   .fv-help { display: none; }
+}
+
+/* Short windows (about 720 px high): tighter spacing so nothing is cut off */
+@media (max-height: 760px) {
+  .leftcol, .rightcol { gap: 6px; }
+  .search { padding: 8px 10px; }
+  .results { max-height: 30vh; }
+  .phead { padding: 8px 12px 6px; }
+  .legend { bottom: 62px; max-height: 40%; overflow-y: auto; }
+  .empty h1 { font-size: 22px; }
+  .empty .steps { margin: 10px auto; gap: 6px; }
+  .empty { overflow-y: auto; }
+  dialog, .dlg { max-height: 92vh; }
+  .doc { max-height: 52vh; }
 }
 
 /* PDF export via the print dialog */

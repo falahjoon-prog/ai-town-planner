@@ -313,6 +313,7 @@ async function loadSite(pid: number) {
     return alertMsg(e);
   }
   const a = current;
+  try { localStorage.setItem("lastPid", String(a.parcel.pid)); } catch { /* storage unavailable */ }
   touchSite(a.parcel);
   renderSiteTools();
   $("empty").hidden = true;
@@ -913,7 +914,11 @@ $("apprCopy").addEventListener("click", async () => {
 });
 
 refreshStatus().then((s) => {
-  if (!s.datapack) ($("settings") as HTMLDialogElement).showModal();
+  if (!s.datapack) return ($("settings") as HTMLDialogElement).showModal();
+  // Remember on start: reopen the last site
+  let last = 0;
+  try { last = Number(localStorage.getItem("lastPid")); } catch { /* storage unavailable */ }
+  if (last > 0) void loadSite(last);
 });
 
 // Light / dark theme (follows the system until the user picks one)
@@ -1163,6 +1168,7 @@ function resizeMap() {
 }
 function setFull(on: boolean) {
   app.classList.toggle("fullmap", on);
+  try { localStorage.setItem("fullmap", on ? "1" : "0"); } catch { /* storage unavailable */ }
   resizeMap();
 }
 $("fullBtn").addEventListener("click", () => setFull(true));
@@ -1192,11 +1198,54 @@ function drag(el: HTMLElement, side: "l" | "r") {
       resizeMap();
     };
     el.addEventListener("pointermove", move);
-    el.addEventListener("pointerup", () => el.removeEventListener("pointermove", move), { once: true });
+    el.addEventListener("pointerup", () => {
+      el.removeEventListener("pointermove", move);
+      try { localStorage.setItem(side === "l" ? "colLeft" : "colRight", document.documentElement.style.getPropertyValue(side === "l" ? "--left" : "--right")); } catch { /* storage unavailable */ }
+    }, { once: true });
   });
 }
 drag($("gripL"), "l");
 drag($("gripR"), "r");
+
+// Restore remembered layout (column widths, Full map)
+try {
+  const l = localStorage.getItem("colLeft"), r = localStorage.getItem("colRight");
+  if (l && /^\d+(\.\d+)?px$/.test(l)) document.documentElement.style.setProperty("--left", l);
+  if (r && /^\d+(\.\d+)?px$/.test(r)) document.documentElement.style.setProperty("--right", r);
+  if (localStorage.getItem("fullmap") === "1") app.classList.add("fullmap");
+} catch { /* storage unavailable */ }
+
+// ---- Backup and restore (Settings) ----
+const BACKUP_KEYS = ["sites", "brand", MAP_KEY, "base", "theme"];
+$("backupBtn").addEventListener("click", async () => {
+  const data: Record<string, string> = {};
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && (BACKUP_KEYS.includes(k) || k.startsWith("daform1:"))) data[k] = localStorage.getItem(k) ?? "";
+    }
+  } catch { /* storage unavailable */ }
+  try {
+    const path = await save({ defaultPath: `Town_planner_backup_${new Date().toISOString().slice(0, 10)}.json`, filters: [{ name: "Backup", extensions: ["json"] }] });
+    if (!path) return;
+    await invoke("save_text", { path, content: JSON.stringify({ app: "ai-town-planner", version: 1, data }) });
+    $("backupMsg").textContent = `Backed up ${Object.keys(data).length} items.`;
+  } catch (e) { $("backupMsg").textContent = String(e); }
+});
+$("restoreBtn").addEventListener("click", async () => {
+  try {
+    const path = await open({ multiple: false, filters: [{ name: "Backup", extensions: ["json"] }] });
+    if (typeof path !== "string") return;
+    const parsed = JSON.parse(await invoke<string>("read_backup", { path }));
+    const data: Record<string, unknown> = parsed && typeof parsed.data === "object" && parsed.data ? parsed.data : {};
+    let n = 0;
+    for (const [k, v] of Object.entries(data)) {
+      if ((BACKUP_KEYS.includes(k) || k.startsWith("daform1:")) && typeof v === "string") { localStorage.setItem(k, v); n++; }
+    }
+    if (!n) throw new Error("No data found in that file.");
+    location.reload();
+  } catch (e) { $("backupMsg").textContent = `Restore failed: ${e}`; }
+});
 
 // ---- Forms page: DA Form 1 (Queensland, version 1.3), numbered as on the PDF ----
 type FItem = { id: string; n: string; q: string; t: "text" | "area" | "radio" | "check" | "note"; o?: string[] };
