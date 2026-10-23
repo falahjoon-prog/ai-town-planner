@@ -1798,6 +1798,7 @@ $("formsBtn").addEventListener("click", openFormView);
 $("openFormBtn").addEventListener("click", openFormView);
 $("fvBack").addEventListener("click", closeFormView);
 $("fvClose").addEventListener("click", closeFormView);
+$("formsView").addEventListener("click", (e) => { if (e.target === $("formsView")) closeFormView(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && app.classList.contains("formsmode") && !document.querySelector("dialog[open]")) closeFormView(); });
 // any map tool or map style button returns to the map
 document.querySelectorAll<HTMLElement>(".toolstack > button").forEach((b) => {
