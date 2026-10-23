@@ -268,3 +268,5 @@ dialog.wide { width: min(820px, 94vw); }
 .measout button { padding: 3px 8px; font-size: 12px; }
 .measlbl { background: #111827; color: #fff; font-size: 11px; padding: 1px 5px; border-radius: 6px; white-space: nowrap; pointer-events: none; }
 .maplibregl-canvas.meas { cursor: crosshair; }
+.fv-headrow { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.fv-headrow button { flex: none; font-weight: 600; }

@@ -1793,6 +1793,12 @@ function closeFormView() {
 $("formsBtn").addEventListener("click", openFormView);
 $("openFormBtn").addEventListener("click", openFormView);
 $("fvBack").addEventListener("click", closeFormView);
+$("fvClose").addEventListener("click", closeFormView);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && app.classList.contains("formsmode") && !document.querySelector("dialog[open]")) closeFormView(); });
+// any map tool or map style button returns to the map
+document.querySelectorAll<HTMLElement>(".toolstack > button").forEach((b) => {
+  if (b.id !== "formsBtn") b.addEventListener("click", () => { if (app.classList.contains("formsmode") && ["dimBtn","subBtn","setbackBtn","measDBtn","measABtn","contBtn","floodBtn","powerBtn","envBtn"].includes(b.id)) closeFormView(); });
+});
 
 function printForm() {
   if (!current) return;
