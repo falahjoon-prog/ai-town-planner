@@ -419,7 +419,7 @@ function renderPotential() {
   ].filter(Boolean).join(" · ");
   const prov = p.provisions
     ? `<table class="ptable"><tr><th colspan="2">${esc(p.provisions.title)}</th><th>Source</th></tr>${p.provisions.items
-        .map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ` <span class="pill warn">verify</span>` : ""}</td><td class="meta">${link(i.url, i.source)}</td></tr>`)
+        .map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ` <span class="pill warn" title="Not yet confirmed for Brisbane: check with Brisbane City Council or a registered planner">verify</span>` : ""}</td><td class="meta">${link(i.url, i.source)}</td></tr>`)
         .join("")}</table>`
     : `<p class="meta">${p.pda ? "PDA site: limits come from the PDA development scheme (EDQ)." : "No sourced numeric provisions for this zone in the app yet. The AI report names the City Plan codes that set them."}</p>`;
   const fit = p.use_fit
@@ -1301,7 +1301,7 @@ function renderSetbacks(a: Assessment) {
   $("setbacks").innerHTML = `<div class="card"><div class="meta">${esc(set.title)} · <span class="pill warn">verify</span></div>
     <table class="ptable"><tbody>${set.rows.map((r) => `<tr><td>${esc(r.label)}<div class="meta">${esc(r.ref)}</div></td><td><b>${esc(r.value)}</b></td></tr>`).join("")}</tbody></table>
     <p class="meta">${esc(set.note)}</p><p class="meta">${esc(set.check)}</p>
-    <button type="button" class="ghost" data-url="${esc(set.source)}">Open the code</button> ${fact}</div>`;
+    <button type="button" class="primary" data-act="setb">Show on map and try options</button> <button type="button" class="ghost" data-url="${esc(set.source)}">Open the code</button> ${fact}</div>`;
 }
 
 // ==== Setbacks tool: buildable area inset from the lot by the ground-floor setbacks (indicative only) ====
@@ -1314,21 +1314,24 @@ const SETBACK_ROWS = { front: "Front, primary frontage (building wall)", side: "
 function clearSetbackLayer() {
   setbackMarkers.forEach((m) => m.remove());
   setbackMarkers = [];
+  if (map?.getLayer("setbf")) map.removeLayer("setbf");
   if (map?.getLayer("setb")) { map.removeLayer("setb"); map.removeSource("setb"); }
 }
 function resetSetbackTool() {
   measMode = ""; measPts = []; measMarks = []; toolUi("measDBtn", false); toolUi("measABtn", false); ($("measOut") as HTMLElement).hidden = true;
   setbackOn = false;
+  setbackOv = {};
+  ($("setbackEd") as HTMLElement).hidden = true;
   toolUi("setbackBtn", false);
   setbackMarkers = []; // the map is rebuilt on a new site, which removes the layer
 }
 
 /** Buildable polygon (lon/lat ring) and labels, or a reason it can't be drawn. */
-function setbackEnvelope(a: Assessment, p: Pot): { ring: XY[]; labels: { ll: XY; text: string }[] } | string {
+type SbInfo = { i: number; kind: string; len: number; std: number; off: number; mid: XY };
+function setbackEnvelope(a: Assessment, p: Pot, ov: Record<number, number> = {}): { ring: XY[]; labels: { ll: XY; text: string }[]; info: SbInfo[]; area: number; stdArea: number; lotArea: number } | string {
   const set = setbackSet(a);
   if (!set) return "Setback distances for this zone and lot size aren't in the app.";
   const val = (label: string) => parseFloat(set.rows.find((r) => r.label === label)?.value ?? "");
-  const txt = (label: string) => set.rows.find((r) => r.label === label)?.value ?? "";
   const d = { front: val(SETBACK_ROWS.front), side: val(SETBACK_ROWS.side), rear: val(SETBACK_ROWS.rear) };
   if (!isFinite(d.front) || !isFinite(d.side) || !isFinite(d.rear)) return "The setback rows needed aren't in the data.";
   const g = a.parcel.geom;
@@ -1385,23 +1388,33 @@ function setbackEnvelope(a: Assessment, p: Pot): { ring: XY[]; labels: { ll: XY;
   if (Math.abs(fd[0] * rd[0] + fd[1] * rd[1]) < Math.cos((30 * Math.PI) / 180)) return "No clear rear edge opposite the front.";
   // Intersect the half-planes: clip the lot by each edge moved inward by its setback.
   let poly: XY[] = sides.map((sd) => sd[0]);
-  const lines: { a: XY; nrm: XY; off: number }[] = [];
-  for (let i = 0; i < n; i++) {
-    const off = fronts.includes(i) ? d.front : i === ri ? d.rear : d.side;
-    const nrm = normal(i);
-    lines.push({ a: sides[i][0], nrm, off });
-    const f = (q: XY) => (q[0] - sides[i][0][0]) * nrm[0] + (q[1] - sides[i][0][1]) * nrm[1] - off;
-    const out: XY[] = [];
-    for (let k = 0; k < poly.length; k++) {
-      const [c, nx] = [poly[k], poly[(k + 1) % poly.length]];
-      const [fc, fnx] = [f(c), f(nx)];
-      if (fc >= 0) out.push(c);
-      if ((fc >= 0) !== (fnx >= 0)) { const t = fc / (fc - fnx); out.push([c[0] + (nx[0] - c[0]) * t, c[1] + (nx[1] - c[1]) * t]); }
+  const kindOf = (i: number) => (fronts.includes(i) ? "front" : i === ri ? "rear" : "side");
+  const std = (i: number) => (fronts.includes(i) ? d.front : i === ri ? d.rear : d.side);
+  // Clip the lot by every edge moved inward by its setback.
+  const clip = (offOf: (i: number) => number) => {
+    let poly: XY[] = sides.map((sd) => sd[0]);
+    const lines: { a: XY; nrm: XY; off: number }[] = [];
+    for (let i = 0; i < n; i++) {
+      const off = offOf(i);
+      const nrm = normal(i);
+      lines.push({ a: sides[i][0], nrm, off });
+      const f = (q: XY) => (q[0] - sides[i][0][0]) * nrm[0] + (q[1] - sides[i][0][1]) * nrm[1] - off;
+      const out: XY[] = [];
+      for (let k = 0; k < poly.length; k++) {
+        const [c, nx] = [poly[k], poly[(k + 1) % poly.length]];
+        const [fc, fnx] = [f(c), f(nx)];
+        if (fc >= 0) out.push(c);
+        if ((fc >= 0) !== (fnx >= 0)) { const t = fc / (fc - fnx); out.push([c[0] + (nx[0] - c[0]) * t, c[1] + (nx[1] - c[1]) * t]); }
+      }
+      poly = out;
+      if (poly.length < 3) return null;
     }
-    poly = out;
-    if (poly.length < 3) return "The setbacks leave no buildable area on this lot.";
-  }
-  if (Math.abs(shoe(poly)) < 1) return "The setbacks leave no buildable area on this lot.";
+    return Math.abs(shoe(poly)) < 1 ? null : { poly, lines };
+  };
+  const base = clip(std);
+  const cur = clip((i) => ov[i] ?? std(i));
+  if (!cur) return "The setbacks leave no buildable area on this lot.";
+  const { poly, lines } = cur;
   const labels: { ll: XY; text: string }[] = [];
   lines.forEach((ln, i) => {
     const on = poly.filter((q) => Math.abs((q[0] - ln.a[0]) * ln.nrm[0] + (q[1] - ln.a[1]) * ln.nrm[1] - ln.off) < 0.01);
@@ -1409,20 +1422,24 @@ function setbackEnvelope(a: Assessment, p: Pot): { ring: XY[]; labels: { ll: XY;
     const u = dirOf(i), t = (q: XY) => q[0] * u[0] + q[1] * u[1];
     const [lo, hi] = [on.reduce((x, y) => (t(y) < t(x) ? y : x)), on.reduce((x, y) => (t(y) > t(x) ? y : x))];
     if (Math.hypot(hi[0] - lo[0], hi[1] - lo[1]) < 1) return;
-    const kind = fronts.includes(i) ? "front" : i === ri ? "rear" : "side";
-    labels.push({ ll: toLL([(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2]), text: `${kind} ${txt(SETBACK_ROWS[kind])}` });
+    labels.push({ ll: toLL([(lo[0] + hi[0]) / 2, (lo[1] + hi[1]) / 2]), text: `${kindOf(i)} ${+ln.off.toFixed(2)} m` });
   });
   setbackNote = corner ? " Corner lot: both street edges use the front setback; a secondary frontage may need less, so check." : "";
-  return { ring: [...poly, poly[0]].map(toLL), labels };
+  const info: SbInfo[] = sides.map((_, i) => ({ i, kind: kindOf(i), len: p.edges[i].length_m, std: std(i), off: ov[i] ?? std(i), mid: p.edges[i].mid as XY }));
+  return { ring: [...poly, poly[0]].map(toLL), labels, info, area: Math.abs(shoe(poly)), stdArea: base ? Math.abs(shoe(base.poly)) : 0, lotArea: Math.abs(shoe(sides.map((sd) => sd[0]))) };
 }
 
+let setbackOv: Record<number, number> = {};
 function drawSetbacks() {
   if (!map) return;
   clearSetbackLayer();
-  if (!setbackOn) return setFloodUi(floodOn);
-  const res = current && pot ? setbackEnvelope(current, pot) : "Lot measurements aren't loaded yet.";
-  if (typeof res === "string") return setFloodUi(floodOn, `<b>Can't draw setbacks for this lot</b><div class="meta">${esc(res)}</div>`);
-  map.addSource("setb", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: res.ring } } });
+  const ed = $("setbackEd") as HTMLElement;
+  if (!setbackOn) { ed.hidden = true; return setFloodUi(floodOn); }
+  const res = current && pot ? setbackEnvelope(current, pot, setbackOv) : "Lot measurements aren't loaded yet.";
+  if (typeof res === "string") { ed.hidden = true; return setFloodUi(floodOn, `<b>Can't draw setbacks for this lot</b><div class="meta">${esc(res)}</div>`); }
+  const geom = { type: "Polygon", coordinates: [res.ring] };
+  map.addSource("setb", { type: "geojson", data: { type: "Feature", properties: {}, geometry: geom as any } });
+  map.addLayer({ id: "setbf", type: "fill", source: "setb", paint: { "fill-color": "#0f5e4b", "fill-opacity": 0.22 } });
   map.addLayer({ id: "setb", type: "line", source: "setb", paint: { "line-color": "#0f5e4b", "line-width": 2, "line-dasharray": [3, 2] } });
   for (const l of res.labels) {
     const el = document.createElement("div");
@@ -1430,8 +1447,34 @@ function drawSetbacks() {
     el.textContent = l.text;
     setbackMarkers.push(new maplibregl.Marker({ element: el }).setLngLat(l.ll).addTo(map));
   }
+  for (const e of res.info) {
+    const el = document.createElement("div");
+    el.className = "measlbl";
+    el.textContent = String(e.i + 1);
+    setbackMarkers.push(new maplibregl.Marker({ element: el }).setLngLat(e.mid).addTo(map));
+  }
+  const diff = res.area - res.stdArea;
+  ed.hidden = false;
+  ed.innerHTML = `<b>Setbacks: try options</b>
+    <div class="meta">Numbered lot edges. Change a distance to see the buildable area.</div>
+    <table>${res.info.map((e) => `<tr><td>${e.i + 1} · ${e.kind}<div class="meta">${e.len.toFixed(1)} m edge</div></td><td><input type="number" step="0.1" min="0" max="30" data-edge="${e.i}" value="${+e.off.toFixed(2)}" class="${e.off < e.std - 0.001 ? "below" : ""}" /> m<div class="meta">standard ${+e.std.toFixed(2)}</div></td></tr>`).join("")}</table>
+    <div class="sbarea">Buildable area <b>${res.area.toFixed(0)} m²</b> of ${res.lotArea.toFixed(0)} m² lot<div class="meta">Standard setbacks: ${res.stdArea.toFixed(0)} m² (${diff >= 0 ? "+" : ""}${diff.toFixed(0)} m² with your changes)</div></div>
+    ${res.info.some((e) => e.off < e.std - 0.001) ? `<p class="meta warnp">Orange distances are below the standard. A building closer than the acceptable outcome is assessed against the performance outcome instead, and council has to agree. Ask Brisbane City Council before relying on it.</p>` : `<p class="meta">Moving one side in lets you move another side out only if council accepts the lower distance.</p>`}
+    <button type="button" class="ghost" id="sbReset">Reset to standard</button>`;
   setFloodUi(floodOn, `<b>Setbacks (indicative)</b><div class="meta">Ground-floor building wall setbacks from the Queensland Housing Code, applied to the measured lot. Verify with council before designing.${setbackNote}</div>`);
 }
+$("setbackEd").addEventListener("change", (ev) => {
+  const t = ev.target as HTMLInputElement;
+  if (t.dataset.edge == null) return;
+  const v = parseFloat(t.value);
+  if (isFinite(v) && v >= 0) setbackOv[Number(t.dataset.edge)] = v; else delete setbackOv[Number(t.dataset.edge)];
+  drawSetbacks();
+});
+$("setbackEd").addEventListener("click", (ev) => { if ((ev.target as HTMLElement).id === "sbReset") { setbackOv = {}; drawSetbacks(); } });
+document.querySelector(".panel")!.addEventListener("click", (ev) => {
+  if (!(ev.target as HTMLElement).closest("[data-act=setb]")) return;
+  setbackOn = true; toolUi("setbackBtn", true); drawSetbacks();
+});
 $("setbackBtn").addEventListener("click", () => { setbackOn = !setbackOn; toolUi("setbackBtn", setbackOn); drawSetbacks(); });
 // ==== end Setbacks tool ====
 
