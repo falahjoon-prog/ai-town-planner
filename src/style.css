@@ -201,9 +201,10 @@ dialog.wide { width: min(820px, 94vw); }
 .dlg-foot { display: flex; justify-content: flex-end; position: sticky; bottom: 0; background: var(--panel); padding: 10px 0 12px; margin-top: 6px; border-top: 1px solid var(--line); }
 .dlg > h2, .dlg-top { position: sticky; top: 0; z-index: 3; background: var(--panel); padding-top: 4px; padding-bottom: 6px; margin: 0; }
 .dlg-top { display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid var(--line); }
+.dlg-top:not(:has(.dlg-row)) { flex-direction: row; align-items: center; justify-content: space-between; }
 .dlg-top h2 { margin: 0; }
 .dlg-row { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; padding-top: 2px; }
-.x { background: transparent; color: var(--ink); border: 1px solid var(--line); padding: 2px 10px; font-size: 16px; line-height: 1.4; border-radius: 8px; }
+.x { flex: none; align-self: center; background: transparent; color: var(--ink); border: 1px solid var(--line); padding: 2px 10px; font-size: 16px; line-height: 1.4; border-radius: 8px; }
 .x:hover { background: var(--chip); }
 .model { display: flex; justify-content: space-between; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .model.active { border-color: var(--accent); }
