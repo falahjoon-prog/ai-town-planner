@@ -539,13 +539,14 @@ const link = (url: string, text: string) => (url ? `<a href="#" data-url="${esc(
 
 async function loadPotential(changed = false) {
   if (!current) return;
+  $("pot").innerHTML = `<p class="meta">Loading…</p>`;
   try {
     pot = await invoke<Pot>("potential", { pid: current.parcel.pid, useId: useId() });
+    renderPotential();
   } catch (e) {
-    $("pot").innerHTML = `<p class="err">${esc(e)}</p>`;
+    $("pot").innerHTML = `<p class="err">Development potential could not be shown: ${esc(e)}</p>`;
     return;
   }
-  renderPotential();
   if (changed) {
     const pb = $("site").querySelector<HTMLElement>(".pbody")!;
     pb.scrollTop = 0;
@@ -856,11 +857,12 @@ function drawMap(a: Assessment) {
       const color = PALETTE[i % PALETTE.length];
       m.addSource(id, { type: "geojson", data: { type: "Feature", properties: {}, geometry: o.geom } });
       const t = o.geom?.type ?? "";
-      if (t.includes("Polygon")) m.addLayer({ id, type: "fill", source: id, paint: { "fill-color": color, "fill-opacity": 0.15 } });
+      if (t.includes("Polygon")) m.addLayer({ id, type: "line", source: id, paint: { "line-color": color, "line-width": 1.5, "line-opacity": 0.8, "line-dasharray": [2, 2] } });
       else if (t.includes("Line")) m.addLayer({ id, type: "line", source: id, paint: { "line-color": color, "line-width": 3 } });
       else m.addLayer({ id, type: "circle", source: id, paint: { "circle-color": color, "circle-radius": 5 } });
     });
     m.addSource("lot", { type: "geojson", data: { type: "Feature", properties: {}, geometry: a.parcel.geom } });
+    m.addLayer({ id: "lot-hl", type: "fill", source: "lot", paint: { "fill-color": "#fde68a", "fill-opacity": 0.12 } });
     m.addLayer({ id: "lot", type: "line", source: "lot", paint: { "line-color": "#111827", "line-width": 2.5 } });
     const b = bounds(a.parcel.geom);
     m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 40, duration: 0 });
