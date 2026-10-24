@@ -1517,29 +1517,27 @@ document.querySelectorAll<HTMLElement>(".seg [data-base]").forEach((b) =>
 );
 syncBase();
 
-function drag(el: HTMLElement, side: "l" | "r") {
+function drag(el: HTMLElement) {
   el.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     el.setPointerCapture(e.pointerId);
     const move = (ev: PointerEvent) => {
-      const px = side === "l" ? clampN(ev.clientX - 6, 120, 320) : clampN(innerWidth - ev.clientX - 6, 340, 700);
-      document.documentElement.style.setProperty(side === "l" ? "--left" : "--right", `${px}px`);
+      const px = clampN(innerWidth - ev.clientX - 6, 340, 700);
+      document.documentElement.style.setProperty("--right", `${px}px`);
       resizeMap();
     };
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", () => {
       el.removeEventListener("pointermove", move);
-      try { localStorage.setItem(side === "l" ? "colLeft" : "colRight", document.documentElement.style.getPropertyValue(side === "l" ? "--left" : "--right")); } catch { /* storage unavailable */ }
+      try { localStorage.setItem("colRight", document.documentElement.style.getPropertyValue("--right")); } catch { /* storage unavailable */ }
     }, { once: true });
   });
 }
-drag($("gripL"), "l");
-drag($("gripR"), "r");
+drag($("gripR"));
 
-// Restore remembered layout (column widths, Full map)
+// Restore remembered layout (right panel width, Full map)
 try {
-  const l = localStorage.getItem("colLeft"), r = localStorage.getItem("colRight");
-  if (l && /^\d+(\.\d+)?px$/.test(l)) document.documentElement.style.setProperty("--left", l);
+  const r = localStorage.getItem("colRight");
   if (r && /^\d+(\.\d+)?px$/.test(r)) document.documentElement.style.setProperty("--right", r);
   if (localStorage.getItem("fullmap") === "1") app.classList.add("fullmap");
 } catch { /* storage unavailable */ }
@@ -1937,7 +1935,7 @@ const MENUS: [string, MI[]][] = [
   ["AI", [["AI engine…", () => openSettings("sset-ai")], ["Built-in models…", () => openSettings("sset-models")], "-", ["Generate AI report", clickId("footReport")], ["Ask the assistant", () => setChat(true)]]],
   ["Forms", [["Open DA forms", clickId("formsBtn")], ["Approvals", clickId("apprBtn")]]],
   ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
-  ["Window", [["Full map on/off", () => setFull(!app.classList.contains("fullmap"))], "-", ["Plain map", setBaseTo("plain")], ["Street map", setBaseTo("street")], ["Aerial photo", setBaseTo("sat")], "-", ["Light / dark", clickId("themeBtn")], ["Reset panel widths", () => { ["--left", "--right"].forEach((v) => document.documentElement.style.removeProperty(v)); try { localStorage.removeItem("colLeft"); localStorage.removeItem("colRight"); } catch { /* storage unavailable */ } resizeMap(); }], "-", ["Settings…", () => openSettings()]]],
+  ["Window", [["Full map on/off", () => setFull(!app.classList.contains("fullmap"))], "-", ["Plain map", setBaseTo("plain")], ["Street map", setBaseTo("street")], ["Aerial photo", setBaseTo("sat")], "-", ["Light / dark", clickId("themeBtn")], ["Reset panel widths", () => { document.documentElement.style.removeProperty("--right"); try { localStorage.removeItem("colRight"); } catch { /* storage unavailable */ } resizeMap(); }], "-", ["Settings…", () => openSettings()]]],
 ];
 const mbar = $("menubar");
 MENUS.forEach(([name, items]) => {
