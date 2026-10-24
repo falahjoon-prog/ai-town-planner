@@ -205,6 +205,7 @@ def schema(db):
     CREATE TABLE parcels(pid INTEGER PRIMARY KEY, lotplan TEXT, address TEXT, suburb TEXT,
         search TEXT, area REAL, props TEXT, geom TEXT, council TEXT);
     CREATE INDEX parcels_lotplan ON parcels(lotplan);
+    CREATE INDEX parcels_suburb ON parcels(suburb COLLATE NOCASE);
     CREATE TABLE layers(lid INTEGER PRIMARY KEY, dataset_id TEXT UNIQUE, title TEXT, n INTEGER, authority TEXT, council TEXT);
     CREATE TABLE features(fid INTEGER PRIMARY KEY, lid INTEGER, props TEXT, geom TEXT);
     CREATE VIRTUAL TABLE feature_idx USING rtree(fid, minx, maxx, miny, maxy);

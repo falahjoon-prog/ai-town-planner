@@ -545,7 +545,8 @@ async function loadPotential(changed = false) {
     pot = await invoke<Pot>("potential", { pid: current.parcel.pid, useId: useId() });
     renderPotential();
   } catch (e) {
-    $("pot").innerHTML = `<p class="err">Development potential could not be shown: ${esc(e)}</p>`;
+    $("pot").innerHTML = `<p class="err" role="alert">Development potential could not be shown: ${esc(String(e))} <a href="#" id="potRetry">Retry</a></p>`;
+    $("potRetry").addEventListener("click", (ev) => { ev.preventDefault(); loadPotential(changed); });
     return;
   }
   if (changed) {
@@ -1645,7 +1646,8 @@ $("suburbBtn").addEventListener("click", async () => {
       <tr><td>Lots 1,000 m² or more</td><td>${r.pct_1000}%</td></tr></tbody></table>
       <p class="meta">${siteCouncil().id === "brisbane" ? "From the Brisbane cadastre in the data pack." : "From the Queensland cadastre in the data pack (lots in this suburb name, all councils)."} Population, income and housing: ${destBtn("abs", "ABS Census search by area", "", "a")} (QuickStats for "${esc(sub)}").</p>`;
   } catch (e) {
-    out.innerHTML = `<p class="err" role="alert">Suburb report failed: ${esc(String(e))}</p>`;
+    out.innerHTML = `<p class="err" role="alert">Suburb report failed: ${esc(String(e))} <a href="#" id="suburbRetry">Retry</a></p>`;
+    $("suburbRetry").addEventListener("click", (ev) => { ev.preventDefault(); $("suburbBtn").click(); });
   } finally {
     ($("suburbBtn") as HTMLButtonElement).disabled = false;
   }

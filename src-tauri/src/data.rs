@@ -346,6 +346,8 @@ fn has_authority_column(c: &Connection) -> bool {
 fn layer_council_col(c: &Connection) -> &'static str {
     if c.prepare("SELECT council FROM layers LIMIT 1").is_ok() {
         "COALESCE(l.council, CASE WHEN COALESCE(l.authority, 'council') = 'council' THEN 'brisbane' END)"
+    } else if !has_authority_column(c) {
+        "'brisbane'" // oldest packs: every layer is Brisbane's
     } else {
         "CASE WHEN COALESCE(l.authority, 'council') = 'council' THEN 'brisbane' END"
     }
@@ -466,4 +468,29 @@ pub fn flood_map(c: &Connection, p: &Parcel, radius_m: f64) -> Result<Vec<Overla
         out.push(OverlayHit { authority, council, dataset_id, title, props, coverage_pct: None, distance_m: None, geom });
     }
     Ok(out)
+}
+
+/// Lot-size profile of a suburb (one row per lot/plan). One pass over parcels: grouping in SQL walked the lotplan
+/// index and read every parcel row in random order, which was very slow on a large pack.
+pub fn suburb_stats(c: &Connection, suburb: &str) -> Result<Value, String> {
+    let mut st = c.prepare("SELECT lotplan, area FROM parcels WHERE suburb = ?1 COLLATE NOCASE AND area > 0").map_err(e)?;
+    let mut by_lot: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
+    let rows = st.query_map([suburb], |r| Ok((r.get::<_, Option<String>>(0)?.unwrap_or_default(), r.get::<_, f64>(1)?))).map_err(e)?;
+    for r in rows {
+        let (lp, a) = r.map_err(e)?;
+        let m = by_lot.entry(lp).or_insert(a);
+        *m = m.max(a);
+    }
+    let mut v: Vec<f64> = by_lot.into_values().collect();
+    if v.is_empty() {
+        return Err(format!("No lots found for {suburb}"));
+    }
+    v.sort_by(|a, b| a.total_cmp(b));
+    let q = |f: f64| v[((v.len() - 1) as f64 * f).round() as usize].round();
+    let share = |min: f64| (v.iter().filter(|x| **x >= min).count() as f64 * 1000.0 / v.len() as f64).round() / 10.0;
+    Ok(serde_json::json!({
+        "suburb": suburb, "lots": v.len(), "median_m2": q(0.5), "p25_m2": q(0.25), "p75_m2": q(0.75),
+        "pct_600": share(600.0), "pct_800": share(800.0), "pct_900": share(900.0), "pct_1000": share(1000.0),
+        "count_900": v.iter().filter(|x| **x >= 900.0).count()
+    }))
 }

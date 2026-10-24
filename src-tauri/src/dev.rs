@@ -263,10 +263,12 @@ fn strips(lot_m: &MultiPolygon<f64>, u: (f64, f64), n: usize, pr: &Proj) -> Vec<
     let v = (-u.1, u.0);
     let ts: Vec<f64> = lot_m.0.iter().flat_map(|p| p.exterior().0.iter().map(|c| c.x * u.0 + c.y * u.1)).collect();
     let (tmin, tmax) = ts.iter().fold((f64::MAX, f64::MIN), |(a, b), t| (a.min(*t), b.max(*t)));
-    let big = 1.0e4;
+    // Slab extent across the frontage direction must span the lot itself (coordinates are absolute metres).
+    let (smin, smax) = lot_m.0.iter().flat_map(|p| p.exterior().0.iter().map(|c| c.x * v.0 + c.y * v.1)).fold((f64::MAX, f64::MIN), |(a, b), s| (a.min(s), b.max(s)));
     let slab = |t0: f64, t1: f64| {
         let pt = |t: f64, s: f64| Coord { x: u.0 * t + v.0 * s, y: u.1 * t + v.1 * s };
-        MultiPolygon(vec![Polygon::new(LineString(vec![pt(t0, -big), pt(t1, -big), pt(t1, big), pt(t0, big), pt(t0, -big)]), vec![])])
+        let (s0, s1) = (smin - 1.0, smax + 1.0);
+        MultiPolygon(vec![Polygon::new(LineString(vec![pt(t0, s0), pt(t1, s0), pt(t1, s1), pt(t0, s1), pt(t0, s0)]), vec![])])
     };
     let cut = |t0: f64, t1: f64| catch_unwind(AssertUnwindSafe(|| lot_m.intersection(&slab(t0, t1)))).ok();
     let total = lot_m.unsigned_area();
@@ -530,13 +532,28 @@ fn infra_kind(title: &str, props: &Value) -> String {
     }
 }
 
+/// Removes the connection's progress handler (time budget) when dropped.
+struct Reset<'a>(&'a Connection);
+impl Drop for Reset<'_> {
+    fn drop(&mut self) {
+        self.0.progress_handler(0, None::<fn() -> bool>);
+    }
+}
+
 /// Nearest electricity infrastructure of each kind within `search_m`, plus features within `map_m` for the map.
 pub fn infra(c: &Connection, pg: &geo::Geometry<f64>, pr: &Proj, search_m: f64, map_m: f64) -> Result<(Vec<Nearest>, Vec<Value>), String> {
-    if c.prepare("SELECT authority FROM layers LIMIT 1").is_err() {
+    // Packs without infrastructure layers (older ones) skip the wide spatial scan, which reads every feature within
+    // `search_m` and took minutes on a large pack.
+    let has_infra = c.query_row("SELECT 1 FROM layers WHERE authority = 'infra' LIMIT 1", [], |_| Ok(())).is_ok();
+    if !has_infra {
         return Ok((vec![], vec![]));
     }
     let rect = geo::BoundingRect::bounding_rect(pg).ok_or("Empty lot")?;
     let (px, py) = (search_m / pr.kx, search_m / pr.ky);
+    // Time budget: a slow scan gives no power results instead of holding up the whole command.
+    let until = std::time::Instant::now() + std::time::Duration::from_secs(6);
+    c.progress_handler(10_000, Some(move || std::time::Instant::now() > until));
+    let _reset = Reset(c);
     let mut st = c
         .prepare(
             "SELECT l.title, f.props, f.geom FROM feature_idx i JOIN features f ON f.fid = i.fid JOIN layers l ON l.lid = f.lid
@@ -550,8 +567,12 @@ pub fn infra(c: &Connection, pg: &geo::Geometry<f64>, pr: &Proj, search_m: f64, 
         .map_err(e)?;
     let mut best: Vec<Nearest> = Vec::new();
     let mut feats = Vec::new();
-    for row in rows.flatten() {
-        let (title, props, geom) = row;
+    for row in rows {
+        let (title, props, geom) = match row {
+            Ok(r) => r,
+            Err(rusqlite::Error::SqliteFailure(..)) => break, // interrupted by the time budget
+            Err(_) => continue,
+        };
         let Ok(fg) = to_geo(&geom) else { continue };
         let props: Value = serde_json::from_str(&props).unwrap_or(Value::Null);
         let d = distance_m(pg, &fg, pr);
@@ -637,4 +658,108 @@ pub async fn contours(p: &Parcel) -> Result<Value, String> {
         return Ok(json!({"source": label, "stats": stats, "features": lines}));
     }
     Err("No contour data found for this area.".into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{data, rules};
+    use std::time::{Duration, Instant};
+
+    /// Old Brisbane-only pack schema (no council/authority columns) with a lot, its neighbours and a zoning polygon.
+    fn pack(w: f64, d: f64, newer: bool) -> Connection {
+        let c = Connection::open_in_memory().unwrap();
+        c.execute_batch(
+            "CREATE TABLE manifest(key TEXT PRIMARY KEY, value TEXT);
+             CREATE TABLE parcels(pid INTEGER PRIMARY KEY, lotplan TEXT, address TEXT, suburb TEXT, area REAL, props TEXT, geom TEXT);
+             CREATE TABLE layers(lid INTEGER PRIMARY KEY, dataset_id TEXT UNIQUE, title TEXT, n INTEGER);
+             CREATE TABLE features(fid INTEGER PRIMARY KEY, lid INTEGER, props TEXT, geom TEXT);
+             CREATE VIRTUAL TABLE feature_idx USING rtree(fid, minx, maxx, miny, maxy);
+             CREATE VIRTUAL TABLE parcel_idx USING rtree(pid, minx, maxx, miny, maxy);
+             INSERT INTO manifest VALUES('version', 'test');
+             INSERT INTO layers VALUES(1, 'bcc:zoning', 'Zoning', 1);",
+        )
+        .unwrap();
+        if newer {
+            c.execute_batch(
+                "ALTER TABLE layers ADD COLUMN authority TEXT; ALTER TABLE layers ADD COLUMN council TEXT;
+                 UPDATE layers SET authority = 'council', council = 'brisbane';
+                 INSERT INTO layers VALUES(2, 'ga:lines', 'Australia — Transmission lines', 1, 'infra', NULL);",
+            )
+            .unwrap();
+        }
+        let pr = Proj::new(-27.62);
+        let (x0, y0) = (153.05, -27.62);
+        let rect = |x: f64, y: f64| {
+            let (dx, dy) = (w / pr.kx, d / pr.ky);
+            let g = json!({"type": "Polygon", "coordinates": [[[x, y], [x + dx, y], [x + dx, y + dy], [x, y + dy], [x, y]]]});
+            (g.to_string(), x, x + dx, y, y + dy)
+        };
+        for (pid, k) in [(1i64, 0.0), (2, -1.0), (3, 1.0)] {
+            let (g, a, b, c0, d0) = rect(x0 + k * w / pr.kx, y0);
+            c.execute("INSERT INTO parcels VALUES(?1, ?2, '28 EDEN ELM ST', 'CALAMVALE', ?3, '{}', ?4)", rusqlite::params![pid, format!("{pid}RP850593"), w * d, g])
+                .unwrap();
+            c.execute("INSERT INTO parcel_idx VALUES(?1, ?2, ?3, ?4, ?5)", rusqlite::params![pid, a, b, c0, d0]).unwrap();
+        }
+        let z = json!({"type": "Polygon", "coordinates": [[[x0 - 0.01, y0 - 0.01], [x0 + 0.01, y0 - 0.01], [x0 + 0.01, y0 + 0.01], [x0 - 0.01, y0 + 0.01], [x0 - 0.01, y0 - 0.01]]]});
+        c.execute("INSERT INTO features VALUES(1, 1, ?1, ?2)", rusqlite::params![json!({"ZONE_DESC": "Low density residential"}).to_string(), z.to_string()]).unwrap();
+        c.execute("INSERT INTO feature_idx VALUES(1, ?1, ?2, ?3, ?4)", rusqlite::params![x0 - 0.01, x0 + 0.01, y0 - 0.01, y0 + 0.01]).unwrap();
+        if newer {
+            let l = json!({"type": "LineString", "coordinates": [[x0 + 0.02, y0 - 0.05], [x0 + 0.02, y0 + 0.05]]});
+            c.execute("INSERT INTO features VALUES(2, 2, '{}', ?1)", [l.to_string()]).unwrap();
+            c.execute("INSERT INTO feature_idx VALUES(2, ?1, ?1, ?2, ?3)", rusqlite::params![x0 + 0.02, y0 - 0.05, y0 + 0.05]).unwrap();
+        }
+        c
+    }
+
+    fn run(w: f64, d: f64, use_id: &str, newer: bool) -> Potential {
+        let c = pack(w, d, newer);
+        let p = data::parcel(&c, 1).unwrap();
+        let o = data::overlays(&c, &p).unwrap();
+        let a = rules::assess(p, o, data::manifest(&c).unwrap());
+        let t = Instant::now();
+        let pot = potential(&c, &a, use_id).unwrap();
+        assert!(t.elapsed() < Duration::from_secs(5), "potential took {:?}", t.elapsed());
+        pot
+    }
+
+    #[test]
+    fn knowledge_files_parse() {
+        assert!(!provisions_kb().is_empty());
+        assert!(!uses_kb().is_empty());
+        assert!(!forms_kb().is_empty());
+        assert!(council::kb("brisbane").is_some() || council::kb("logan").is_some());
+        assert!(!council::field(council::DEFAULT, "scheme").is_empty());
+    }
+
+    #[test]
+    fn potential_small_and_large_lots() {
+        for (w, d) in [(16.0, 40.0), (20.0, 45.0), (30.0, 60.0), (60.0, 120.0)] {
+            for u in ["general", "house", "dual", "md"] {
+                for newer in [false, true] {
+                    let pot = run(w, d, u, newer);
+                    assert!(pot.area_m2 > 0.0);
+                    assert_eq!(pot.power.len(), newer as usize, "power infrastructure only in newer packs");
+                }
+            }
+        }
+        // 1,800 m² low density lot: 4 lots by area, and the sketch strips must actually cover the lot.
+        let pot = run(30.0, 60.0, "general", false);
+        assert!(pot.provisions.is_some(), "low density residential provisions");
+        assert_eq!(pot.lots_by_area, Some(4));
+        assert_eq!(pot.sketch.len(), 4);
+        let total: f64 = pot.sketch.iter().map(|s| s.area_m2).sum();
+        assert!((total - 1800.0).abs() < 20.0, "sketch area {total}");
+    }
+
+    #[test]
+    fn suburb_stats_one_row_per_lot() {
+        let c = pack(20.0, 45.0, false);
+        // A strata scheme repeats its base lot: counted once.
+        c.execute("INSERT INTO parcels VALUES(9, '1RP850593', '', 'calamvale', 900, '{}', '{}')", []).unwrap();
+        let s = data::suburb_stats(&c, "Calamvale").unwrap();
+        assert_eq!(s["lots"], 3);
+        assert_eq!(s["count_900"], 3);
+        assert!(data::suburb_stats(&c, "Nowhere").is_err());
+    }
 }
