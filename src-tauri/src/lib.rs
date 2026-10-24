@@ -481,7 +481,7 @@ async fn chat(
     let sink: ai::Sink = Arc::new(move |t: &str| {
         let _ = on_token.send(t.to_string());
     });
-    ai::generate(&cfg, model, state.llm.clone(), msgs, 900, sink).await
+    ai::generate(&cfg, model, state.llm.clone(), msgs, 512, sink).await
 }
 
 #[tauri::command]
@@ -506,7 +506,7 @@ async fn assistant(
     let sink: ai::Sink = Arc::new(move |t: &str| {
         let _ = on_token.send(t.to_string());
     });
-    ai::generate(&cfg, model, state.llm.clone(), msgs, 900, sink).await
+    ai::generate(&cfg, model, state.llm.clone(), msgs, 512, sink).await
 }
 
 #[tauri::command]
