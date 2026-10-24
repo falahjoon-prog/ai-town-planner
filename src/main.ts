@@ -1593,6 +1593,7 @@ function drag(el: HTMLElement) {
   el.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     el.setPointerCapture(e.pointerId);
+    el.classList.add("dragging");
     const move = (ev: PointerEvent) => {
       const px = clampN(innerWidth - ev.clientX - 6, 340, maxRight());
       document.documentElement.style.setProperty("--right", `${px}px`);
@@ -1600,12 +1601,36 @@ function drag(el: HTMLElement) {
     };
     el.addEventListener("pointermove", move);
     el.addEventListener("pointerup", () => {
+      el.classList.remove("dragging");
       el.removeEventListener("pointermove", move);
       try { localStorage.setItem("colRight", document.documentElement.style.getPropertyValue("--right")); } catch { /* storage unavailable */ }
     }, { once: true });
   });
 }
 drag($("gripR"));
+// Double-click: expand to max width, again to restore the remembered width (or the default)
+let prevRight: string | null = null;
+$("gripR").addEventListener("dblclick", (e) => {
+  e.preventDefault();
+  const root = document.documentElement;
+  const cur = $("rightcol").getBoundingClientRect().width;
+  const max = Math.floor(maxRight());
+  if (cur >= max - 1) {
+    if (prevRight) root.style.setProperty("--right", prevRight);
+    else root.style.removeProperty("--right");
+    prevRight = null;
+  } else {
+    prevRight = root.style.getPropertyValue("--right") || null;
+    root.style.setProperty("--right", `${max}px`);
+  }
+  root.classList.add("grip-anim");
+  setTimeout(() => { root.classList.remove("grip-anim"); resizeMap(); }, 180);
+  resizeMap();
+  try {
+    const v = root.style.getPropertyValue("--right");
+    if (v) localStorage.setItem("colRight", v); else localStorage.removeItem("colRight");
+  } catch { /* storage unavailable */ }
+});
 
 // Restore remembered layout (right panel width, Full map)
 try {
@@ -1989,7 +2014,22 @@ $("rail").addEventListener("click", (ev) => {
   else showSec(b.dataset.sec!);
 });
 showSec("zoning");
+$("recentBtn").setAttribute("aria-haspopup", "listbox");
+$("recentBtn").setAttribute("aria-expanded", "false");
 $("recentBtn").addEventListener("click", () => { if ($("results").innerHTML) $("results").innerHTML = ""; else showRecents(); });
+new MutationObserver(() => {
+  const open = !!$("results").firstElementChild;
+  $("recentBtn").setAttribute("aria-expanded", String(open));
+  if (!open && !$("hint").classList.contains("err") && $("hint").textContent !== "No matches.") $("hint").textContent = "";
+}).observe($("results"), { childList: true });
+document.addEventListener("mousedown", (ev) => {
+  if (!$("results").firstElementChild) return;
+  const t = ev.target as HTMLElement;
+  if (!t.closest("#results") && !t.closest("#recentBtn") && t.id !== "q") $("results").innerHTML = "";
+});
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Escape" && $("results").firstElementChild) { $("results").innerHTML = ""; $("recentBtn").focus(); }
+});
 $("botClose").addEventListener("click", () => setChat(false));
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !($("botWin") as HTMLElement).hidden && !document.querySelector("dialog[open]")) setChat(false); });
 
