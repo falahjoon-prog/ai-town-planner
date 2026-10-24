@@ -302,44 +302,46 @@ async fn flood_map(state: State<'_, AppState>, pid: i64) -> Result<Vec<data::Ove
     .map_err(e)?
 }
 
+/// Runs a heavy read on its own read-only connection, so it never holds the shared lock other commands wait on.
+/// A panic becomes an error, and after 20 s the query is interrupted and an error returned instead of hanging.
+async fn heavy<T: Send + 'static>(
+    app: &AppHandle,
+    state: &AppState,
+    f: impl FnOnce(&rusqlite::Connection) -> Result<T, String> + Send + 'static,
+) -> Result<T, String> {
+    let c = {
+        let g = state.db.lock().map_err(e)?; // held only while opening, so a pack import is not mid-swap
+        g.as_ref().ok_or("No data pack loaded. Open Settings and import a data pack.")?;
+        data::open(&datapack_path(app)?)?
+    };
+    let stop = c.get_interrupt_handle();
+    let job = tauri::async_runtime::spawn_blocking(move || {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&c))).unwrap_or_else(|p| {
+            let msg = p.downcast_ref::<&str>().map(|s| s.to_string()).or_else(|| p.downcast_ref::<String>().cloned());
+            Err(format!("Internal error: {}", msg.unwrap_or_else(|| "unexpected failure".into())))
+        })
+    });
+    match tokio::time::timeout(std::time::Duration::from_secs(20), job).await {
+        Ok(r) => r.map_err(e)?,
+        Err(_) => {
+            stop.interrupt();
+            Err("Timed out after 20 seconds reading the data pack. Try again; if it keeps happening, import the latest data pack in Settings.".into())
+        }
+    }
+}
+
 #[tauri::command]
-async fn potential(state: State<'_, AppState>, pid: i64, use_id: String) -> Result<dev::Potential, String> {
-    let db = state.db.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let a = load_assessment(&db, pid)?;
-        let g = db.lock().map_err(e)?;
-        let c = g.as_ref().ok_or("No data pack loaded")?;
-        dev::potential(c, &a, &use_id)
+async fn potential(app: AppHandle, state: State<'_, AppState>, pid: i64, use_id: String) -> Result<dev::Potential, String> {
+    heavy(&app, &state, move |c| {
+        dev::potential(c, &assessment(c, pid)?, &use_id)
     })
     .await
-    .map_err(e)?
 }
 
 /// Lot-size profile of a suburb from the data pack (one row per lot/plan).
 #[tauri::command]
-async fn suburb_stats(state: State<'_, AppState>, suburb: String) -> Result<serde_json::Value, String> {
-    let db = state.db.clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let g = db.lock().map_err(e)?;
-        let c = g.as_ref().ok_or("No data pack loaded")?;
-        let mut st = c
-            .prepare("SELECT max(area) FROM parcels WHERE suburb = ?1 COLLATE NOCASE AND area > 0 GROUP BY lotplan")
-            .map_err(e)?;
-        let mut v: Vec<f64> = st.query_map([&suburb], |r| r.get::<_, f64>(0)).map_err(e)?.flatten().collect();
-        if v.is_empty() {
-            return Err(format!("No lots found for {suburb}"));
-        }
-        v.sort_by(|a, b| a.total_cmp(b));
-        let q = |f: f64| v[((v.len() - 1) as f64 * f).round() as usize].round();
-        let share = |min: f64| (v.iter().filter(|x| **x >= min).count() as f64 * 1000.0 / v.len() as f64).round() / 10.0;
-        Ok(serde_json::json!({
-            "suburb": suburb, "lots": v.len(), "median_m2": q(0.5), "p25_m2": q(0.25), "p75_m2": q(0.75),
-            "pct_600": share(600.0), "pct_800": share(800.0), "pct_900": share(900.0), "pct_1000": share(1000.0),
-            "count_900": v.iter().filter(|x| **x >= 900.0).count()
-        }))
-    })
-    .await
-    .map_err(e)?
+async fn suburb_stats(app: AppHandle, state: State<'_, AppState>, suburb: String) -> Result<serde_json::Value, String> {
+    heavy(&app, &state, move |c| data::suburb_stats(c, &suburb)).await
 }
 
 /// Electricity infrastructure within 5 km of the lot (for the map).
@@ -406,7 +408,10 @@ async fn draft_form(
 
 fn load_assessment(db: &Arc<Mutex<Option<rusqlite::Connection>>>, pid: i64) -> Result<rules::Assessment, String> {
     let g = db.lock().map_err(e)?;
-    let c = g.as_ref().ok_or("No data pack loaded")?;
+    assessment(g.as_ref().ok_or("No data pack loaded")?, pid)
+}
+
+fn assessment(c: &rusqlite::Connection, pid: i64) -> Result<rules::Assessment, String> {
     let p = data::parcel(c, pid)?;
     let o = data::overlays(c, &p)?;
     Ok(rules::assess(p, o, data::manifest(c)?))
