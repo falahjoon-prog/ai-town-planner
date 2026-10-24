@@ -67,3 +67,9 @@ Common rules for every thread
 2) Done: rail is now the outermost element on the panel's right edge; content sits next to the map; grip, widths, Full map and chat unchanged. No dead CSS (swap only).
 3) Tests: tsc --noEmit ok; vite build ok; headless Chromium 768/1280/1920 light+dark: no horizontal scroll, no clipped text, rail x 1197-1273 / content 763-1197 at 1280, grip drag 762->673 works. Shots /tmp/claude-0/shots/t7-before-* and t7-after-*.
 4) Remaining: none known.
+
+## T8 report – Compare dialog address entry (branch t8-compare-entry, stacked on t7-rail-right)
+1) Files: index.html, src/main.ts, src/style.css, handoffs/threads.md.
+2) Done: address search input in Compare dialog using new shared `findAddresses()` (main search `runSearch` now uses it too, no second search); picked result is added as a checked row, max 3, limit message, Remove button on added rows, Compare disabled until 2-3 ticked; dialog width min(940px, 92vw), max 85vh, larger rows/font, title/X pinned; comparison output code unchanged.
+3) Tests: `tsc --noEmit` and `vite build` pass; headless Chromium (mocked invoke) at 768/1280, light/dark: dialog fully inside viewport, no horizontal scroll, add/remove/limit/disable verified; shots /tmp/claude-0/shots/t8-before-* and t8-after-*. Not tested: Google suggest path (no key), real Windows build.
+4) Remaining: none known; 375 px not checked.
