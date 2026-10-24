@@ -61,3 +61,9 @@ Common rules for every thread
 2) Done: left column is now a 56 px icon rail (app icon on top, 7 tool buttons with SVG icon, title tooltip, aria-label, same ids/order/actions, hover/focus/on states); old logo card, text labels, `--left` clamp, left grip and its drag/localStorage code removed (fixed width makes resizing pointless; right grip kept). Full map still adds Map style and Exit full map to the rail. Right panel: section title 18->15 px, tile value 15->14, finding card title 14.5->14, card/panel padding 10-12 px, setbacks table 12.5 px with 5 px cell padding. At <=900 px right panel is 380 px, tiles go 2 columns with Zone full width, map tools wrap. Map gains about 90 px at 1280.
 3) Tests: tsc --noEmit clean; vite build OK; headless Chromium with mocked invoke at 768/1280/1920, light and dark, constraints and setbacks: no horizontal scroll, no clipped text, no page errors; full map checked at 1280. Shots in /tmp/claude-0/shots/t6-before-* and t6-after-*.
 4) Remaining: at 768 the map is only about 300 px wide; at 1280 the right panel is still 512 px (40vw), the main lever for more map width; other sections (potential, checklist, forms, assistant) only checked indirectly via shared tokens.
+
+## T7 report – rail to right edge
+1) Files: src/style.css (line 56 `.rail`: `order: 2`, border-right -> border-left), handoffs/threads.md.
+2) Done: rail is now the outermost element on the panel's right edge; content sits next to the map; grip, widths, Full map and chat unchanged. No dead CSS (swap only).
+3) Tests: tsc --noEmit ok; vite build ok; headless Chromium 768/1280/1920 light+dark: no horizontal scroll, no clipped text, rail x 1197-1273 / content 763-1197 at 1280, grip drag 762->673 works. Shots /tmp/claude-0/shots/t7-before-* and t7-after-*.
+4) Remaining: none known.
