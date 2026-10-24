@@ -4,7 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       test:
-        description: "Quick test build (2,000 parcels, 3 layers)"
+        description: "Quick test build (small area per council; Brisbane 2,000 parcels, 3 layers)"
+        type: boolean
+        default: false
+      councils:
+        description: "Council ids from src-tauri/knowledge/councils.json, comma separated (empty = all)"
+        type: string
+        default: ""
+      discover:
+        description: "Only print what each council source resolves to (layers, fields, samples); no release"
         type: boolean
         default: false
   schedule:
@@ -16,28 +24,51 @@ permissions:
 jobs:
   datapack:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: pip install ijson
-      - name: Build
-        run: |
-          if [ "${{ inputs.test }}" = "true" ]; then
-            python pipeline/build_datapack.py datapack.sqlite --limit-parcels 2000 --only cp14-zoning-overlay,cp14-flood-overlay-brisbane-river-flood-planning-area,cp14-heritage-overlay
-          else
-            python pipeline/build_datapack.py datapack.sqlite
-          fi
-          ls -lh datapack.sqlite
-          gzip -9 -k datapack.sqlite
-          ls -lh datapack.sqlite.gz
-      - name: Publish release
+      - name: Discover
+        if: ${{ inputs.discover }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="datapack-$(date -u +%Y%m%d-%H%M)"
-          gh release create "$TAG" datapack.sqlite.gz --title "Data pack $TAG" \
-            --notes "Brisbane City Plan 2014 + parcels. Contains data (c) Brisbane City Council, CC BY 4.0. Import this file in the app: Settings > Import data pack." \
+          python pipeline/build_datapack.py --discover ${{ inputs.councils && format('--councils {0}', inputs.councils) || '' }} 2>&1 | tee discover.txt
+          # Published as a release asset so the output can be read without log access; the app ignores this tag.
+          gh release create "discover-$(date -u +%Y%m%d-%H%M)" discover.txt --target "${{ github.sha }}" --title "Discover output" --notes "Source discovery output (not a data pack)." --prerelease
+      - name: Build
+        if: ${{ !inputs.discover }}
+        run: |
+          ARGS="${{ inputs.councils && format('--councils {0}', inputs.councils) || '' }}"
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
+          set -o pipefail
+          python -u pipeline/build_datapack.py datapack.sqlite $ARGS 2>&1 | tee build.log
+          ls -lh datapack.sqlite
+          gzip -9 -k datapack.sqlite
+          ls -lh datapack.sqlite.gz
+      - name: Publish build log
+        # Readable without Actions log access (release assets can be downloaded through the API); the app ignores this tag.
+        if: ${{ always() && !inputs.discover && github.event_name == 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f build.log ] || exit 0
+          gh release create "buildlog-$(date -u +%Y%m%d-%H%M)" build.log --target "${{ github.sha }}" --title "Data pack build log" --notes "Build log of run ${{ github.run_id }} (not a data pack)." --prerelease
+      - name: Publish release
+        if: ${{ !inputs.discover }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # The app downloads the newest "datapack-*" release, so only full builds from main use that tag.
+          STAMP="$(date -u +%Y%m%d-%H%M)"
+          BRANCH="$(echo '${{ github.ref_name }}' | tr -c 'A-Za-z0-9.-' '-' | sed 's/-*$//')"
+          if [ "${{ inputs.test }}" = "true" ]; then TAG="testpack-$BRANCH-$STAMP"
+          elif [ "${{ github.ref_name }}" != "main" ]; then TAG="branchpack-$BRANCH-$STAMP"
+          else TAG="datapack-$STAMP"; fi
+          REGION="$(python3 -c "import sqlite3;print(dict(sqlite3.connect('datapack.sqlite').execute('select key,value from manifest'))['region'])")"
+          gh release create "$TAG" datapack.sqlite.gz --target "${{ github.sha }}" --title "Data pack $TAG" \
+            --notes "Councils: $REGION. Planning scheme layers, parcels and Queensland state layers; see each council's licence in handoffs/councils.md. Import this file in the app: Settings > Import data pack." \
             --prerelease

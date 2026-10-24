@@ -1,0 +1,2094 @@
+{
+ "logan": {
+  "zones": [
+   {
+    "name": "Low density residential zone",
+    "keywords": [
+     "low density residential"
+    ],
+    "purpose": "The purpose of the Low density residential zone is to provide for: a. a variety of low density dwelling types, including dwelling houses; and b. community uses, and small-scale services, facilities and infrastructure, to support local residents. Precincts: Acreage, Large suburban, Small acreage, Small lot, Suburban, Village.",
+    "typical": "Dwelling house is accepted development; dual occupancy (auxiliary unit) is accepted subject to requirements; multiple dwellings need code assessment within precinct density limits (Table 5.5.5.1).",
+    "source": "Logan Planning Scheme 2015 v9.2, 6.2.5.2 Purpose",
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%206-2-5%20Zone%20code%20-%20Low%20density%20residential%20(LPS%20v9_2).pdf",
+    "verify": false
+   },
+   {
+    "name": "Low-medium density residential zone",
+    "keywords": [
+     "low medium density residential",
+     "low-medium density residential"
+    ],
+    "purpose": "The purpose of the Low-medium density residential zone is to provide for: a. a variety of dwelling types, including dwelling houses and low to medium density multiple dwellings; and b. community uses, and small-scale services, facilities and infrastructure, to support local residents. Precincts: Apartment, Townhouse.",
+    "typical": "Dwelling house is accepted development; multiple dwellings need code assessment; dual occupancy is accepted subject to requirements in the Townhouse precinct on 500 m² or more (Table 5.5.7.1).",
+    "source": "Logan Planning Scheme 2015 v9.2, 6.2.7.2 Purpose",
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%206-2-7%20Zone%20code%20-%20Low-medium%20density%20residential%20(LPS%20v9_2).pdf",
+    "verify": false
+   },
+   {
+    "name": "Medium density residential zone",
+    "keywords": [
+     "medium density residential"
+    ],
+    "purpose": "The purpose of the Medium density residential zone is to provide for: a. medium density multiple dwellings; and b. community uses, and small-scale services, facilities and infrastructure, to support local residents. Precincts: High rise, Medium rise.",
+    "typical": "Multiple dwellings (apartments) need code assessment; dwelling house is accepted development (Table 5.5.8.1).",
+    "source": "Logan Planning Scheme 2015 v9.2, 6.2.8.2 Purpose",
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%206-2-8%20Zone%20code%20-%20Medium%20density%20residential%20(LPS%20v9_2).pdf",
+    "verify": false
+   },
+   {
+    "name": "Emerging community zone",
+    "keywords": [
+     "emerging community"
+    ],
+    "purpose": "The local government purpose of the Emerging community zone code is to protect the future use of land for urban purposes.",
+    "typical": "Dwelling house is accepted development; multiple dwellings are not listed in Table 5.5.3.1, so they are impact assessable.",
+    "source": "Logan Planning Scheme 2015 v9.2, 6.2.3.2 Purpose (2)",
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%206-2-3%20Zone%20code%20-%20Emerging%20community%20(LPS%20v9_2).pdf",
+    "verify": false
+   },
+   {
+    "name": "Rural residential zone",
+    "keywords": [
+     "rural residential"
+    ],
+    "purpose": "The purpose of the Rural residential zone is to provide for residential uses and activities on large lots, including lots for which the local government has not provided infrastructure and services. Precincts: Carbrook, Cottage rural, Park living, Park residential.",
+    "typical": "Levels of assessment: not loaded yet – see Part 5.5 of the Logan Planning Scheme 2015.",
+    "source": "Logan Planning Scheme 2015 v9.2, 6.2.13.2 Purpose (1)",
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%206-2-13%20Zone%20code%20-%20Rural%20Residential%20(LPS%20v9_2).pdf",
+    "verify": false
+   }
+  ],
+  "rules": [
+   {
+    "id": "lg-flood",
+    "authority": "council",
+    "keywords": [
+     "flood"
+    ],
+    "title": "Flood hazard overlay",
+    "code": "8.2.5 Flood hazard overlay code (with TLPI No. 1/2024)",
+    "note": "Part of the lot is mapped in the Flood hazard overlay. Development is assessed against the Flood hazard overlay code. Temporary Local Planning Instrument No. 1/2024 (in effect from 6 March 2025) changes the flood provisions and mapping, so use the TLPI version.",
+    "checklist": [
+     "Read the Flood hazard overlay code as changed by TLPI No. 1/2024",
+     "Ask Logan City Council for flood information for the lot (Logan PD Hub)",
+     "Check for a newer TLPI on council's planning scheme page"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-5%20Overlay%20-%20Flood%20hazard%20(LPS%20v9_2%20with%20TLPI%201_2024).pdf"
+   },
+   {
+    "id": "lg-acid",
+    "authority": "council",
+    "keywords": [
+     "acid sulfate"
+    ],
+    "title": "Acid sulfate soils overlay",
+    "code": "8.2.1 Acid sulfate soils overlay code",
+    "note": "Part of the lot is mapped in the Acid sulfate soils overlay. Excavation or filling may need investigation and management under the overlay code.",
+    "checklist": [
+     "Read the Acid sulfate soils overlay code",
+     "Check whether excavation or filling triggers the code"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-1%20Overlay%20-%20Acid%20sulfate%20soils%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-bio",
+    "authority": "council",
+    "keywords": [
+     "biodiversity",
+     "vegetation management",
+     "locally significant",
+     "environmental significance",
+     "koala corridor",
+     "environmental management and conservation area"
+    ],
+    "title": "Biodiversity areas overlay",
+    "code": "8.2.2 Biodiversity areas overlay code",
+    "note": "Part of the lot is mapped in the Biodiversity areas overlay. Clearing vegetation and siting buildings are assessed against the overlay code.",
+    "checklist": [
+     "Read the Biodiversity areas overlay code",
+     "Map vegetation and habitat on the site plan"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-2%20Overlay%20-%20Biodiversity%20areas%20%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-bushfire",
+    "authority": "council",
+    "keywords": [
+     "bushfire"
+    ],
+    "title": "Bushfire hazard overlay",
+    "code": "8.2.3 Bushfire hazard overlay code",
+    "note": "Part of the lot is mapped in the Bushfire hazard overlay. Siting, access, water supply and building construction are assessed against the overlay code.",
+    "checklist": [
+     "Read the Bushfire hazard overlay code",
+     "Check the bushfire hazard category for the lot",
+     "Planning scheme policy PSP6 Bushfire hazard"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-3%20Overlay%20-%20Bushfire%20hazard%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-extractive",
+    "authority": "council",
+    "keywords": [
+     "extractive"
+    ],
+    "title": "Extractive resources overlay",
+    "code": "8.2.4 Extractive resources overlay code",
+    "note": "Part of the lot is mapped in the Extractive resources overlay (resource area, separation area or transport route). Sensitive uses near extractive industry are assessed against the overlay code.",
+    "checklist": [
+     "Read the Extractive resources overlay code"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-4%20Overlay%20-%20Extractive%20resources%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-greenbank",
+    "authority": "council",
+    "keywords": [
+     "greenbank"
+    ],
+    "title": "Greenbank Training Area overlay",
+    "code": "8.2.6 Greenbank Training Area overlay code",
+    "note": "The lot is mapped near the Greenbank Training Area (Defence). Development is assessed against the overlay code.",
+    "checklist": [
+     "Read the Greenbank Training Area overlay code"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-6%20Overlay%20-%20Greenbank%20Training%20Area%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-heritage",
+    "authority": "council",
+    "keywords": [
+     "heritage"
+    ],
+    "title": "Heritage overlay",
+    "code": "8.2.7 Heritage overlay code",
+    "note": "A heritage place or area is mapped on or next to the lot. Demolition, alterations and new building are assessed against the Heritage overlay code.",
+    "checklist": [
+     "Read the Heritage overlay code",
+     "Planning scheme policy PSP4 Heritage"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-7%20Overlay%20-%20Heritage%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-landslide",
+    "authority": "council",
+    "keywords": [
+     "landslide",
+     "steep slope"
+    ],
+    "title": "Landslide hazard and steep slope overlay",
+    "code": "8.2.8 Landslide hazard and steep slope area overlay code",
+    "note": "Part of the lot is mapped as landslide hazard or steep slope. Earthworks and building are assessed against the overlay code; the Dwelling house code (AO27) also limits building height at the perimeter in these areas.",
+    "checklist": [
+     "Read the Landslide hazard and steep slope overlay code",
+     "Get a geotechnical report if building on the mapped area"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-8%20Overlay%20-%20Landslide%20hazard%20steep%20slope%20area%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-infra",
+    "authority": "council",
+    "keywords": [
+     "regional infrastructure",
+     "substation",
+     "powerline",
+     "pipeline"
+    ],
+    "title": "Regional infrastructure and substations overlay",
+    "code": "8.2.9 Regional infrastructure and substations overlay code",
+    "note": "Regional infrastructure (for example a major powerline, substation, pipeline or corridor) is mapped on or near the lot. Development near it is assessed against the overlay code.",
+    "checklist": [
+     "Read the Regional infrastructure and substations overlay code",
+     "Check easements on the title"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-9%20Overlay%20-%20Regional%20infrastructure%20%26%20substations%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-airport",
+    "authority": "council",
+    "keywords": [
+     "airport"
+    ],
+    "title": "Strategic airport environs overlay",
+    "code": "8.2.10 Strategic airport environs overlay code",
+    "note": "The lot is in a mapped airport environs area. Building height, lighting and noise-sensitive uses may be assessed against the overlay code.",
+    "checklist": [
+     "Read the Strategic airport environs overlay code"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-10%20Overlay%20-%20Strategic%20airport%20environs%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-catchment",
+    "authority": "council",
+    "keywords": [
+     "water resource catchment",
+     "water catchment",
+     "catchment"
+    ],
+    "title": "Water resource catchments overlay",
+    "code": "8.2.11 Water resource catchments overlay code",
+    "note": "The lot is in a mapped water resource catchment. Development that affects water quality is assessed against the overlay code.",
+    "checklist": [
+     "Read the Water resource catchments overlay code"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-11%20Overlay%20-%20Water%20resource%20catchments%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-waterway",
+    "authority": "council",
+    "keywords": [
+     "waterway",
+     "wetland"
+    ],
+    "title": "Waterway wetlands overlay",
+    "code": "8.2.12 Waterway wetlands overlay code",
+    "note": "A waterway or wetland (or its buffer) is mapped on the lot. Development and clearing near it are assessed against the overlay code.",
+    "checklist": [
+     "Read the Waterway wetlands overlay code",
+     "Show the waterway or wetland and its buffer on the site plan"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%208-2-12%20Overlay%20-%20Waterway%20wetlands%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-res",
+    "authority": "council",
+    "keywords": [
+     "residential overlay"
+    ],
+    "title": "Residential overlay (OM-10)",
+    "code": "Overlay map OM-10.00 Residential overlay; editor's note in Part 5.5 tables",
+    "note": "The lot is mapped as a residential area on overlay map OM-10.00. The Part 5.5 tables' editor's note says a Dwelling house here is accepted development subject to requirements, with the 9.3.2 Dual occupancy and Dwelling house code as the benchmark.",
+    "checklist": [
+     "Check the Dwelling house against the 9.3.2 code's acceptable outcomes"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "lg-noise",
+    "authority": "council",
+    "keywords": [
+     "transport noise"
+    ],
+    "title": "Transport noise corridor (OM-12)",
+    "code": "Overlay map OM-12 Transport noise corridors; QDC MP 4.4",
+    "note": "The lot is in a mapped transport noise corridor. Residential buildings in a designated corridor generally need noise-reducing construction under QDC MP 4.4 at building approval.",
+    "checklist": [
+     "Ask the building certifier about QDC MP 4.4 for the corridor category"
+    ],
+    "url": "https://www.logan.qld.gov.au/planning-scheme-2"
+   },
+   {
+    "id": "lg-localplan",
+    "authority": "council",
+    "keywords": [
+     "local plan"
+    ],
+    "title": "Local plan",
+    "code": "Part 7 local plan code (the relevant plan) and Part 5.9 tables of assessment",
+    "note": "A local plan applies. Its tables of assessment (Part 5.9) can change the level of assessment set by the zone, for example in the Loganholme and Loganlea local plans.",
+    "checklist": [
+     "Read the local plan code and its precinct for this lot",
+     "Check the local plan's tables of assessment in Part 5.9"
+    ],
+    "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-9%20Tables%20of%20assessment%20-%20Local%20Plans%20(LPS%20v9_2).pdf"
+   },
+   {
+    "id": "water",
+    "authority": "other",
+    "keywords": [],
+    "title": "Water and sewer (Logan Water)",
+    "code": "Logan City Council (Logan Water) connections",
+    "note": "New or intensified development needs water and sewer connection approval from Logan City Council (Logan Water) and may attract infrastructure charges.",
+    "checklist": [
+     "Ask Logan City Council (Logan Water) about connections and services",
+     "Check for sewer mains through the lot (build-over rules, Dwelling house code AO17 / QDC MP 1.4)"
+    ],
+    "url": "https://www.logan.qld.gov.au/",
+    "always": true
+   }
+  ],
+  "provisions": [
+   {
+    "zone": [
+     "low density residential"
+    ],
+    "precinct": [
+     "large suburban"
+    ],
+    "title": "Low density residential – Large suburban precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "1,000 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 1000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "20 m / 10 m / 22 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "3 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed: at least 1,000 m² clear of the access strip; access strip up to 60 m (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.4",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_rear",
+      "n": 1000
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low density residential"
+    ],
+    "precinct": [
+     "small acreage"
+    ],
+    "title": "Low density residential – Small acreage precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "2,000 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 2000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "20 m / 15 m / 30 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "4 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed: at least 2,000 m² clear of the access strip; access strip up to 75 m (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.4",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_rear",
+      "n": 2000
+     },
+     {
+      "label": "Maximum site cover (dwelling house or auxiliary unit)",
+      "value": "35%",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO3",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low density residential"
+    ],
+    "precinct": [
+     "acreage"
+    ],
+    "title": "Low density residential – Acreage precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "4,000 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 4000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "40 m / 20 m / 40 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "4 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum site cover (dwelling house or auxiliary unit)",
+      "value": "20%",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO3",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low density residential"
+    ],
+    "precinct": [
+     "small lot"
+    ],
+    "title": "Low density residential – Small lot precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "300 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 300
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "10 m / 6 m / 12 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "Not applicable (NA in the table)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum site cover (dwelling house or auxiliary unit)",
+      "value": "60%",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO3",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Dual occupancy (not an auxiliary unit): accepted subject to requirements on a lot of at least",
+      "value": "525 m² (Small lot precinct)",
+      "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Table 5.5.5.1",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_dual_occ",
+      "n": 525
+     },
+     {
+      "label": "Multiple dwelling: code assessment if net density is no more than",
+      "value": "33 equivalent dwellings per hectare (Small lot precinct)",
+      "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Table 5.5.5.1",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low density residential"
+    ],
+    "precinct": [
+     "suburban"
+    ],
+    "title": "Low density residential – Suburban precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "400 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 400
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "12.5 m / 10 m / 15 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "Not applicable (NA in the table)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed: at least 500 m² clear of the access strip; access strip up to 35 m (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.4",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_rear",
+      "n": 500
+     },
+     {
+      "label": "Dual occupancy (not an auxiliary unit): accepted subject to requirements on a lot of at least",
+      "value": "700 m² (Suburban precinct)",
+      "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Table 5.5.5.1",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_dual_occ",
+      "n": 700
+     },
+     {
+      "label": "Multiple dwelling: code assessment if net density is no more than",
+      "value": "25 equivalent dwellings per hectare (Suburban precinct)",
+      "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Table 5.5.5.1",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low density residential"
+    ],
+    "precinct": [
+     "village"
+    ],
+    "title": "Low density residential – Village precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "500 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 500
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "15 m / 10 m / 18 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "Not applicable (NA in the table)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed: at least 600 m² clear of the access strip; access strip up to 50 m (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.4",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_rear",
+      "n": 600
+     },
+     {
+      "label": "Dual occupancy (not an auxiliary unit): accepted subject to requirements on a lot of at least",
+      "value": "875 m² (Village precinct)",
+      "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Table 5.5.5.1",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_dual_occ",
+      "n": 875
+     },
+     {
+      "label": "Multiple dwelling: code assessment if net density is no more than",
+      "value": "20 equivalent dwellings per hectare (Village precinct)",
+      "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Table 5.5.5.1",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low medium density residential"
+    ],
+    "precinct": [
+     "townhouse"
+    ],
+    "title": "Low-medium density residential – Townhouse precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "500 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 500
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "20 m / no minimum / 30 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "3 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Dual occupancy (not an auxiliary unit): accepted subject to requirements on a lot of at least",
+      "value": "500 m² (Townhouse precinct)",
+      "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Table 5.5.7.1",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_dual_occ",
+      "n": 500
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low medium density residential"
+    ],
+    "precinct": [
+     "apartment"
+    ],
+    "title": "Low-medium density residential – Apartment precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "800 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 800
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "20 m / no minimum / 30 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "3 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "medium density residential"
+    ],
+    "precinct": [],
+    "title": "Medium density residential (Medium rise and High rise precincts)",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "1,200 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 1200
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "20 m / no minimum / 30 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "3 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "emerging community"
+    ],
+    "precinct": [],
+    "title": "Emerging community zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "20 hectares",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 200000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum site cover (dwelling house or auxiliary unit)",
+      "value": "700 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO3",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "rural residential"
+    ],
+    "precinct": [
+     "park residential"
+    ],
+    "title": "Rural residential – Park residential precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "5,000 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 5000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "40 m / 20 m / 40 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "3 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed: at least 5,000 m² clear of the access strip; access strip up to 150 m (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.4",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_rear",
+      "n": 5000
+     },
+     {
+      "label": "Maximum site cover (dwelling house or auxiliary unit)",
+      "value": "700 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO3",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "rural residential"
+    ],
+    "precinct": [
+     "park living"
+    ],
+    "title": "Rural residential – Park living precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "100 hectares",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 1000000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum site cover (dwelling house or auxiliary unit)",
+      "value": "700 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO3",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "rural residential"
+    ],
+    "precinct": [
+     "cottage rural",
+     "carbrook"
+    ],
+    "title": "Rural residential – Cottage rural and Carbrook precincts",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "20 hectares in the urban footprint; 100 hectares in the regional landscape and rural production area",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum site cover (dwelling house or auxiliary unit)",
+      "value": "700 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO3",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   }
+  ],
+  "uses": {
+   "house": {
+    "zones": [
+     "low density residential",
+     "low medium density residential",
+     "medium density residential",
+     "emerging community"
+    ],
+    "checks": [
+     "Siting against QDC MP 1.1 (lots under 450 m²) or MP 1.2 (450 m² and over) under the Dwelling house code AO1",
+     "Overlays (flood, bushfire, landslide) can change the level of assessment"
+    ],
+    "sources": [
+     {
+      "name": "Logan Planning Scheme 2015 v9.2 – Part 5.5",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf"
+     },
+     {
+      "name": "9.3.2 Dual occupancy and Dwelling house code",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low density residential",
+       "low medium density residential",
+       "medium density residential",
+       "emerging community"
+      ],
+      "level": "Accepted development (not subject to requirements) in these zones. An editor's note in the tables makes it accepted development subject to requirements (benchmark 9.3.2 Dual occupancy and Dwelling house code) where mapped as a residential area on overlay map OM-10.00. Overlays can change the level of assessment.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use, Tables 5.5.3.1, 5.5.5.1, 5.5.7.1, 5.5.8.1",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       },
+       {
+        "label": "Height",
+        "value": "No general height limit in the code; carport at most 3.5 m (AO4); 3 m at the building perimeter in steep slope or historical landslide areas (AO27)",
+        "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+        "verify": true
+       },
+       {
+        "label": "Siting",
+        "value": "QDC MP 1.1 acceptable solutions on lots under 450 m², MP 1.2 on lots of 450 m² or more (AO1), unless AO3–AO9 apply",
+        "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO1",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+        "verify": true
+       },
+       {
+        "label": "Road boundary clearance",
+        "value": "4 m in the Low-medium density residential zone (AO4)",
+        "source": "Logan Planning Scheme 2015 v9.2, 9.3.2 Dual occupancy and Dwelling house code, Table 9.3.2.3.1 AO4",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "dual": {
+    "zones": [
+     "low density residential",
+     "low medium density residential",
+     "medium density residential"
+    ],
+    "sources": [
+     {
+      "name": "Logan Planning Scheme 2015 v9.2 – Part 5.5",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low density residential"
+      ],
+      "level": "Accepted development subject to requirements for an auxiliary unit in any precinct, or a non-auxiliary dual occupancy on a lot of at least 525 m² (Small lot precinct), 700 m² (Suburban precinct) or 875 m² (Village precinct). Benchmarks: 9.3.2 (auxiliary unit); 6.2.5, 9.3.2, 9.4.2, 9.4.3 and 9.4.7 (non-auxiliary). Otherwise check Table 5.5.5.1.",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.5.1 Low density residential zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "low medium density residential"
+      ],
+      "level": "Accepted development subject to requirements for a non-auxiliary dual occupancy in the Townhouse precinct on a lot of at least 500 m², or an auxiliary unit in the Apartment or Townhouse precinct; otherwise code assessment. Benchmarks: 9.3.2 (auxiliary unit); 6.2.7, 9.3.2, 9.4.2, 9.4.3, 9.4.4 and 9.4.7 (non-auxiliary).",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.7.1 Low-medium density residential zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "medium density residential"
+      ],
+      "level": "Accepted development subject to requirements only for an auxiliary unit (benchmark 9.3.2). Check Table 5.5.8.1 for other dual occupancies.",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.8.1 Medium density residential zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "emerging community"
+      ],
+      "level": "Accepted development subject to requirements only for an auxiliary unit (benchmark 9.3.2).",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.3.1 Emerging community zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "md": {
+    "zones": [
+     "low medium density residential",
+     "medium density residential",
+     "low density residential"
+    ],
+    "sources": [
+     {
+      "name": "Logan Planning Scheme 2015 v9.2 – Part 5.5",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low medium density residential"
+      ],
+      "level": "Code assessment. Benchmarks: 6.2.7, 9.3.5, 9.4.2, 9.4.3, 9.4.4 and 9.4.7. The Loganlea and Loganholme local plans change the categories (Part 5.9).",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.7.1 Low-medium density residential zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "medium density residential"
+      ],
+      "level": "Code assessment if the dwellings are apartments. Benchmarks: 6.2.8, 9.3.5, 9.4.2, 9.4.3, 9.4.4 and 9.4.7.",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.8.1 Medium density residential zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "low density residential"
+      ],
+      "level": "Code assessment if the net density does not exceed 33 equivalent dwellings per hectare (Small lot precinct), 25 (Suburban precinct) or 20 (Village precinct). Benchmarks: 6.2.5, 9.3.5, 9.4.2, 9.4.3, 9.4.4 and 9.4.7. Otherwise check Table 5.5.5.1.",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.5.1 Low density residential zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "emerging community"
+      ],
+      "level": "Not listed in Table 5.5.3.1, so it falls under 'any other use not listed in this table': impact assessment.",
+      "items": [
+       {
+        "label": "Table",
+        "value": "5.5.3.1 Emerging community zone",
+        "source": "Logan Planning Scheme 2015 v9.2, Part 5.5 Tables of assessment – Material change of use",
+        "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%205-5%20Tables%20of%20assessment%20-%20Material%20change%20of%20use%20(LPS%20v9_2).pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "setbacks": {
+   "Low-medium density residential zone": {
+    "title": "Logan Planning Scheme 2015, 9.3.2 Dual occupancy and Dwelling house code",
+    "min_area_m2": 0,
+    "note": "Other distances follow the QDC MP 1.1 (lots under 450 m²) or MP 1.2 (450 m² and over) acceptable solutions under AO1. Logan Planning Scheme 2015 v9.2; check whether the Queensland Housing Code now replaces the QDC parts it refers to.",
+    "source": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+    "rows": [
+     {
+      "label": "Road boundary clearance (minimum)",
+      "value": "4 m",
+      "ref": "Table 9.3.2.3.1, AO4"
+     }
+    ],
+    "check": "Confirm with Logan City Council or a registered planner before relying on these distances."
+   },
+   "Emerging community zone": {
+    "title": "Logan Planning Scheme 2015, 9.3.2 Dual occupancy and Dwelling house code",
+    "min_area_m2": 0,
+    "note": "Other distances follow the QDC MP 1.1 (lots under 450 m²) or MP 1.2 (450 m² and over) acceptable solutions under AO1. Logan Planning Scheme 2015 v9.2; check whether the Queensland Housing Code now replaces the QDC parts it refers to.",
+    "source": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+    "rows": [
+     {
+      "label": "Road boundary clearance (minimum)",
+      "value": "10 m",
+      "ref": "Table 9.3.2.3.1, AO4"
+     },
+     {
+      "label": "Side and rear boundary clearance (minimum)",
+      "value": "3 m",
+      "ref": "Table 9.3.2.3.1, AO5"
+     },
+     {
+      "label": "Large domestic outbuilding: side and rear",
+      "value": "6 m",
+      "ref": "Table 9.3.2.3.2"
+     }
+    ],
+    "check": "Confirm with Logan City Council or a registered planner before relying on these distances."
+   },
+   "Rural residential zone": {
+    "title": "Logan Planning Scheme 2015, 9.3.2 Dual occupancy and Dwelling house code",
+    "min_area_m2": 0,
+    "note": "Other distances follow the QDC MP 1.1 (lots under 450 m²) or MP 1.2 (450 m² and over) acceptable solutions under AO1. Logan Planning Scheme 2015 v9.2; check whether the Queensland Housing Code now replaces the QDC parts it refers to.",
+    "source": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+    "rows": [
+     {
+      "label": "Side and rear boundary clearance (minimum)",
+      "value": "3 m",
+      "ref": "Table 9.3.2.3.1, AO5"
+     },
+     {
+      "label": "Road boundary clearance (minimum)",
+      "value": "10 m or 20 m depending on precinct",
+      "ref": "Table 9.3.2.3.1, AO4"
+     },
+     {
+      "label": "Large domestic outbuilding: side and rear",
+      "value": "6 m",
+      "ref": "Table 9.3.2.3.2"
+     }
+    ],
+    "check": "Confirm with Logan City Council or a registered planner before relying on these distances."
+   },
+   "Low density residential zone": [
+    {
+     "title": "Logan Planning Scheme 2015, 9.3.2 Dual occupancy and Dwelling house code",
+     "min_area_m2": 0,
+     "note": "Other distances follow the QDC MP 1.1 (lots under 450 m²) or MP 1.2 (450 m² and over) acceptable solutions under AO1. Logan Planning Scheme 2015 v9.2; check whether the Queensland Housing Code now replaces the QDC parts it refers to.",
+     "source": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-3-2%20Dev%20code%20-%20Dual%20occ%20%26%20Dwelling%20house%20(LPS%20v9_2).pdf",
+     "rows": [
+      {
+       "label": "Side and rear boundary clearance (minimum)",
+       "value": "3 m",
+       "ref": "Table 9.3.2.3.1, AO5"
+      }
+     ],
+     "check": "Confirm with Logan City Council or a registered planner before relying on these distances.",
+     "precinct": [
+      "acreage"
+     ]
+    }
+   ]
+  }
+ },
+ "moreton_bay": {
+  "zones": [
+   {
+    "name": "General residential zone",
+    "keywords": [
+     "general residential"
+    ],
+    "purpose": "The purpose of the General residential zone is to provide for the establishment of an appropriate mix of dwelling types, with small-scale community services for local residents. Precincts: Coastal communities, Suburban neighbourhood, Next generation neighbourhood, Urban neighbourhood.",
+    "typical": "Coastal communities and Suburban neighbourhood: dwelling houses (up to 15 dwellings per hectare, 8.5 m). Next generation: houses, dual occupancy and multiple dwellings (generally up to 12 m). Urban neighbourhood: multiple dwellings (8.5–27 m).",
+    "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+    "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+    "verify": true
+   }
+  ],
+  "rules": [
+   {
+    "id": "mb-flood",
+    "authority": "council",
+    "keywords": [
+     "flood hazard",
+     "flood haz"
+    ],
+    "title": "Flood hazard overlay",
+    "code": "Part 8: Flood hazard overlay code",
+    "note": "Part of the lot is mapped in the Flood hazard overlay. Development is assessed against the Flood hazard overlay code; floor levels and filling may be controlled.",
+    "checklist": [
+     "Read the Flood hazard overlay code",
+     "Ask City of Moreton Bay for flood information for the lot",
+     "Planning scheme policy – Flood hazard, coastal hazard and overland flow"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-overland",
+    "authority": "council",
+    "keywords": [
+     "overland flow"
+    ],
+    "title": "Overland flow path overlay",
+    "code": "Part 8: Overland flow path overlay code",
+    "note": "An overland flow path is mapped on the lot. Buildings, fences and filling in the flow path are assessed against the overlay code.",
+    "checklist": [
+     "Read the Overland flow path overlay code",
+     "Show the flow path on the site plan"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-coastal",
+    "authority": "council",
+    "keywords": [
+     "coastal hazard",
+     "storm tide",
+     "erosion"
+    ],
+    "title": "Coastal hazard overlay",
+    "code": "Part 8: Coastal hazard overlay code",
+    "note": "Part of the lot is mapped as coastal hazard (erosion prone or storm tide inundation). Development is assessed against the overlay code.",
+    "checklist": [
+     "Read the Coastal hazard overlay code"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-acid",
+    "authority": "council",
+    "keywords": [
+     "acid sulfate"
+    ],
+    "title": "Acid sulfate soils overlay",
+    "code": "Part 8: Acid sulfate soils overlay code",
+    "note": "Part of the lot is mapped in the Acid sulfate soils overlay. Excavation or filling may need investigation and management.",
+    "checklist": [
+     "Read the Acid sulfate soils overlay code",
+     "Planning scheme policy – Acid sulfate soils"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-bushfire",
+    "authority": "council",
+    "keywords": [
+     "bushfire"
+    ],
+    "title": "Bushfire hazard overlay",
+    "code": "Part 8: Bushfire hazard overlay code",
+    "note": "Part of the lot is mapped in the Bushfire hazard overlay. Siting, access, water supply and construction are assessed against the overlay code.",
+    "checklist": [
+     "Read the Bushfire hazard overlay code",
+     "Planning scheme policy – Bushfire prone areas"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-landslide",
+    "authority": "council",
+    "keywords": [
+     "landslide"
+    ],
+    "title": "Landslide hazard overlay",
+    "code": "Part 8: Landslide hazard overlay code",
+    "note": "Part of the lot is mapped as landslide hazard. Earthworks and building are assessed against the overlay code.",
+    "checklist": [
+     "Read the Landslide hazard overlay code",
+     "Planning scheme policy – Landslide hazard"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-env",
+    "authority": "council",
+    "keywords": [
+     "environmental area",
+     "environmental offset",
+     "ecological corridor"
+    ],
+    "title": "Environmental areas overlay",
+    "code": "Part 8: Environmental areas overlay code",
+    "note": "Environmental values are mapped on the lot. Vegetation clearing and building location are assessed against the overlay code; offsets may apply.",
+    "checklist": [
+     "Read the Environmental areas overlay code",
+     "Planning scheme policy – Environmental areas and corridors"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-riparian",
+    "authority": "council",
+    "keywords": [
+     "riparian",
+     "wetland",
+     "waterway"
+    ],
+    "title": "Riparian and wetland setbacks overlay",
+    "code": "Part 8: Riparian and wetland setbacks overlay code",
+    "note": "A waterway or wetland setback is mapped on the lot. Building and clearing inside the setback are assessed against the overlay code.",
+    "checklist": [
+     "Read the Riparian and wetland setbacks overlay code",
+     "Show the setback line on the site plan"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-heritage",
+    "authority": "council",
+    "keywords": [
+     "heritage",
+     "significant tree",
+     "landscape character"
+    ],
+    "title": "Heritage and landscape character overlay",
+    "code": "Part 8: Heritage and landscape character overlay code",
+    "note": "A heritage place, significant tree or landscape character area is mapped on or next to the lot. Demolition, alterations and tree removal are assessed against the overlay code.",
+    "checklist": [
+     "Read the Heritage and landscape character overlay code",
+     "Planning scheme policy – Heritage and landscape character"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-scenic",
+    "authority": "council",
+    "keywords": [
+     "scenic amenity"
+    ],
+    "title": "Scenic amenity overlay",
+    "code": "Part 8: Scenic amenity overlay code",
+    "note": "The lot is in a mapped scenic amenity area. Building height, bulk and siting may be assessed against the overlay code.",
+    "checklist": [
+     "Read the Scenic amenity overlay code"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-extractive",
+    "authority": "council",
+    "keywords": [
+     "extractive"
+    ],
+    "title": "Extractive resources overlay",
+    "code": "Part 8: Extractive resources overlay code",
+    "note": "An extractive resource, separation area or haul route is mapped on or near the lot. Sensitive uses are assessed against the overlay code.",
+    "checklist": [
+     "Read the Extractive resources overlay code"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-infra",
+    "authority": "council",
+    "keywords": [
+     "infrastructure buffer",
+     "infrastructure lines",
+     "infrastructure points",
+     "infrastructure polygons"
+    ],
+    "title": "Infrastructure buffers overlay",
+    "code": "Part 8: Infrastructure buffers overlay code",
+    "note": "An infrastructure buffer (for example a powerline, pipeline, rail, sewage treatment or waste facility) is mapped on or near the lot. Development is assessed against the overlay code.",
+    "checklist": [
+     "Read the Infrastructure buffers overlay code",
+     "Check easements on the title"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-noise",
+    "authority": "council",
+    "keywords": [
+     "transport noise"
+    ],
+    "title": "Transport noise corridor overlay",
+    "code": "Part 8: Noise overlay / QDC MP 4.4",
+    "note": "The lot is in a mapped transport noise corridor. Noise-sensitive buildings may need acoustic treatment.",
+    "checklist": [
+     "Read the noise provisions for the corridor",
+     "Planning scheme policy – Noise"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-heights",
+    "authority": "council",
+    "keywords": [
+     "building height"
+    ],
+    "title": "Building heights overlay",
+    "code": "Overlay map – Building heights",
+    "note": "The planning scheme maps the building height for this lot; the dwelling house and zone codes refer to it. See the mapped value in the layer attributes.",
+    "checklist": [
+     "Check the mapped height in the layer attributes",
+     "Read the zone code's height outcome"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-walk",
+    "authority": "council",
+    "keywords": [
+     "walking distance"
+    ],
+    "title": "Walking distance overlay",
+    "code": "Overlay map – Walking distance (centre or train station)",
+    "note": "The lot is within a mapped walking distance of a centre or train station. This changes levels of assessment and densities for some housing (dual occupancy and multiple dwelling).",
+    "checklist": [
+     "Check the walking distance overlay in the tables of assessment"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-hubs",
+    "authority": "council",
+    "keywords": [
+     "neighbourhood hub",
+     "community activit"
+    ],
+    "title": "Community activities and neighbourhood hubs overlay",
+    "code": "Overlay map – Community activities and neighbourhood hubs",
+    "note": "The lot is in a mapped community activity or neighbourhood hub area, which the zone code refers to.",
+    "checklist": [
+     "Read the General residential zone code and the Neighbourhood hubs info sheet"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-rrlots",
+    "authority": "council",
+    "keywords": [
+     "rural residential lot"
+    ],
+    "title": "Rural residential lot sizes overlay",
+    "code": "Overlay map – Rural residential lot sizes",
+    "note": "The minimum lot size for subdivision in the Rural residential zone is set by this map (2 ha, 6,000 m², 3,000 m² or no further reconfiguration).",
+    "checklist": [
+     "Check the mapped lot size category in the layer attributes"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-road",
+    "authority": "council",
+    "keywords": [
+     "road hierarchy",
+     "active transport"
+    ],
+    "title": "Road hierarchy / active transport",
+    "code": "Overlay map – Road hierarchy / Active transport",
+    "note": "The road or path network next to the lot is mapped. Access, frontage works and setbacks may be affected.",
+    "checklist": [
+     "Check the road hierarchy and active transport maps"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-stormwater",
+    "authority": "council",
+    "keywords": [
+     "stormwater catchment"
+    ],
+    "title": "Stormwater catchments overlay",
+    "code": "Overlay map – Stormwater catchments",
+    "note": "The lot is in a mapped stormwater catchment that sets stormwater management requirements.",
+    "checklist": [
+     "Planning scheme policy – Stormwater management"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-localplan",
+    "authority": "council",
+    "keywords": [
+     "local plan"
+    ],
+    "title": "Local plan",
+    "code": "Part 7 local plan code (the relevant plan)",
+    "note": "A local plan applies (for example Caboolture West or Redcliffe Kippa-Ring). It can change zones' precincts, levels of assessment and lot sizes.",
+    "checklist": [
+     "Read the local plan code and its precinct for this lot"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "mb-tlpi",
+    "authority": "council",
+    "keywords": [
+     "temporary local planning instrument",
+     "tlpi"
+    ],
+    "title": "Temporary local planning instrument",
+    "code": "Temporary local planning instrument (TLPI)",
+    "note": "A TLPI is mapped on the lot. It overrides parts of the planning scheme while it is in effect.",
+    "checklist": [
+     "Read the TLPI and check its expiry date"
+    ],
+    "url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document"
+   },
+   {
+    "id": "water",
+    "authority": "other",
+    "keywords": [],
+    "title": "Water and sewer (Unitywater)",
+    "code": "South East Queensland Water (Distribution and Retail Restructuring) Act 2009 – Unitywater connections",
+    "note": "New or intensified development needs water and sewer connection approval from Unitywater and may attract infrastructure charges.",
+    "checklist": [
+     "Ask Unitywater about connections and services",
+     "Check for sewer mains through the lot (build-over rules)"
+    ],
+    "url": "https://www.unitywater.com/",
+    "always": true
+   }
+  ],
+  "provisions": [
+   {
+    "zone": [
+     "general residential"
+    ],
+    "precinct": [
+     "coastal communities"
+    ],
+    "title": "General residential – Coastal communities precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "600 m² (example; maximum density 11 lots per hectare)",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true,
+      "key": "min_front",
+      "n": 600
+     },
+     {
+      "label": "Minimum frontage",
+      "value": "12.5 m",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true
+     },
+     {
+      "label": "Density",
+      "value": "No greater than 15 dwellings per hectare",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     },
+     {
+      "label": "Building height",
+      "value": "Up to 8.5 metres",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "general residential"
+    ],
+    "precinct": [
+     "suburban neighbourhood"
+    ],
+    "title": "General residential – Suburban neighbourhood precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "600 m² (example; maximum density 11 lots per hectare)",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true,
+      "key": "min_front",
+      "n": 600
+     },
+     {
+      "label": "Minimum frontage",
+      "value": "12.5 m",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true
+     },
+     {
+      "label": "Density",
+      "value": "No greater than 15 dwellings per hectare",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     },
+     {
+      "label": "Building height",
+      "value": "Up to 8.5 metres",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     },
+     {
+      "label": "Dual occupancy",
+      "value": "Code assessment if on a lot of 1,000 m² or more",
+      "source": "City of Moreton Bay info sheet: Dual occupancy",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy",
+      "verify": true,
+      "key": "min_dual_occ",
+      "n": 1000
+     }
+    ]
+   },
+   {
+    "zone": [
+     "general residential"
+    ],
+    "precinct": [
+     "next generation"
+    ],
+    "title": "General residential – Next generation neighbourhood precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "Not specified on the council info sheet – see 9.4.1 Reconfiguring a lot code",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true
+     },
+     {
+      "label": "Density",
+      "value": "Minimum 25 dwellings per hectare inside the 800 m walking distance overlays; 15–75 dwellings per hectare outside them",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     },
+     {
+      "label": "Building height",
+      "value": "Generally up to 12 metres",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     },
+     {
+      "label": "Dual occupancy",
+      "value": "Accepted subject to requirements within 800 m walking distance of a higher order or district centre or train station, or with two or more road frontages and 450 m² minimum site area, or a 15 m+ road frontage and 500 m² minimum site area",
+      "source": "City of Moreton Bay info sheet: Dual occupancy",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy",
+      "verify": true
+     },
+     {
+      "label": "Multiple dwelling (accepted subject to requirements)",
+      "value": "6 or fewer dwellings, on a lot of 800 m² or more with a road frontage of 20 m or more, meeting the building height condition",
+      "source": "City of Moreton Bay info sheet: Multiple dwelling",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Multiple-Dwelling",
+      "verify": true,
+      "key": "min_site_md",
+      "n": 800
+     }
+    ]
+   },
+   {
+    "zone": [
+     "general residential"
+    ],
+    "precinct": [
+     "urban neighbourhood"
+    ],
+    "title": "General residential – Urban neighbourhood precinct",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "Not specified on the council info sheet – see 9.4.1 Reconfiguring a lot code",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true
+     },
+     {
+      "label": "Density",
+      "value": "Minimum site density of 45 dwellings per hectare (75 dwellings per hectare in particular localities)",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     },
+     {
+      "label": "Building height",
+      "value": "Between 8.5 metres and 27 metres",
+      "source": "City of Moreton Bay info sheet: General residential zone (MBRC Planning Scheme 2016)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/General-Residential-Zone",
+      "verify": true
+     },
+     {
+      "label": "Multiple dwelling (accepted subject to requirements)",
+      "value": "6 or fewer dwellings, on a lot of 800 m² or more with a road frontage of 20 m or more, meeting the building height condition",
+      "source": "City of Moreton Bay info sheet: Multiple dwelling",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Multiple-Dwelling",
+      "verify": true,
+      "key": "min_site_md",
+      "n": 800
+     }
+    ]
+   },
+   {
+    "zone": [
+     "rural residential"
+    ],
+    "precinct": [],
+    "title": "Rural residential zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "Set by Overlay map – Rural residential lot sizes: 2 ha, 6,000 m², 3,000 m², or no further reconfiguration",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "rural"
+    ],
+    "precinct": [],
+    "title": "Rural zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "100 ha (exceptions in the Reconfiguring a lot code – Rural zone)",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true,
+      "key": "min_front",
+      "n": 1000000
+     },
+     {
+      "label": "Minimum frontage",
+      "value": "100 m",
+      "source": "City of Moreton Bay info sheet: Reconfiguring a lot (mostly examples E in 9.4.1)",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Reconfiguring-A-Lot",
+      "verify": true
+     }
+    ]
+   }
+  ],
+  "uses": {
+   "house": {
+    "zones": [
+     "general residential",
+     "rural",
+     "emerging community",
+     "rural residential",
+     "township"
+    ],
+    "checks": [
+     "Height from Overlay map – Building heights",
+     "Built form requirements in the Dwelling house code (9.3.1) or zone code"
+    ],
+    "sources": [
+     {
+      "name": "Info sheet: Dwelling house",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dwelling-House"
+     },
+     {
+      "name": "Info sheet: version 7 updates – Dwelling house",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dwelling-House/Dwelling-House-Policy-Changes"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Generally accepted development subject to requirements (no council approval) in listed zones or precincts such as the General residential and Rural zones; code assessment if it does not meet the requirements for accepted development in the zone code, or in a zone or precinct that is not listed.",
+      "items": [
+       {
+        "label": "Site cover (detached house, version 7 precincts)",
+        "value": "60% for all lot sizes",
+        "source": "City of Moreton Bay info sheet: version 7 updates – Dwelling house",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dwelling-House/Dwelling-House-Policy-Changes",
+        "verify": true
+       },
+       {
+        "label": "Rear setback (detached, version 7 precincts)",
+        "value": "5 m for lot depths over 25 m; 3 m for lot depths of 25 m or less",
+        "source": "City of Moreton Bay info sheet: version 7 updates – Dwelling house",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dwelling-House/Dwelling-House-Policy-Changes",
+        "verify": true
+       },
+       {
+        "label": "Side setback (version 7 precincts)",
+        "value": "Minimum 1 m or the QDC Table A2 sliding scale, measured to the wall; eaves at wall setback minus 0.5 m",
+        "source": "City of Moreton Bay info sheet: version 7 updates – Dwelling house",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dwelling-House/Dwelling-House-Policy-Changes",
+        "verify": true
+       },
+       {
+        "label": "Car parking (version 7 precincts)",
+        "value": "2 spaces, plus 1 for any secondary dwelling (tandem allowed)",
+        "source": "City of Moreton Bay info sheet: version 7 updates – Dwelling house",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dwelling-House/Dwelling-House-Policy-Changes",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "dual": {
+    "zones": [
+     "general residential",
+     "emerging community",
+     "centre",
+     "township"
+    ],
+    "sources": [
+     {
+      "name": "Info sheet: Dual occupancy",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "next generation"
+      ],
+      "level": "Accepted development subject to requirements if within 800 m walking distance of a higher order or district centre or a train station, or with two or more road frontages and 450 m² minimum site area, or a 15 m+ road frontage and 500 m² minimum site area.",
+      "items": [
+       {
+        "label": "Benchmarks",
+        "value": "General residential zone code, Part E; Residential uses code, Part A",
+        "source": "City of Moreton Bay info sheet: Dual occupancy",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "transition"
+      ],
+      "level": "Accepted development subject to requirements on a developed lot, within 800 m walking distance of a higher order or district centre or train station, or meeting the lot criteria.",
+      "items": [
+       {
+        "label": "Benchmarks",
+        "value": "Emerging community zone code, Part E; Residential uses code, Part A",
+        "source": "City of Moreton Bay info sheet: Dual occupancy",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "coastal communities",
+       "suburban neighbourhood"
+      ],
+      "level": "Code assessment if on a lot with an area of 1,000 m² or more; otherwise impact assessment.",
+      "items": [
+       {
+        "label": "Benchmarks",
+        "value": "General residential zone code (relevant precinct); Residential uses code",
+        "source": "City of Moreton Bay info sheet: Dual occupancy",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "urban neighbourhood",
+       "rural residential",
+       "rural"
+      ],
+      "level": "Not suitable: the council info sheet says dual occupancies are not appropriate here (impact assessment).",
+      "items": [
+       {
+        "label": "Source",
+        "value": "Dual occupancy info sheet",
+        "source": "City of Moreton Bay info sheet: Dual occupancy",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [],
+      "level": "Impact assessment in all other zones and precincts (Part 5 tables of assessment).",
+      "items": [
+       {
+        "label": "Source",
+        "value": "Dual occupancy info sheet",
+        "source": "City of Moreton Bay info sheet: Dual occupancy",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dual-Occupancy",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "md": {
+    "zones": [
+     "next generation",
+     "urban neighbourhood",
+     "transition"
+    ],
+    "sources": [
+     {
+      "name": "Info sheet: Multiple dwelling",
+      "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Multiple-Dwelling"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "next generation",
+       "urban neighbourhood",
+       "transition"
+      ],
+      "level": "Accepted development subject to requirements for 6 or fewer dwellings on a lot of 800 m² or more with a road frontage of 20 m or more, meeting the building height condition; otherwise limited code assessment.",
+      "items": [
+       {
+        "label": "Benchmarks",
+        "value": "Residential uses code (9.3.2); Schedule 7 car parking",
+        "source": "City of Moreton Bay info sheet: Multiple dwelling",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Multiple-Dwelling",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "suburban neighbourhood"
+      ],
+      "level": "Code assessment if within 400 m walking distance of a higher order or district centre or train station and meeting the building height acceptable outcome; otherwise impact assessment.",
+      "items": [
+       {
+        "label": "Source",
+        "value": "Multiple dwelling info sheet",
+        "source": "City of Moreton Bay info sheet: Multiple dwelling",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Multiple-Dwelling",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "coastal communities"
+      ],
+      "level": "Code assessment if on a lot within the Main Street, Beachmere area (Figure 6.2.6.1.1); otherwise impact assessment. Generally not suitable in this precinct.",
+      "items": [
+       {
+        "label": "Source",
+        "value": "Multiple dwelling info sheet",
+        "source": "City of Moreton Bay info sheet: Multiple dwelling",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Multiple-Dwelling",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [],
+      "level": "Impact assessment in Rural residential and most other zones (check the Part 5 tables for Centre and Township precincts).",
+      "items": [
+       {
+        "label": "Source",
+        "value": "Multiple dwelling info sheet",
+        "source": "City of Moreton Bay info sheet: Multiple dwelling",
+        "url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Multiple-Dwelling",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "setbacks": {
+   "General residential zone": [
+    {
+     "title": "MBRC Planning Scheme 2016 v7, Dwelling house (council info sheet)",
+     "min_area_m2": 0,
+     "precinct": [
+      "next generation"
+     ],
+     "source": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Info-Sheets/Dwelling-House/Dwelling-House-Policy-Changes",
+     "note": "Version 7 (Better Housing Amendment, from 30 October 2024) changes for detached dwelling houses in the Next generation neighbourhood precinct and other listed areas. Front setbacks are in the Dwelling house code tables (not loaded yet).",
+     "check": "Confirm with City of Moreton Bay or a registered planner before relying on these distances.",
+     "rows": [
+      {
+       "label": "Rear, detached house (lot depth over 25 m)",
+       "value": "5 m",
+       "ref": "Info sheet: version 7 updates"
+      },
+      {
+       "label": "Rear, detached house (lot depth 25 m or less)",
+       "value": "3 m",
+       "ref": "Info sheet: version 7 updates"
+      },
+      {
+       "label": "Side wall",
+       "value": "1 m minimum or QDC Table A2 sliding scale",
+       "ref": "Info sheet: version 7 updates"
+      },
+      {
+       "label": "Eaves (outermost projection)",
+       "value": "Wall setback minus 0.5 m",
+       "ref": "Info sheet: version 7 updates"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

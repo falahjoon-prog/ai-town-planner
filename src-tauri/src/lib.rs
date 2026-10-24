@@ -1,4 +1,5 @@
 mod ai;
+mod council;
 mod data;
 mod dev;
 mod llm;

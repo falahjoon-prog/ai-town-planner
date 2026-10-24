@@ -10,8 +10,8 @@
     <div class="app" id="app">
       <!-- Left rail: app icon and tool icons -->
       <aside class="leftcol">
-        <svg class="applogo" viewBox="0 0 120 120" role="img" aria-label="PlanLens, Brisbane planning">
-          <title>PlanLens, Brisbane planning</title>
+        <svg class="applogo" viewBox="0 0 120 120" role="img" aria-label="PlanLens, Queensland planning">
+          <title>PlanLens, Queensland planning</title>
           <rect width="120" height="120" rx="26" fill="#0f5e4b" />
           <path d="M60 18 C40 18 28 32 28 50 C28 72 60 102 60 102 C60 102 92 72 92 50 C92 32 80 18 60 18 Z" fill="#3fb592" />
           <path d="M46 56 L60 44 L74 56 L74 70 L46 70 Z" fill="#0f5e4b" />
@@ -42,7 +42,7 @@
           <div>
             <h1>Desktop planning assessment, offline</h1>
             <ol class="steps">
-              <li><b>Search</b> for a Brisbane address or lot on plan.</li>
+              <li><b>Search</b> for an address or lot on plan in a council covered by the data pack (Brisbane, Logan, Moreton Bay).</li>
               <li><b>Check</b> the zoning, overlays and constraints for that site.</li>
               <li><b>Generate</b> an AI planner's report, or export a client PDF.</li>
             </ol>
@@ -128,7 +128,7 @@
             <div class="meta" id="siteMeta">No address loaded</div>
             <div class="tiles">
               <div class="tile"><small>Lot</small><b id="tLot">–</b></div>
-              <div class="tile"><small>Zone</small><b id="tZone">–</b></div>
+              <div class="tile"><small id="tZoneLbl">Zone</small><b id="tZone">–</b></div>
               <div class="tile"><small>Flags</small><b id="tFlags">–</b></div>
             </div>
           </div>
@@ -182,7 +182,7 @@
               <summary>Approvals, clock &amp; referrals</summary>
               <div class="sbody">
                 <div class="report-bar"><button type="button" class="ghost" id="daRegBtn">Open Council DA register (Development.i)</button></div>
-                <div class="meta">The address is copied. Paste it into Development.i's search to see applications and decisions on this lot and next door.</div>
+                <div class="meta" id="daRegNote">The address is copied. Paste it into Development.i's search to see applications and decisions on this lot and next door.</div>
                 <h4 class="subh">Statutory clock</h4>
                 <div class="clockform">
                   <label class="meta">Lodgement date <input type="date" id="clkDate"></label>
@@ -357,6 +357,7 @@
           <div class="dlg-row"><h2>Queensland maps</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
           <input id="mapsFilter" placeholder="Filter, e.g. Logan" autocomplete="off" />
         </div>
+        <div id="siteCouncilMaps" class="maplist"></div>
         <h3>State &amp; federal</h3>
         <div id="stateMaps" class="maplist"></div>
         <h3>Councils</h3>
