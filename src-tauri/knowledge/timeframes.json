@@ -1,0 +1,322 @@
+{
+ "holidays_source": {
+  "name": "Queensland Government, Public holidays",
+  "url": "https://www.qld.gov.au/recreation/travel/holidays/public"
+ },
+ "holidays_cover": [
+  "2026",
+  "2027"
+ ],
+ "holidays": [
+  {
+   "date": "2026-01-01",
+   "name": "New Year's Day",
+   "scope": "state"
+  },
+  {
+   "date": "2026-01-26",
+   "name": "Australia Day",
+   "scope": "state"
+  },
+  {
+   "date": "2026-04-03",
+   "name": "Good Friday",
+   "scope": "state"
+  },
+  {
+   "date": "2026-04-04",
+   "name": "The day after Good Friday",
+   "scope": "state"
+  },
+  {
+   "date": "2026-04-05",
+   "name": "Easter Sunday",
+   "scope": "state"
+  },
+  {
+   "date": "2026-04-06",
+   "name": "Easter Monday",
+   "scope": "state"
+  },
+  {
+   "date": "2026-04-25",
+   "name": "Anzac Day",
+   "scope": "state"
+  },
+  {
+   "date": "2026-05-04",
+   "name": "Labour Day",
+   "scope": "state"
+  },
+  {
+   "date": "2026-08-12",
+   "name": "Royal Queensland Show (Brisbane area only)",
+   "scope": "brisbane"
+  },
+  {
+   "date": "2026-10-05",
+   "name": "King's Birthday",
+   "scope": "state"
+  },
+  {
+   "date": "2026-12-25",
+   "name": "Christmas Day",
+   "scope": "state"
+  },
+  {
+   "date": "2026-12-26",
+   "name": "Boxing Day",
+   "scope": "state"
+  },
+  {
+   "date": "2026-12-28",
+   "name": "Boxing Day (additional)",
+   "scope": "state"
+  },
+  {
+   "date": "2027-01-01",
+   "name": "New Year's Day",
+   "scope": "state"
+  },
+  {
+   "date": "2027-01-26",
+   "name": "Australia Day",
+   "scope": "state"
+  },
+  {
+   "date": "2027-03-26",
+   "name": "Good Friday",
+   "scope": "state"
+  },
+  {
+   "date": "2027-03-27",
+   "name": "The day after Good Friday",
+   "scope": "state"
+  },
+  {
+   "date": "2027-03-28",
+   "name": "Easter Sunday",
+   "scope": "state"
+  },
+  {
+   "date": "2027-03-29",
+   "name": "Easter Monday",
+   "scope": "state"
+  },
+  {
+   "date": "2027-04-26",
+   "name": "Anzac Day (observed)",
+   "scope": "state"
+  },
+  {
+   "date": "2027-05-03",
+   "name": "Labour Day",
+   "scope": "state"
+  },
+  {
+   "date": "2027-08-11",
+   "name": "Royal Queensland Show (Brisbane area only)",
+   "scope": "brisbane"
+  },
+  {
+   "date": "2027-10-04",
+   "name": "King's Birthday",
+   "scope": "state"
+  },
+  {
+   "date": "2027-12-25",
+   "name": "Christmas Day",
+   "scope": "state"
+  },
+  {
+   "date": "2027-12-26",
+   "name": "Boxing Day",
+   "scope": "state"
+  },
+  {
+   "date": "2027-12-27",
+   "name": "Christmas Day (additional)",
+   "scope": "state"
+  },
+  {
+   "date": "2027-12-28",
+   "name": "Boxing Day (additional)",
+   "scope": "state"
+  }
+ ],
+ "notes": [
+  "Business days exclude weekends and the listed public holidays. Other local holidays and any extra closed days in the Planning Act definition of business day are NOT excluded, so confirm with the assessment manager.",
+  "Dates assume no referral agency and no stop-the-clock events other than those shown. All rows need checking against the Planning Act 2016 and the current DA Rules text, which could not be read directly."
+ ],
+ "rules": [
+  {
+   "id": "confirmation_notice",
+   "label": "Confirmation notice due",
+   "days": 10,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "code",
+    "impact"
+   ],
+   "start": "lodgement",
+   "source": {
+    "name": "DA Rules guidance for development assessment (July 2025, DA Rules v3.0)",
+    "url": "https://www.planning.qld.gov.au/__data/assets/pdf_file/0014/102272/da-rules-guidance-version3.pdf"
+   },
+   "verify": true,
+   "note": "Assessment manager decides if the application is properly made. Counted from the day after it receives the application (DA Rules v2 s1.2)."
+  },
+  {
+   "id": "information_request",
+   "label": "Information request due (if one is made)",
+   "days": 10,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "code",
+    "impact"
+   ],
+   "start": "confirmation_notice",
+   "source": {
+    "name": "DA Rules guidance for development assessment (July 2025, DA Rules v3.0)",
+    "url": "https://www.planning.qld.gov.au/__data/assets/pdf_file/0014/102272/da-rules-guidance-version3.pdf"
+   },
+   "verify": true,
+   "note": "10 business days to make an information request. DA Rules v2 s12.2 starts the count the day after Part 1 ends; check the v3.0 wording."
+  },
+  {
+   "id": "applicant_response",
+   "label": "Applicant response to information request due",
+   "days": null,
+   "months": 3,
+   "day_type": "calendar",
+   "applies_to": [
+    "code",
+    "impact"
+   ],
+   "start": "information_request",
+   "source": {
+    "name": "DA Rules guidance for development assessment (July 2025, DA Rules v3.0)",
+    "url": "https://www.planning.qld.gov.au/__data/assets/pdf_file/0014/102272/da-rules-guidance-version3.pdf"
+   },
+   "verify": true,
+   "note": "3 months from the date the information request was made (shown for a request made on the last day)."
+  },
+  {
+   "id": "public_notification_start",
+   "label": "Public notification must start",
+   "days": 20,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "impact"
+   ],
+   "start": "confirmation_notice",
+   "source": {
+    "name": "DA Rules guidance for development assessment (July 2025, DA Rules v3.0)",
+    "url": "https://www.planning.qld.gov.au/__data/assets/pdf_file/0014/102272/da-rules-guidance-version3.pdf"
+   },
+   "verify": true,
+   "note": "Applies where there are no referral agencies and no information request. Otherwise the start is measured from a later point (DA Rules Ch 1 Pt 4)."
+  },
+  {
+   "id": "public_notification_end",
+   "label": "Public notification period ends",
+   "days": 15,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "impact"
+   ],
+   "start": "public_notification_start",
+   "source": {
+    "name": "DA Rules guidance for development assessment (July 2025, DA Rules v3.0)",
+    "url": "https://www.planning.qld.gov.au/__data/assets/pdf_file/0014/102272/da-rules-guidance-version3.pdf"
+   },
+   "verify": true,
+   "note": "Planning Act s53(4)(b): 15 business days after the notice is given. Guidance says s53(12) excludes 20 December to 5 January from business days for public notification. Longer for a variation request (30 business days).",
+   "exclude_md_ranges": [
+    [
+     "12-20",
+     "01-05"
+    ]
+   ]
+  },
+  {
+   "id": "decision_period",
+   "label": "Decision due (35 business days)",
+   "days": 35,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "code",
+    "impact"
+   ],
+   "start": "confirmation_notice",
+   "source": {
+    "name": "DA Rules guidance for development assessment (July 2025, DA Rules v3.0)",
+    "url": "https://www.planning.qld.gov.au/__data/assets/pdf_file/0014/102272/da-rules-guidance-version3.pdf"
+   },
+   "verify": true,
+   "note": "Same period for code and impact. Counts from the end of the last relevant stage with no referral or information request assumed; days used for an information request are deducted (v2 ss22.3-22.4).",
+   "start_by_path": {
+    "code": "confirmation_notice",
+    "impact": "public_notification_end"
+   }
+  },
+  {
+   "id": "decision_notice",
+   "label": "Decision notice due",
+   "days": 5,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "code",
+    "impact"
+   ],
+   "start": "decision_period",
+   "source": {
+    "name": "DA Rules guidance for development assessment (July 2025, DA Rules v3.0)",
+    "url": "https://www.planning.qld.gov.au/__data/assets/pdf_file/0014/102272/da-rules-guidance-version3.pdf"
+   },
+   "verify": true,
+   "note": "5 business days after the decision period (DA Rules Ch 1 Pt 5)."
+  },
+  {
+   "id": "appeal_applicant",
+   "label": "Applicant appeal period ends",
+   "days": 20,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "code",
+    "impact"
+   ],
+   "start": "decision_notice",
+   "source": {
+    "name": "Brisbane City Council, Table of appeal rights under the Planning Act 2016 (as at 1 July 2019)",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/table-of-appeal-rights-under-planning-act-2016.pdf"
+   },
+   "verify": true,
+   "note": "20 business days after notice of the decision is given (Planning Act s229, Sch 1). Source is a 2019 council table; confirm against the Act."
+  },
+  {
+   "id": "appeal_submitter",
+   "label": "Submitter appeal period ends",
+   "days": 20,
+   "months": null,
+   "day_type": "business",
+   "applies_to": [
+    "impact"
+   ],
+   "start": "decision_notice",
+   "source": {
+    "name": "Brisbane City Council, Table of appeal rights under the Planning Act 2016 (as at 1 July 2019)",
+    "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/table-of-appeal-rights-under-planning-act-2016.pdf"
+   },
+   "verify": true,
+   "note": "Eligible submitters, impact-assessed parts (Planning Act Sch 1, Table 2). Source is a 2019 council table."
+  }
+ ]
+}

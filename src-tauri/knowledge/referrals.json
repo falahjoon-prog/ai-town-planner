@@ -1,0 +1,5 @@
+{
+ "title": "Possible referrals",
+ "note": "Each row maps a detected constraint (rules.json id) to a referral trigger. Only add a row after confirming it in Planning Regulation 2017 Schedule 10 or the City Plan, with its source.",
+ "rows": []
+}
