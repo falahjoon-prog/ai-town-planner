@@ -79,3 +79,9 @@ Common rules for every thread
 2) Done: grip drags to max = window - 94px chrome - max(200px, 20%) (about 75-78%, map keeps >=20%/200px); min stays 340; resize and stored-width restore clamp to the new max; old fixed 700 clamp removed; no grip double-click reset existed (Window > Reset panel widths unchanged); zone/flag cards go 2 columns when content is over 900px, tiles stay 3 across.
 3) Tests: tsc and vite build clean; headless Chromium 1280/1920 light+dark: max (930/1442 px), min (340), shrink 1920->1000 clamps 1442->706, reload keeps clamp; no horizontal scroll, no page errors, map visible (>=206 px) and grip reachable. Shots /tmp/claude-0/shots/t9-*.
 4) Remaining: map minimum counts side chrome so max is about 75% not a flat 80%; chat view only checked for no errors at max width.
+
+## T10 – Slim panel chrome
+1) Files: index.html (rail buttons icon-only with title+aria-label), src/style.css (.rail 48px, .sqbtn 32px/16px icons, #q flex:1, .panelfoot nowrap), handoffs/threads.md.
+2) Done: rail 76->48px icon-only (40px targets, labels and unused label CSS removed); address row buttons 32px square, input takes remaining width; Generate AI report and Client PDF always in one row.
+3) Tests: tsc and vite build clean; headless Chromium 768/1280/1920 light+dark, default and 340px min: rail 48px, 0 buttons without name/tooltip, address input 152-332px, buttons one row, no clipping, no horizontal scroll; chat view opens. Shots: /tmp/claude-0/shots/t10-*.
+4) Remaining: at 340px the address input is about 152px (long addresses still truncate); rail tooltips are native title only.
