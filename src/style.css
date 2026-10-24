@@ -53,7 +53,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .fullbtn { background: var(--accent); color: var(--accent-ink); border: 1px solid var(--accent); font-weight: 600; border-radius: 10px; padding: 7px 12px; }
 
 .rightcol { position: absolute; top: calc(var(--top) + 6px); right: 6px; bottom: calc(var(--bot) + 6px); width: var(--right); z-index: 6; display: flex; flex-direction: row; min-height: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-.rail { width: 76px; flex: none; padding: 10px 6px; display: flex; flex-direction: column; gap: 4px; background: var(--bg); border-right: 1px solid var(--line); overflow-y: auto; }
+.rail { width: 76px; flex: none; padding: 10px 6px; display: flex; flex-direction: column; gap: 4px; background: var(--bg); order: 2; border-left: 1px solid var(--line); overflow-y: auto; }
 .rail button { height: 56px; padding: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: transparent; color: var(--muted); border-radius: 10px; font-size: 11px; font-weight: 500; }
 .rail button svg { width: 20px; height: 20px; }
 .rail button:hover { background: var(--chip); }
