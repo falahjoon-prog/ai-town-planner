@@ -84,6 +84,21 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .results li { padding: 8px 10px; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; }
 .results li span { color: var(--muted); font-size: 12px; }
 .results li:hover { background: var(--chip); }
+.results li.rtools, .results li.rgrp { cursor: default; }
+.results li.rtools:hover, .results li.rgrp:hover { background: transparent; }
+.results li.rtools { gap: 4px; padding: 6px 4px 8px; border-bottom: 1px solid var(--line); border-radius: 0; }
+.results li.rgrp { padding: 8px 10px 2px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.rbar { display: flex; gap: 6px; align-items: center; }
+.rbar select { min-width: 84px; padding: 6px 6px; }
+.rbar button { padding: 6px 8px; font-size: 12.5px; flex: none; }
+.rform { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; font-size: 12.5px; color: var(--ink); }
+.rform label { display: flex; flex-direction: column; gap: 2px; color: var(--muted); font-size: 12px; }
+.rform input { padding: 6px 8px; }
+.rrow { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.rtxt { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow-wrap: anywhere; }
+select.mv { flex: none; width: 96px; max-width: 34%; padding: 4px 6px; font-size: 12px; }
+.cmp-projbar { display: flex; gap: 8px; flex-wrap: wrap; }
+.cmp-projbar select { min-width: 140px; }
 .results li.sel { background: var(--chip); box-shadow: inset 3px 0 0 var(--accent); }
 .hint { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
 .hint.err { color: var(--warn); }

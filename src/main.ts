@@ -227,7 +227,7 @@ $("q").addEventListener("input", () => {
 let hasGoogle = false;
 const OPEN_LAST_KEY = "openLast"; // "0" = do not reopen the last address on start
 
-type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string };
+type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string; project?: string };
 function sites(): Record<string, Site> {
   try { return JSON.parse(localStorage.getItem("sites") ?? "{}"); } catch { return {}; }
 }
@@ -236,7 +236,7 @@ function saveSites(m: Record<string, Site>) {
   const all = Object.values(m).sort((x, y) => y.ts - x.ts);
   let n = 0;
   const keep: Record<string, Site> = {};
-  for (const x of all) if (x.star || x.note || x.title || n++ < 20) keep[x.lotplan] = x;
+  for (const x of all) if (x.star || x.note || x.title || x.project || n++ < 20) keep[x.lotplan] = x;
   try { localStorage.setItem("sites", JSON.stringify(keep)); } catch { /* storage unavailable */ }
 }
 function touchSite(p: { pid: number; address: string; lotplan: string }, patch: Partial<Site> = {}) {
@@ -244,13 +244,86 @@ function touchSite(p: { pid: number; address: string; lotplan: string }, patch: 
   m[p.lotplan] = { ...m[p.lotplan], pid: p.pid, address: p.address, lotplan: p.lotplan, ts: Date.now(), ...patch };
   saveSites(m);
 }
-function showRecents() {
-  const r = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts);
-  $("results").innerHTML = r
-    .map((h) => `<li data-pid="${h.pid}" data-lp="${esc(h.lotplan)}"><b>${h.star ? "★ " : ""}${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}${h.note ? " · note" : ""}${h.title ? " · title" : ""}</span></li>`)
-    .join("");
-  $("hint").textContent = r.length ? "Saved and recent addresses" : "";
+// ---- Projects: named groups of saved addresses (one per address). Stored in localStorage "projects"; the link lives on the site as `project`. ----
+type Project = { id: string; name: string; client?: string; note?: string; created: number };
+function projects(): Project[] {
+  try { const a = JSON.parse(localStorage.getItem("projects") ?? "[]"); return Array.isArray(a) ? a : []; } catch { return []; }
 }
+function saveProjects(a: Project[]) {
+  try { localStorage.setItem("projects", JSON.stringify(a)); } catch { /* storage unavailable */ }
+}
+const sortedProjects = () => projects().sort((a, b) => a.name.localeCompare(b.name));
+const projLabel = (p: Project) => p.client ? `${p.name} (${p.client})` : p.name;
+function moveSite(lp: string, pid: string) {
+  const m = sites();
+  if (!m[lp]) return;
+  if (pid) m[lp].project = pid; else delete m[lp].project;
+  saveSites(m);
+}
+let projFilter = "all"; // "all" | "none" (Unfiled) | project id
+let projMode: "" | "new" | "edit" | "del" = "";
+function projOptions(sel: string, all = true) {
+  return `${all ? `<option value="all"${sel === "all" ? " selected" : ""}>All addresses</option>` : ""}<option value="none"${sel === "none" ? " selected" : ""}>Unfiled</option>${sortedProjects().map((p) => `<option value="${esc(p.id)}"${sel === p.id ? " selected" : ""}>${esc(projLabel(p))}</option>`).join("")}`;
+}
+function showRecents(focus = "") {
+  const ps = sortedProjects();
+  if (projFilter !== "all" && projFilter !== "none" && !ps.some((p) => p.id === projFilter)) projFilter = "all";
+  const cur = ps.find((p) => p.id === projFilter);
+  const all = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts);
+  const inProj = (h: Site) => (h.project && ps.some((p) => p.id === h.project) ? h.project : "none");
+  const r = all.filter((h) => projFilter === "all" || inProj(h) === projFilter);
+  const row = (h: Site) => `<li data-pid="${h.pid}" data-lp="${esc(h.lotplan)}"><div class="rrow"><div class="rtxt"><b>${h.star ? "★ " : ""}${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}${h.note ? " · note" : ""}${h.title ? " · title" : ""}</span></div><select class="mv" aria-label="Move ${esc(h.address || h.lotplan)} to project" title="Move to project">${projOptions(inProj(h), false)}</select></div></li>`;
+  let rows = "";
+  if (projFilter === "all" && ps.length) {
+    for (const g of [...ps.map((p) => p.id), "none"]) {
+      const items = r.filter((h) => inProj(h) === g);
+      if (items.length) rows += `<li class="rgrp" role="presentation">${esc(g === "none" ? "Unfiled" : projLabel(ps.find((p) => p.id === g)!))}</li>${items.map(row).join("")}`;
+    }
+  } else rows = r.map(row).join("");
+  const ctl = `<li class="rtools" role="presentation"><label for="projSel" class="meta">Project</label><div class="rbar"><select id="projSel" aria-label="Filter by project">${projOptions(projFilter)}</select><button type="button" class="ghost" data-act="new">New</button><button type="button" class="ghost" data-act="edit"${cur ? "" : " disabled"}>Rename</button><button type="button" class="ghost" data-act="del"${cur ? "" : " disabled"}>Delete</button></div>${
+    projMode === "new" || (projMode === "edit" && cur)
+      ? `<div class="rform"><label>Name<input id="pfName" value="${esc(projMode === "edit" ? cur!.name : "")}" maxlength="60"></label><label>Client (optional)<input id="pfClient" value="${esc(projMode === "edit" ? cur!.client ?? "" : "")}" maxlength="60"></label><label>Note (optional)<input id="pfNote" value="${esc(projMode === "edit" ? cur!.note ?? "" : "")}" maxlength="120"></label><div class="rbar"><button type="button" data-act="save">Save</button><button type="button" class="ghost" data-act="cancel">Cancel</button></div></div>`
+      : projMode === "del" && cur
+        ? `<div class="rform" role="alert"><span>Delete project "${esc(cur.name)}"? Its ${all.filter((h) => inProj(h) === cur.id).length} address(es) become Unfiled. No address is deleted.</span><div class="rbar"><button type="button" data-act="delgo">Delete project</button><button type="button" class="ghost" data-act="cancel">Cancel</button></div></div>`
+        : cur?.note ? `<div class="meta">${esc(cur.note)}</div>` : ""
+  }</li>`;
+  $("results").innerHTML = ctl + rows;
+  $("hint").textContent = r.length ? "Saved and recent addresses" : "";
+  if (focus) ($(focus) as HTMLElement | null)?.focus();
+}
+
+$("results").addEventListener("change", (ev) => {
+  const t = ev.target as HTMLSelectElement;
+  if (t.id === "projSel") { projFilter = t.value; projMode = ""; showRecents("projSel"); }
+  else if (t.classList.contains("mv")) {
+    const lp = t.closest<HTMLElement>("li")!.dataset.lp!;
+    moveSite(lp, t.value === "none" ? "" : t.value);
+    showRecents();
+  }
+});
+$("results").addEventListener("click", (ev) => {
+  const b = (ev.target as HTMLElement).closest<HTMLElement>("button[data-act]");
+  if (!b || !$("results").contains(b)) return;
+  const act = b.dataset.act;
+  const val = (id: string) => ($(id) as HTMLInputElement).value.trim();
+  if (act === "new" || act === "edit" || act === "del") { projMode = act; showRecents(act === "del" ? "" : "pfName"); }
+  else if (act === "cancel") { projMode = ""; showRecents("projSel"); }
+  else if (act === "save") {
+    const name = val("pfName");
+    if (!name) { $("pfName").focus(); return; }
+    const a = projects();
+    const f = { name, client: val("pfClient") || undefined, note: val("pfNote") || undefined };
+    if (projMode === "edit") { const p = a.find((x) => x.id === projFilter); if (p) Object.assign(p, f); }
+    else { const id = `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`; a.push({ id, created: Date.now(), ...f }); projFilter = id; }
+    saveProjects(a); projMode = ""; showRecents("projSel");
+  } else if (act === "delgo") {
+    const m = sites();
+    for (const x of Object.values(m)) if (x.project === projFilter) delete x.project;
+    saveSites(m);
+    saveProjects(projects().filter((p) => p.id !== projFilter));
+    projFilter = "all"; projMode = ""; showRecents("projSel");
+  }
+});
 
 // Shared address search (main box and Compare dialog): Google suggestions when a key is set, else the offline typo-tolerant search.
 async function findAddresses(q: string): Promise<{ google?: { place_id: string; text: string }[]; hits?: Hit[]; note?: string }> {
@@ -294,7 +367,7 @@ async function runSearch() {
 
 $("results").addEventListener("click", (ev) => {
   const li = (ev.target as HTMLElement).closest("li");
-  if (!li) return;
+  if (!li || li.classList.contains("rtools") || li.classList.contains("rgrp") || (ev.target as HTMLElement).closest("select")) return;
   document.querySelectorAll("#results li").forEach((x) => x.classList.toggle("sel", x === li));
   if (li.dataset.place) {
     invoke<Hit>("google_pick", { placeId: li.dataset.place }).then((h) => loadSite(h.pid), alertMsg);
@@ -1218,8 +1291,13 @@ $("suburbBtn").addEventListener("click", async () => {
 let cmpAdded: Site[] = [];
 function cmpRender() {
   const checked = new Set([...document.querySelectorAll<HTMLInputElement>("#cmpPick input:checked")].map((i) => i.value));
-  const list = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts).filter((h) => !cmpAdded.some((c) => c.lotplan === h.lotplan));
+  const ps = projects();
+  const pf = ($("cmpProj") as HTMLSelectElement).value || "all";
+  const pOf = (h: Site) => (h.project && ps.some((p) => p.id === h.project) ? h.project : "none");
+  const list = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts).filter((h) => !cmpAdded.some((c) => c.lotplan === h.lotplan) && (pf === "all" || pOf(h) === pf));
   const row = (h: Site, added: boolean) => `<div class="mapitem cmprow"><label><input type="checkbox" value="${esc(h.lotplan)}" data-pid="${h.pid}"${checked.has(h.lotplan) ? " checked" : ""}> ${h.star ? "★ " : ""}<b>${esc(h.address || h.lotplan)}</b> <span class="meta">${esc(h.lotplan)}</span></label>${added ? `<button type="button" class="ghost cmp-rm" data-lp="${esc(h.lotplan)}" aria-label="Remove ${esc(h.address || h.lotplan)}">Remove</button>` : ""}</div>`;
+  $("cmpProj").innerHTML = projOptions(ps.some((p) => p.id === pf) || pf === "none" ? pf : "all");
+  ($("cmpAll") as HTMLButtonElement).disabled = pf === "all" || !list.length;
   $("cmpPick").innerHTML = cmpAdded.map((h) => row(h, true)).join("") + list.map((h) => row(h, false)).join("") || `<p class="meta">No saved addresses yet. Search above to add one.</p>`;
   cmpSync();
 }
@@ -1231,6 +1309,14 @@ function cmpSync() {
   $("cmpMsg").textContent = n >= 3 ? "Limit of 3 addresses reached. Untick or remove one to change the selection." : `${n} of 3 selected (pick at least 2).`;
 }
 $("cmpPick").addEventListener("change", cmpSync);
+$("cmpProj").addEventListener("change", cmpRender);
+$("cmpAll").addEventListener("click", () => {
+  for (const i of document.querySelectorAll<HTMLInputElement>("#cmpPick input:not(:checked)")) {
+    if (document.querySelectorAll("#cmpPick input:checked").length >= 3) break;
+    i.checked = true;
+  }
+  cmpSync();
+});
 $("cmpPick").addEventListener("click", (ev) => {
   const b = (ev.target as HTMLElement).closest<HTMLElement>(".cmp-rm");
   if (!b) return;
@@ -1649,18 +1735,18 @@ openLastBox.addEventListener("change", () => {
   try { localStorage.setItem(OPEN_LAST_KEY, openLastBox.checked ? "1" : "0"); } catch { /* storage unavailable */ }
 });
 
-type Backup = { app: string; version: number; savedAt: string; sites: Record<string, Site>; checklists: Record<string, string[]>; forms: Record<string, string>; settings: Record<string, string> };
+type Backup = { app: string; version: number; savedAt: string; sites: Record<string, Site>; checklists: Record<string, string[]>; forms: Record<string, string>; settings: Record<string, string>; projects: Project[] };
 const backupMsg = (t: string) => { $("backupMsg").textContent = t; };
 let pendingBackup: Backup | null = null;
 
 function backupCounts(b: Backup) {
   const s = Object.values(b.sites);
-  return { saved: s.filter((x) => x.star).length, recent: s.filter((x) => !x.star).length, notes: s.filter((x) => x.note).length };
+  return { saved: s.filter((x) => x.star).length, recent: s.filter((x) => !x.star).length, notes: s.filter((x) => x.note).length, projects: b.projects.length };
 }
-const countText = (c: { saved: number; recent: number; notes: number }) => `${c.saved} saved, ${c.recent} recent, ${c.notes} note${c.notes === 1 ? "" : "s"}`;
+const countText = (c: { saved: number; recent: number; notes: number; projects: number }) => `${c.saved} saved, ${c.recent} recent, ${c.notes} note${c.notes === 1 ? "" : "s"}, ${c.projects} project${c.projects === 1 ? "" : "s"}`;
 
 function makeBackup(): Backup {
-  const b: Backup = { app: "ai-town-planner", version: 2, savedAt: new Date().toISOString(), sites: sites(), checklists: {}, forms: {}, settings: {} };
+  const b: Backup = { app: "ai-town-planner", version: 3, savedAt: new Date().toISOString(), sites: sites(), checklists: {}, forms: {}, settings: {}, projects: projects() };
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
@@ -1679,8 +1765,8 @@ function parseBackup(text: string): Backup {
   let p: any;
   try { p = JSON.parse(text); } catch { throw new Error("That file is not valid JSON."); }
   if (!p || typeof p !== "object" || p.app !== "ai-town-planner" || typeof p.version !== "number") throw new Error("That is not a backup from this app.");
-  if (p.version > 2 || p.version < 1) throw new Error(`Backup version ${p.version} is not supported by this app.`);
-  const out: Backup = { app: p.app, version: 2, savedAt: String(p.savedAt ?? ""), sites: {}, checklists: {}, forms: {}, settings: {} };
+  if (p.version > 3 || p.version < 1) throw new Error(`Backup version ${p.version} is not supported by this app.`);
+  const out: Backup = { app: p.app, version: 3, savedAt: String(p.savedAt ?? ""), sites: {}, checklists: {}, forms: {}, settings: {}, projects: [] };
   if (p.version === 1) {
     const d = p.data;
     if (!d || typeof d !== "object") throw new Error("The backup has no data.");
@@ -1690,8 +1776,10 @@ function parseBackup(text: string): Backup {
   if (!isObj(p.sites)) throw new Error("The backup has no saved addresses section.");
   for (const [lp, x] of Object.entries(p.sites)) {
     if (!isObj(x) || typeof x.pid !== "number" || typeof x.lotplan !== "string" || typeof x.address !== "string") throw new Error("The backup has a damaged address entry.");
-    out.sites[lp] = { pid: x.pid, address: x.address, lotplan: x.lotplan, ts: Number(x.ts) || 0, ...(x.star ? { star: true } : {}), ...(typeof x.note === "string" && x.note ? { note: x.note } : {}), ...(typeof x.title === "string" && x.title ? { title: x.title } : {}) };
+    out.sites[lp] = { pid: x.pid, address: x.address, lotplan: x.lotplan, ts: Number(x.ts) || 0, ...(x.star ? { star: true } : {}), ...(typeof x.note === "string" && x.note ? { note: x.note } : {}), ...(typeof x.title === "string" && x.title ? { title: x.title } : {}), ...(typeof x.project === "string" && x.project ? { project: x.project } : {}) };
   }
+  if (Array.isArray(p.projects)) for (const q of p.projects) if (isObj(q) && typeof q.id === "string" && q.id && typeof q.name === "string" && q.name) out.projects.push({ id: q.id, name: q.name, created: Number(q.created) || 0, ...(typeof q.client === "string" && q.client ? { client: q.client } : {}), ...(typeof q.note === "string" && q.note ? { note: q.note } : {}) });
+  for (const x of Object.values(out.sites)) if (x.project && !out.projects.some((q) => q.id === x.project)) delete x.project;
   if (isObj(p.checklists)) for (const [k, v] of Object.entries(p.checklists)) if (k.startsWith("checklist:") && Array.isArray(v)) out.checklists[k] = v.filter((t) => typeof t === "string");
   if (isObj(p.forms)) for (const [k, v] of Object.entries(p.forms)) if (k.startsWith("daform1:") && typeof v === "string") out.forms[k] = v;
   if (isObj(p.settings)) for (const [k, v] of Object.entries(p.settings)) if (BACKUP_SETTINGS.includes(k) && typeof v === "string") out.settings[k] = v;
@@ -1701,12 +1789,16 @@ function safeJson(s: unknown): unknown { try { return JSON.parse(String(s)); } c
 
 // Merge only: nothing is deleted. The newer entry's note and title win (by timestamp); stars and checklist ticks are unioned.
 function mergeBackup(b: Backup) {
+  const pj = projects();
+  for (const q of b.projects) if (!pj.some((x) => x.id === q.id)) pj.push(q);
+  saveProjects(pj);
   const cur = sites();
   for (const [lp, inc] of Object.entries(b.sites)) {
     const ex = cur[lp];
     if (!ex) { cur[lp] = inc; continue; }
+    const project = ex.project ?? inc.project;
     const newer = inc.ts > ex.ts;
-    cur[lp] = { ...ex, ts: Math.max(ex.ts, inc.ts), star: ex.star || inc.star || undefined, note: newer ? inc.note ?? ex.note : ex.note ?? inc.note, title: newer ? inc.title ?? ex.title : ex.title ?? inc.title };
+    cur[lp] = { ...ex, ts: Math.max(ex.ts, inc.ts), star: ex.star || inc.star || undefined, note: newer ? inc.note ?? ex.note : ex.note ?? inc.note, title: newer ? inc.title ?? ex.title : ex.title ?? inc.title, ...(project ? { project } : {}) };
   }
   saveSites(cur);
   try {
