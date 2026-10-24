@@ -287,6 +287,7 @@ def arcgis_features(url, oid=None, bbox=None, where="1=1", page=None, geojson=No
         feats = d.get("features", [])
         if not feats:
             return
+        before = last
         for f in feats:
             if not geojson:
                 f = {"type": "Feature", "properties": f.get("attributes") or {},
@@ -299,6 +300,9 @@ def arcgis_features(url, oid=None, bbox=None, where="1=1", page=None, geojson=No
                 last = max(last, int(v))
             yield f
         if len(feats) < page and not d.get("exceededTransferLimit") and not (d.get("properties") or {}).get("exceededTransferLimit"):
+            return
+        if last <= before:  # object ids missing from the output: stop rather than loop on the same page
+            print(f"::warning title=Paging stopped::{url}: object id field {oid} not in the output", flush=True)
             return
 
 
@@ -349,7 +353,9 @@ def _addr_key(a):
 
 
 def cadastre_where(field, names):
-    return " OR ".join(f"upper({field})='{n.upper()}'" for n in names)
+    """Exact match on the LGA name as stored (e.g. "Logan City"); no upper() so the server can use its index."""
+    vals = sorted({v for n in names for v in (n, n.upper(), n.title())})
+    return f"{field} IN (" + ",".join("'" + v.replace("'", "''") + "'" for v in vals) + ")"
 
 
 def load_addresses(lga, bbox):

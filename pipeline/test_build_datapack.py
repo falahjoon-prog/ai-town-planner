@@ -37,13 +37,13 @@ LAYER_INFO = {"type": "Feature Layer", "objectIdField": "OBJECTID", "maxRecordCo
 FEATS = {1: [{"type": "Feature", "properties": {"OBJECTID": 1, "CATEGORY": "Flood hazard area"}, "geometry": poly(SQ)}],
          3: [{"type": "Feature", "properties": {"OBJECTID": 7, "ZONE_NAME": "Low density residential", "PRECINCT": "Suburban precinct"}, "geometry": poly(SQ)}]}
 CAD = [{"type": "Feature", "properties": {"objectid": 11, "lot": "6", "plan": "RP1", "lotplan": "6RP1", "lot_area": 600.0, "tenure": "Freehold",
-                                          "parcel_typ": "Lot Type Parcel", "locality": "ROCHEDALE SOUTH", "shire_name": "LOGAN CITY"}, "geometry": poly(SQ)},
+                                          "parcel_typ": "Lot Type Parcel", "locality": "ROCHEDALE SOUTH", "shire_name": "Logan City"}, "geometry": poly(SQ)},
        {"type": "Feature", "properties": {"objectid": 12, "lot": "0", "plan": "SP9", "lotplan": "0SP9", "lot_area": 900.0, "tenure": "Freehold",
-                                          "parcel_typ": "Lot Type Parcel", "locality": "ROCHEDALE SOUTH", "shire_name": "LOGAN CITY"}, "geometry": poly(SQ2)}]
+                                          "parcel_typ": "Lot Type Parcel", "locality": "ROCHEDALE SOUTH", "shire_name": "Logan City"}, "geometry": poly(SQ2)}]
 ADDR = [{"type": "Feature", "properties": {"objectid": 1, "lotplan": "6RP1", "street_number": "6", "street_name": "GABLE", "street_type": "STREET",
-                                           "locality": "ROCHEDALE SOUTH", "local_authority": "LOGAN CITY"}, "geometry": {"type": "Point", "coordinates": [153.0005, -27.0005]}},
+                                           "locality": "ROCHEDALE SOUTH", "local_authority": "Logan City"}, "geometry": {"type": "Point", "coordinates": [153.0005, -27.0005]}},
         {"type": "Feature", "properties": {"objectid": 2, "lotplan": "1BUP9", "unit_number": "1", "street_number": "8", "street_name": "GABLE",
-                                           "street_type": "STREET", "locality": "ROCHEDALE SOUTH", "local_authority": "LOGAN CITY"},
+                                           "street_type": "STREET", "locality": "ROCHEDALE SOUTH", "local_authority": "Logan City"},
          "geometry": {"type": "Point", "coordinates": [153.0015, -27.0005]}}]
 
 
@@ -106,7 +106,7 @@ class RegistryTest(unittest.TestCase):
     def test_cadastre_parcels_with_addresses(self):
         db = sqlite3.connect(":memory:")
         b.schema(db)
-        n = b.load_parcels_cadastre(db, "logan", 1, {"lga": ["LOGAN CITY"]}, [152.9, -27.1, 153.1, -26.9])
+        n = b.load_parcels_cadastre(db, "logan", 1, {"lga": ["Logan City"]}, [152.9, -27.1, 153.1, -26.9])
         self.assertEqual(n, 2)
         r = db.execute("SELECT pid, address, suburb, council, search, props FROM parcels ORDER BY pid").fetchall()
         self.assertEqual(r[0][0], b.PID_STRIDE + 11)

@@ -14,7 +14,7 @@ provisions.json, uses.json, setbacks.json).
 | State layers | `STATE_LAYERS` in the pipeline (SARA triggers, koala, wetlands, vegetation, coastal, PDA, SEQ land use, protected plants, easements, GA electricity) | CC BY 4.0 | resolved by layer name |
 
 LGA names as they appear in the data (checked with the discover run): `shire_name` / `local_authority` =
-"Brisbane City", "Logan City", "Moreton Bay City". The pipeline compares in upper case.
+"Brisbane City", "Logan City", "Moreton Bay City". The pipeline matches these values exactly (with upper- and title-case variants).
 
 ## Brisbane City Council (unchanged)
 
@@ -97,7 +97,7 @@ One object per council; the array order sets parcel ids (`pid = index * 100,000,
 | `licence`, `attribution` | pipeline manifest, docs | Licence summary |
 | `title_prefix` | both | Prefix of layer titles (e.g. "Logan — "); the flood legend strips it |
 | `bbox` `[minx,miny,maxx,maxy]` | pipeline | WGS84 envelope; parcels are filtered by LGA name inside it, and state layers are loaded once per council bbox (so a council outside SEQ, e.g. Mackay, just needs its own bbox) |
-| `pipeline.parcels` | pipeline | `{"kind":"bcc"}` or `{"kind":"qld_cadastre","lga":["LOGAN CITY"]}` (names as in `shire_name`/`local_authority`) |
+| `pipeline.parcels` | pipeline | `{"kind":"bcc"}` or `{"kind":"qld_cadastre","lga":["Logan City"]}` (exact names as in `shire_name`/`local_authority`; matched without upper() so the server index is used) |
 | `pipeline.layers[]` | pipeline | `{"kind":"bcc_cp14"}` or an `arcgis` source (below) |
 | `pipeline.test` | pipeline | `{"bbox":[…]}` small area for `--test` (council layers and parcels clipped to it), or Brisbane's `parcel_limit` / `only` |
 | `samples` | discover | Address lookups printed by `--discover` |

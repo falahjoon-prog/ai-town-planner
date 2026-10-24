@@ -44,10 +44,19 @@ jobs:
         run: |
           ARGS="${{ inputs.councils && format('--councils {0}', inputs.councils) || '' }}"
           if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
-          python pipeline/build_datapack.py datapack.sqlite $ARGS
+          set -o pipefail
+          python -u pipeline/build_datapack.py datapack.sqlite $ARGS 2>&1 | tee build.log
           ls -lh datapack.sqlite
           gzip -9 -k datapack.sqlite
           ls -lh datapack.sqlite.gz
+      - name: Publish build log
+        # Readable without Actions log access (release assets can be downloaded through the API); the app ignores this tag.
+        if: ${{ always() && !inputs.discover && github.event_name == 'workflow_dispatch' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f build.log ] || exit 0
+          gh release create "buildlog-$(date -u +%Y%m%d-%H%M)" build.log --target "${{ github.sha }}" --title "Data pack build log" --notes "Build log of run ${{ github.run_id }} (not a data pack)." --prerelease
       - name: Publish release
         if: ${{ !inputs.discover }}
         env:

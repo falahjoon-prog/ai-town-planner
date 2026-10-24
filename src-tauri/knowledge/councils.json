@@ -73,7 +73,7 @@
       "parcels": {
         "kind": "qld_cadastre",
         "lga": [
-          "LOGAN CITY"
+          "Logan City"
         ]
       },
       "layers": [
@@ -155,9 +155,7 @@
       "parcels": {
         "kind": "qld_cadastre",
         "lga": [
-          "MORETON BAY CITY",
-          "MORETON BAY REGIONAL",
-          "MORETON BAY"
+          "Moreton Bay City"
         ]
       },
       "layers": [
