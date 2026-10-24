@@ -35,6 +35,13 @@ pub struct ParcelHit {
     pub address: String,
     pub lotplan: String,
     pub suburb: String,
+    /// Council id from the registry (knowledge/councils.json); "brisbane" for older single-council packs
+    pub council: String,
+}
+
+/// SQL for the parcel council id (older packs have no council column: they are Brisbane only).
+fn council_col(c: &Connection) -> &'static str {
+    if c.prepare("SELECT council FROM parcels LIMIT 1").is_ok() { "COALESCE(p.council, 'brisbane')" } else { "'brisbane'" }
 }
 
 /// Street-type words users type vs the abbreviations used in council data.
@@ -70,7 +77,7 @@ fn tokens(q: &str) -> Vec<String> {
 }
 
 fn run_search(c: &Connection, toks: &[String]) -> Result<Vec<ParcelHit>, String> {
-    let mut sql = String::from("SELECT pid, address, lotplan, suburb FROM parcels WHERE 1=1");
+    let mut sql = format!("SELECT p.pid, p.address, p.lotplan, p.suburb, {} FROM parcels p WHERE 1=1", council_col(c));
     let mut ps: Vec<String> = Vec::new();
     for t in toks {
         ps.push(format!("%{t}%"));
@@ -86,7 +93,7 @@ fn run_search(c: &Connection, toks: &[String]) -> Result<Vec<ParcelHit>, String>
     let mut st = c.prepare(&sql).map_err(e)?;
     let rows = st
         .query_map(rusqlite::params_from_iter(ps.iter()), |r| {
-            Ok(ParcelHit { pid: r.get(0)?, address: r.get(1)?, lotplan: r.get(2)?, suburb: r.get(3)? })
+            Ok(ParcelHit { pid: r.get(0)?, address: r.get(1)?, lotplan: r.get(2)?, suburb: r.get(3)?, council: r.get(4)? })
         })
         .map_err(e)?;
     rows.collect::<Result<_, _>>().map_err(e)
@@ -95,14 +102,15 @@ fn run_search(c: &Connection, toks: &[String]) -> Result<Vec<ParcelHit>, String>
 /// The lot that contains a point (lng/lat), using the parcel spatial index.
 pub fn parcel_at(c: &Connection, lng: f64, lat: f64) -> Result<Option<ParcelHit>, String> {
     let mut st = c
-        .prepare(
-            "SELECT p.pid, p.address, p.lotplan, p.suburb, p.geom FROM parcel_idx i JOIN parcels p ON p.pid = i.pid
+        .prepare(&format!(
+            "SELECT p.pid, p.address, p.lotplan, p.suburb, p.geom, {} FROM parcel_idx i JOIN parcels p ON p.pid = i.pid
              WHERE i.minx <= ?1 AND i.maxx >= ?1 AND i.miny <= ?2 AND i.maxy >= ?2 LIMIT 20",
-        )
+            council_col(c)
+        ))
         .map_err(e)?;
     let rows = st
         .query_map(rusqlite::params![lng, lat], |r| {
-            Ok((ParcelHit { pid: r.get(0)?, address: r.get(1)?, lotplan: r.get(2)?, suburb: r.get(3)? }, r.get::<_, String>(4)?))
+            Ok((ParcelHit { pid: r.get(0)?, address: r.get(1)?, lotplan: r.get(2)?, suburb: r.get(3)?, council: r.get(5)? }, r.get::<_, String>(4)?))
         })
         .map_err(e)?;
     let pt = geo::Point::new(lng, lat);
@@ -196,6 +204,8 @@ pub struct Parcel {
     pub lotplan: String,
     pub address: String,
     pub suburb: String,
+    /// Council id from the registry (knowledge/councils.json)
+    pub council: String,
     pub area_m2: Option<f64>,
     pub props: Value,
     pub geom: Value,
@@ -205,6 +215,8 @@ pub struct Parcel {
 pub struct OverlayHit {
     /// council | sara | pda | state | other
     pub authority: String,
+    /// Council id for council planning-scheme layers (None for state and national layers)
+    pub council: Option<String>,
     pub dataset_id: String,
     pub title: String,
     pub props: Value,
@@ -239,7 +251,7 @@ pub(crate) fn geo_json(m: &MultiPolygon<f64>) -> Value {
 
 pub fn parcel(c: &Connection, pid: i64) -> Result<Parcel, String> {
     c.query_row(
-        "SELECT pid, lotplan, address, suburb, area, props, geom FROM parcels WHERE pid = ?1",
+        &format!("SELECT p.pid, p.lotplan, p.address, p.suburb, p.area, p.props, p.geom, {} FROM parcels p WHERE p.pid = ?1", council_col(c)),
         [pid],
         |r| {
             let props: String = r.get(5)?;
@@ -249,6 +261,7 @@ pub fn parcel(c: &Connection, pid: i64) -> Result<Parcel, String> {
                 lotplan: r.get(1)?,
                 address: r.get(2)?,
                 suburb: r.get(3)?,
+                council: r.get(7)?,
                 area_m2: r.get(4)?,
                 props: serde_json::from_str(&props).unwrap_or(Value::Null),
                 geom: serde_json::from_str(&geom).unwrap_or(Value::Null),
@@ -329,6 +342,15 @@ fn has_authority_column(c: &Connection) -> bool {
     c.prepare("SELECT authority FROM layers LIMIT 1").is_ok()
 }
 
+/// SQL for a layer's council: older packs have no column, and their council layers are Brisbane's.
+fn layer_council_col(c: &Connection) -> &'static str {
+    if c.prepare("SELECT council FROM layers LIMIT 1").is_ok() {
+        "COALESCE(l.council, CASE WHEN COALESCE(l.authority, 'council') = 'council' THEN 'brisbane' END)"
+    } else {
+        "CASE WHEN COALESCE(l.authority, 'council') = 'council' THEN 'brisbane' END"
+    }
+}
+
 pub fn overlays(c: &Connection, p: &Parcel) -> Result<Vec<OverlayHit>, String> {
     let pg = to_geo(&p.geom.to_string())?;
     let pm = polys(&pg).ok_or("Lot geometry is not a polygon")?;
@@ -338,16 +360,18 @@ pub fn overlays(c: &Connection, p: &Parcel) -> Result<Vec<OverlayHit>, String> {
     let pad_x = (NEAR_M + 5.0) / pr.kx;
     let pad_y = (NEAR_M + 5.0) / pr.ky;
     let auth = if has_authority_column(c) { "COALESCE(l.authority, 'council')" } else { "'council'" };
+    let lc = layer_council_col(c);
+    // Only the lot's own council's planning-scheme layers apply (neighbouring councils' layers can touch the boundary).
     let mut st = c
         .prepare(&format!(
-            "SELECT {auth}, l.dataset_id, l.title, f.props, f.geom FROM feature_idx i
+            "SELECT {auth}, l.dataset_id, l.title, f.props, f.geom, {lc} FROM feature_idx i
              JOIN features f ON f.fid = i.fid JOIN layers l ON l.lid = f.lid
-             WHERE i.minx <= ?2 AND i.maxx >= ?1 AND i.miny <= ?4 AND i.maxy >= ?3"
+             WHERE i.minx <= ?2 AND i.maxx >= ?1 AND i.miny <= ?4 AND i.maxy >= ?3 AND ({lc} IS NULL OR {lc} = ?5)"
         ))
         .map_err(e)?;
     let rows = st
         .query_map(
-            rusqlite::params![rect.min().x - pad_x, rect.max().x + pad_x, rect.min().y - pad_y, rect.max().y + pad_y],
+            rusqlite::params![rect.min().x - pad_x, rect.max().x + pad_x, rect.min().y - pad_y, rect.max().y + pad_y, p.council],
             |r| {
                 Ok((
                     r.get::<_, String>(0)?,
@@ -355,13 +379,14 @@ pub fn overlays(c: &Connection, p: &Parcel) -> Result<Vec<OverlayHit>, String> {
                     r.get::<_, String>(2)?,
                     r.get::<_, String>(3)?,
                     r.get::<_, String>(4)?,
+                    r.get::<_, Option<String>>(5)?,
                 ))
             },
         )
         .map_err(e)?;
     let mut hits = Vec::new();
     for row in rows {
-        let (authority, dataset_id, title, props, geom) = row.map_err(e)?;
+        let (authority, dataset_id, title, props, geom, council) = row.map_err(e)?;
         let Ok(fg) = to_geo(&geom) else { continue };
         let props = serde_json::from_str(&props).unwrap_or(Value::Null);
         match polys(&fg) {
@@ -378,6 +403,7 @@ pub fn overlays(c: &Connection, p: &Parcel) -> Result<Vec<OverlayHit>, String> {
                 }
                 hits.push(OverlayHit {
                     authority,
+                    council,
                     dataset_id,
                     title,
                     props,
@@ -392,7 +418,7 @@ pub fn overlays(c: &Connection, p: &Parcel) -> Result<Vec<OverlayHit>, String> {
                     continue;
                 }
                 let geom = serde_json::from_str(&geom).unwrap_or(Value::Null);
-                hits.push(OverlayHit { authority, dataset_id, title, props, coverage_pct: None, distance_m: Some(d.round()), geom });
+                hits.push(OverlayHit { authority, council, dataset_id, title, props, coverage_pct: None, distance_m: Some(d.round()), geom });
             }
         }
     }
@@ -409,9 +435,10 @@ pub fn flood_map(c: &Connection, p: &Parcel, radius_m: f64) -> Result<Vec<Overla
     let (x0, x1, y0, y1) = (rect.min().x - px, rect.max().x + px, rect.min().y - py, rect.max().y + py);
     let window = MultiPolygon(vec![geo::Rect::new(geo::coord! { x: x0, y: y0 }, geo::coord! { x: x1, y: y1 }).to_polygon()]);
     let auth = if has_authority_column(c) { "COALESCE(l.authority, 'council')" } else { "'council'" };
+    let lc = layer_council_col(c);
     let mut st = c
         .prepare(&format!(
-            "SELECT {auth}, l.dataset_id, l.title, f.props, f.geom FROM feature_idx i
+            "SELECT {auth}, l.dataset_id, l.title, f.props, f.geom, {lc} FROM feature_idx i
              JOIN features f ON f.fid = i.fid JOIN layers l ON l.lid = f.lid
              WHERE i.minx <= ?2 AND i.maxx >= ?1 AND i.miny <= ?4 AND i.maxy >= ?3
                AND (lower(l.title) LIKE '%flood%' OR lower(l.title) LIKE '%overland%'
@@ -421,12 +448,12 @@ pub fn flood_map(c: &Connection, p: &Parcel, radius_m: f64) -> Result<Vec<Overla
         .map_err(e)?;
     let rows = st
         .query_map(rusqlite::params![x0, x1, y0, y1], |r| {
-            Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?, r.get::<_, String>(3)?, r.get::<_, String>(4)?))
+            Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?, r.get::<_, String>(2)?, r.get::<_, String>(3)?, r.get::<_, String>(4)?, r.get::<_, Option<String>>(5)?))
         })
         .map_err(e)?;
     let mut out = Vec::new();
     for row in rows {
-        let (authority, dataset_id, title, props, geom) = row.map_err(e)?;
+        let (authority, dataset_id, title, props, geom, council) = row.map_err(e)?;
         let Ok(fg) = to_geo(&geom) else { continue };
         let geom = match polys(&fg) {
             Some(fm) => match catch_unwind(AssertUnwindSafe(|| window.intersection(&fm))) {
@@ -436,7 +463,7 @@ pub fn flood_map(c: &Connection, p: &Parcel, radius_m: f64) -> Result<Vec<Overla
             None => serde_json::from_str(&geom).unwrap_or(Value::Null),
         };
         let props = serde_json::from_str(&props).unwrap_or(Value::Null);
-        out.push(OverlayHit { authority, dataset_id, title, props, coverage_pct: None, distance_m: None, geom });
+        out.push(OverlayHit { authority, council, dataset_id, title, props, coverage_pct: None, distance_m: None, geom });
     }
     Ok(out)
 }

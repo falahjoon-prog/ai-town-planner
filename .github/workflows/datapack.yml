@@ -33,7 +33,12 @@ jobs:
       - run: pip install ijson
       - name: Discover
         if: ${{ inputs.discover }}
-        run: python pipeline/build_datapack.py --discover ${{ inputs.councils && format('--councils {0}', inputs.councils) || '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python pipeline/build_datapack.py --discover ${{ inputs.councils && format('--councils {0}', inputs.councils) || '' }} 2>&1 | tee discover.txt
+          # Published as a release asset so the output can be read without log access; the app ignores this tag.
+          gh release create "discover-$(date -u +%Y%m%d-%H%M)" discover.txt --target "${{ github.sha }}" --title "Discover output" --notes "Source discovery output (not a data pack)." --prerelease
       - name: Build
         if: ${{ !inputs.discover }}
         run: |
