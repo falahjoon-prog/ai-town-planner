@@ -146,6 +146,11 @@ fn zone_text(a: &Assessment) -> String {
     norm(&parts.join(" "))
 }
 
+/// A use rule applies when it has no zone list or one of its zone keywords is in the lot's zone text.
+fn rule_hit(r: &UseRule, text: &str) -> bool {
+    r.zone.is_empty() || r.zone.iter().any(|z| text.contains(&norm(z)))
+}
+
 fn match_provisions(text: &str, cid: &str) -> Option<ProvSet> {
     let zone_hit = |p: &ProvSet| p.zone.iter().any(|z| text.contains(&norm(z)));
     let kb: &[ProvSet] = if cid == council::DEFAULT { provisions_kb() } else { council::kb(cid).map(|k| k.provisions.as_slice()).unwrap_or(&[]) };
@@ -426,6 +431,8 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
             }
         }
         None if !pda && brisbane => subdivision.push("No minimum lot size recorded for this zone in the app yet. Refer to the Subdivision code (Table of minimum lot sizes) in City Plan.".into()),
+        None if !pda && !council::zones_loaded(cid) => subdivision.push(format!(
+            "Minimum lot size: the zone is not loaded for this council yet. See the zone-by-zone sizes under the proposed use (Reconfiguring a lot) and the {}.", council::field(cid, "scheme"))),
         None if !pda => subdivision.push(format!("Minimum lot size for this zone: {}.", council::not_loaded(cid))),
         None => {}
     }
@@ -447,7 +454,14 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
     let use_fit = uses_kb().iter().find(|u| u.id == use_id && u.id != "general").map(|u| {
         // Other councils: zones, checks, sources and level-of-assessment rows come from council_rules.json only.
         let u = if brisbane {
-            u.clone()
+            // Rows under "brisbane" in council_rules.json (zones the main files have no value for) add to the main file's data.
+            let mut u = u.clone();
+            if let Some(cu) = council::kb(cid).and_then(|k| k.uses.get(use_id)) {
+                u.zones.extend(cu.zones.iter().cloned());
+                u.checks.extend(cu.checks.iter().cloned());
+                u.sources.extend(cu.sources.iter().cloned());
+            }
+            u
         } else {
             let cu = council::kb(cid).and_then(|k| k.uses.get(use_id));
             UseDef {
@@ -466,7 +480,21 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
             _ if !brisbane && u.rules.is_empty() => format!("Level of assessment for this use: {}.", council::not_loaded(cid)),
             _ => String::new(),
         };
-        let rule = if pda { None } else { u.rules.iter().find(|r| r.zone.is_empty() || r.zone.iter().any(|z| text.contains(&norm(z)))).cloned() };
+        let mut rule = if pda { None } else { u.rules.iter().find(|r| rule_hit(r, &text)).cloned() };
+        // Brisbane: council_rules.json rows only fill in where the main file has no zone-specific rule; a generic rule keeps its items and takes the zone-specific level.
+        if brisbane && !pda && rule.as_ref().map_or(true, |r| r.zone.is_empty()) {
+            let extra = council::kb(cid).and_then(|k| k.uses.get(use_id)).and_then(|cu| cu.rules.iter().find(|r| rule_hit(r, &text)).cloned());
+            if let Some(x) = extra {
+                rule = Some(match rule {
+                    Some(mut r) => {
+                        r.level = x.level.clone();
+                        r.items.extend(x.items.iter().cloned());
+                        r
+                    }
+                    None => x,
+                });
+            }
+        }
         UseFit { use_def: u.clone(), zone_ok, note, rule }
     });
 

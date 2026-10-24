@@ -34,7 +34,7 @@
         "only": [
           "cp14-zoning-overlay",
           "cp14-flood-overlay-brisbane-river-flood-planning-area",
-          "cp14-heritage-overlay"
+          "cp14-heritage-overlay-local-heritage-area"
         ]
       }
     },

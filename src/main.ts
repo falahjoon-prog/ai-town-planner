@@ -1742,7 +1742,7 @@ $("batchSave").addEventListener("click", async () => {
 });
 
 // ---- Setbacks: rows come from knowledge/setbacks.json, only for zones and lot sizes it covers ----
-// Brisbane: knowledge/setbacks.json. Other councils: "setbacks" in knowledge/council_rules.json (keyed by zone, optional precincts).
+// Brisbane: knowledge/setbacks.json (plus extra zones under "brisbane" in council_rules.json). Other councils: "setbacks" in knowledge/council_rules.json (keyed by zone, optional precincts).
 type SetbackSet = { title: string; min_area_m2: number; note: string; source: string; rows: { label: string; value: string; ref: string }[]; check: string; precinct?: string[] };
 const SETBACKS = SETBACKS_DATA as Record<string, SetbackSet>;
 const COUNCIL_KB = COUNCIL_RULES as unknown as Record<string, { setbacks?: Record<string, SetbackSet | SetbackSet[]> }>;
@@ -1751,8 +1751,8 @@ function setbackSet(a: Assessment): SetbackSet | undefined {
   const cid = siteCouncil(a).id;
   const low = (x: string) => x.toLowerCase();
   const pick = (z: Assessment["zones"][number]): SetbackSet | undefined => {
-    if (cid === "brisbane") return SETBACKS[z.zone.name];
-    const v = COUNCIL_KB[cid]?.setbacks?.[z.zone.name];
+    // Brisbane: setbacks.json first, then zones that only council_rules.json covers.
+    const v = (cid === "brisbane" ? SETBACKS[z.zone.name] : undefined) ?? COUNCIL_KB[cid]?.setbacks?.[z.zone.name];
     return (Array.isArray(v) ? v : v ? [v] : []).find((s) => !s.precinct?.length || s.precinct.some((p) => low(z.precinct ?? "").includes(low(p))));
   };
   const set = a.zones.map(pick).find(Boolean);

@@ -32,6 +32,11 @@ pub fn field(id: &str, key: &str) -> String {
     info(id)[key].as_str().unwrap_or("").to_string()
 }
 
+/// False for councils whose zones and overlays are not in the data pack (registry key "zones_loaded": false).
+pub fn zones_loaded(id: &str) -> bool {
+    info(id)["zones_loaded"].as_bool().unwrap_or(true)
+}
+
 #[derive(Deserialize, Default)]
 pub struct CouncilUse {
     /// Zones where the use is generally contemplated (keywords; empty = not recorded)
