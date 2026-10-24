@@ -10,11 +10,12 @@ import TIMEFRAMES_DATA from "../src-tauri/knowledge/timeframes.json";
 import REFERRALS_DATA from "../src-tauri/knowledge/referrals.json";
 import COUNCILS_DATA from "../src-tauri/knowledge/councils.json";
 import COUNCIL_RULES from "../src-tauri/knowledge/council_rules.json";
+import { siteLink, destLabel, type Dest, type SiteRef } from "./sitelink";
 import "./style.css";
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string; council?: string };
 // Council registry entry (src-tauri/knowledge/councils.json, shared with the data pack pipeline)
-type Council = { id: string; name: string; short: string; scheme: string; scheme_url: string; maps_url?: string; maps_name?: string; website?: string; da_url?: string; da_name?: string; water?: { name: string; url: string }; title_prefix?: string; zones_loaded?: boolean };
+type Council = { id: string; name: string; short: string; scheme: string; scheme_url: string; maps_url?: string; maps_site?: string; maps_name?: string; maps_copy?: Dest["copy"]; maps_field?: string; da_url?: string; da_name?: string; da_copy?: Dest["copy"]; da_field?: string; water?: { name: string; url: string }; title_prefix?: string; zones_loaded?: boolean };
 const COUNCILS = COUNCILS_DATA as unknown as Council[];
 /** Councils with no zone or overlay data in the pack (zones_loaded false in the registry) say so instead of showing blank or wrong data. */
 const NO_ZONE = "Zone not loaded for this council yet";
@@ -456,7 +457,7 @@ async function loadSite(pid: number, silent = false) {
   $("tZoneLbl").textContent = `Zone · ${cn.short}`;
   const daName = cn.da_name ?? "DA register";
   $("daRegBtn").textContent = `Open ${cn.short} DA register (${daName})`;
-  $("daRegNote").textContent = `The address is copied. Paste it into the search on ${daName} to see applications and decisions on this lot and next door.`;
+  $("daRegNote").textContent = `The ${cn.da_copy === "short" ? "house number and street name are" : "address is"} copied. Paste ${cn.da_copy === "short" ? "them" : "it"} into ${cn.da_field ?? "the search"} on ${daName} to see applications and decisions on this lot and next door.`;
   $("tLot").textContent = a.parcel.area_m2 ? `${Math.round(a.parcel.area_m2).toLocaleString()} m²` : "–";
   $("tZone").textContent = a.zones[0] ? zoneTitle(a.zones[0]) : zonesMissing(cn) ? "Not loaded" : "–";
   $("tZone").title = a.zones.length ? `${a.zones.map(zoneTitle).join(", ")} (${cn.scheme})` : zonesMissing(cn) ? `${NO_ZONE} (${cn.scheme})` : cn.scheme;
@@ -467,7 +468,7 @@ async function loadSite(pid: number, silent = false) {
         .map((z) => fcard("zone", z.authority, zoneTitle(z), [z.authority === "council" ? cn.scheme : "", z.coverage_pct != null && z.coverage_pct < 99 ? `${z.coverage_pct}% of lot` : ""].filter(Boolean).join(" · "), z.zone.purpose + (z.zone.source ? ` (Source: ${z.zone.source}${z.zone.verify ? "; verify" : ""})` : "")))
         .join("")
     : zonesMissing(cn)
-      ? `<p class="meta"><b>${NO_ZONE}.</b> ${esc(cn.name)} does not publish its zoning as open data, so this lot's zone and overlays are not in the app. Look the lot up on ${cn.maps_url ? link(cn.maps_url, cn.maps_name ?? "the council's online map") : "the council's online map"} or in the ${link(cn.scheme_url, cn.scheme)}.</p>`
+      ? `<p class="meta"><b>${NO_ZONE}.</b> ${esc(cn.name)} does not publish its zoning as open data, so this lot's zone and overlays are not in the app. Look the lot up on ${cn.maps_url ? destBtn(`map:${cn.id}`, cn.maps_name ?? "the council's online map", "", "a") : "the council's online map"} or in the ${link(cn.scheme_url, cn.scheme)}.</p>`
       : `<p class="meta">Zone not identified from the data pack. Check the zoning layer attributes below, or ${link(cn.scheme_url, cn.scheme)}.</p>`;
   $("flags").innerHTML = a.flags.length
     ? a.flags
@@ -1211,7 +1212,7 @@ $("pdfBtn").addEventListener("click", async () => {
 });
 
 // ---- Queensland maps (open in the default browser) ----
-type StateMap = { name: string; url: string; desc: string; at?: string };
+type StateMap = { name: string; url: string; desc: string; copy?: Dest["copy"]; field?: string };
 const STATE_MAPS = MAPS.state as StateMap[];
 const MAP_KEY = "mapSource";
 
@@ -1221,12 +1222,67 @@ function chosenMap(): StateMap {
   return STATE_MAPS.find((m) => m.name === name) ?? STATE_MAPS[0];
 }
 
-// With an address loaded and an address-URL template on the map, centre on the lot; otherwise the general map.
-function mapUrlFor(m: StateMap): string {
-  if (!m.at || !current) return m.url;
+// ---- Deep links for the open lot (src/sitelink.ts). A key names a destination:
+// da:<council id>, map:<council id>, state:<map name>, title:<n>, abs. Deep link when verified, else the address/lot is copied and the most specific page opens. ----
+const ABS_AREA = "https://www.abs.gov.au/census/find-census-data/search-by-area";
+function siteRef(): SiteRef | null {
+  if (!current) return null;
   const [x0, y0, x1, y1] = bounds(current.parcel.geom);
-  return m.at.replace("{lat}", ((y0 + y1) / 2).toFixed(6)).replace("{lng}", ((x0 + x1) / 2).toFixed(6));
+  return { lotplan: current.parcel.lotplan, address: current.parcel.address, suburb: current.parcel.suburb, lng: (x0 + x1) / 2, lat: (y0 + y1) / 2 };
 }
+/** The destination for a key, plus the lot to apply it to (council pages only apply to a lot in that council). */
+function resolveDest(key: string): { d: Dest; site: SiteRef | null } | null {
+  const i = key.indexOf(":");
+  const kind = i < 0 ? key : key.slice(0, i);
+  const id = i < 0 ? "" : key.slice(i + 1);
+  const ref = siteRef();
+  if (kind === "da" || kind === "map") {
+    const c = COUNCILS.find((x) => x.id === id);
+    if (!c) return null;
+    const site = ref && siteCouncil().id === c.id ? ref : null;
+    if (kind === "da") return c.da_url ? { d: { url: c.da_url, copy: c.da_copy, field: c.da_field }, site } : null;
+    return c.maps_url ? { d: { url: c.maps_url, site_url: c.maps_site, copy: c.maps_copy, field: c.maps_field }, site } : null;
+  }
+  if (kind === "state") { const m = STATE_MAPS.find((x) => x.name === id); return m ? { d: { url: m.url, copy: m.copy, field: m.field }, site: ref } : null; }
+  if (kind === "title") { const t = TITLE_LINKS[Number(id)]; return t ? { d: t.dest, site: ref } : null; }
+  if (kind === "abs") return { d: { url: ABS_AREA, copy: "suburb", field: "the Census search box" }, site: ref };
+  return null;
+}
+/** A button or link that opens a destination; its label says when the address or lot/plan is copied. */
+function destBtn(key: string, base: string, cls = "", tag: "button" | "a" = "button"): string {
+  const r = resolveDest(key);
+  if (!r) return "";
+  const text = destLabel(base, r.d, !!r.site);
+  const tip = r.site ? siteLink(r.d, r.site).toast || (r.d.site_url ? "Opens zoomed to this lot" : "") : "";
+  return tag === "a"
+    ? `<a href="#" data-dest="${esc(key)}" title="${esc(tip)}">${esc(text)}</a>`
+    : `<button type="button" class="${cls}" data-dest="${esc(key)}" title="${esc(tip)}">${esc(text)}</button>`;
+}
+function toast(msg: string) {
+  const host = document.querySelector("dialog[open]") ?? document.body;
+  document.querySelectorAll(".toast").forEach((t) => t.remove());
+  const t = document.createElement("div");
+  t.className = "toast";
+  t.setAttribute("role", "status");
+  t.textContent = msg;
+  host.appendChild(t);
+  setTimeout(() => t.remove(), 6000);
+}
+async function go(key: string) {
+  const r = resolveDest(key);
+  if (!r) return;
+  const l = siteLink(r.d, r.site);
+  if (l.copyText) {
+    try { await navigator.clipboard.writeText(l.copyText); toast(l.toast); } catch { toast(`Could not copy – type ${l.copyText} into ${r.d.field ?? "the search box"}`); }
+  }
+  openExternal(l.url);
+}
+document.addEventListener("click", (ev) => {
+  const el = (ev.target as HTMLElement).closest("[data-dest]") as HTMLElement | null;
+  if (!el) return;
+  ev.preventDefault();
+  void go(el.dataset.dest!);
+});
 
 function openExternal(url: string) {
   invoke("open_external", { url }).catch(alertMsg);
@@ -1238,7 +1294,7 @@ mapPick.value = chosenMap().name;
 mapPick.addEventListener("change", () => {
   try { localStorage.setItem(MAP_KEY, mapPick.value); } catch { /* storage unavailable */ }
 });
-$("myMapBtn").addEventListener("click", () => openExternal(mapUrlFor(chosenMap())));
+$("myMapBtn").addEventListener("click", () => void go(`state:${chosenMap().name}`));
 
 function renderMaps() {
   const f = val("mapsFilter").toLowerCase();
@@ -1248,13 +1304,12 @@ function renderMaps() {
   $("siteCouncilMaps").innerHTML = [...COUNCILS].sort((a, b) => Number(b.id === mine) - Number(a.id === mine))
     .filter((c) => ok(c.name) || ok(c.short))
     .map((c) => `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${c.id === mine ? "This site's council · " : ""}${esc(c.scheme)}</div></div><div class="model-act">
-        ${c.maps_url ? `<button type="button" data-url="${esc(c.maps_url)}" data-title="${esc(c.maps_name ?? c.name)}">${esc(c.maps_name ?? "Interactive map")}</button>` : ""}
-        <button type="button" class="ghost" data-url="${esc(c.scheme_url)}" data-title="${esc(c.scheme)}">Planning scheme</button>
-        ${c.website ? `<button type="button" class="ghost" data-url="${esc(c.website)}" data-title="${esc(c.name)}">Website</button>` : ""}</div></div>`)
+        ${destBtn(`map:${c.id}`, c.maps_name ?? "Interactive map")}
+        <button type="button" class="ghost" data-url="${esc(c.scheme_url)}" data-title="${esc(c.scheme)}">Planning scheme</button></div></div>`)
     .join("");
   $("stateMaps").innerHTML = MAPS.state
     .filter((m) => ok(m.name))
-    .map((m) => `<div class="mapitem"><div><b>${esc(m.name)}</b><div class="meta">${esc(m.desc)}</div></div><button type="button" data-url="${esc(m.url)}" data-title="${esc(m.name)}">Open</button></div>`)
+    .map((m) => `<div class="mapitem"><div><b>${esc(m.name)}</b><div class="meta">${esc(m.desc)}</div></div>${destBtn(`state:${m.name}`, "Open")}</div>`)
     .join("");
   const inApp = new Set(COUNCILS.map((c) => c.short.toLowerCase()));
   $("councilMaps").innerHTML = MAPS.councils
@@ -1277,26 +1332,41 @@ $("mapsDlg").addEventListener("click", (ev) => {
   if (b) openExternal(b.dataset.url!);
 });
 
-// ---- Approvals by council: DA register link where known, category copied as a search term ----
+// ---- Approvals by council: this site's council first, then the covered councils, then the rest; the register opens with the lot's address copied for pasting ----
 const APPR_CATS = ["Development application", "New house", "Dual occupancy", "Multiple dwelling", "Commercial", "Industrial", "Subdivision", "Shed or pool"];
 const apprCouncil = $("apprCouncil") as HTMLSelectElement;
 const apprCat = $("apprCat") as HTMLSelectElement;
-apprCouncil.innerHTML = `<option value="__all__">All councils</option>` + MAPS.councils.map((c) => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join("");
 apprCat.innerHTML = APPR_CATS.map((c) => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+
+/** Covered councils (site's council first), then the other Queensland councils. */
+function apprEntries() {
+  const mine = current ? siteCouncil().id : "";
+  const covered = [...COUNCILS].sort((a, b) => Number(b.id === mine) - Number(a.id === mine));
+  const inApp = new Set(COUNCILS.map((c) => c.short.toLowerCase()));
+  return { covered, mine, others: MAPS.councils.filter((c) => !inApp.has(c.name.toLowerCase())) };
+}
+function fillApprSelect() {
+  const { covered, others } = apprEntries();
+  apprCouncil.innerHTML = `<option value="__all__">All councils</option>` + [...covered.map((c) => c.short), ...others.map((c) => c.name)].map((n) => `<option value="${esc(n)}">${esc(n)}</option>`).join("");
+}
 
 function renderAppr() {
   const pick = apprCouncil.value;
-  const list = MAPS.councils.filter((c) => pick === "__all__" || c.name === pick);
-  $("apprList").innerHTML = list
-    .map((c) => {
-      const da = (c as { da?: string }).da;
-      return `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${da ? "Development applications" : "No application page found"}</div></div><div class="model-act">${da ? `<button type="button" data-url="${esc(da)}">DA applications</button>` : ""}<button type="button" class="ghost" data-url="${esc(c.website)}">Website</button></div></div>`;
-    })
-    .join("");
+  const { covered, mine, others } = apprEntries();
+  const rows = covered.filter((c) => pick === "__all__" || c.short === pick).map((c) => {
+    const note = c.id === mine ? "This site's council · " : "";
+    return `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${note}${esc(c.da_name ?? "Development applications")}</div></div><div class="model-act">${destBtn(`da:${c.id}`, "DA applications")}</div></div>`;
+  });
+  for (const c of others.filter((x) => pick === "__all__" || x.name === pick)) {
+    const da = (c as { da?: string }).da;
+    rows.push(`<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${da ? "Development applications" : "No application page found"}</div></div><div class="model-act">${da ? `<button type="button" data-url="${esc(da)}">DA applications</button>` : ""}<button type="button" class="ghost" data-url="${esc(c.website)}">Website</button></div></div>`);
+  }
+  $("apprList").innerHTML = rows.join("");
 }
 
 apprCouncil.addEventListener("change", renderAppr);
 $("apprBtn").addEventListener("click", () => {
+  fillApprSelect();
   renderAppr();
   ($("apprDlg") as HTMLDialogElement).showModal();
 });
@@ -1330,10 +1400,10 @@ function setTheme(t: "light" | "dark") {
 document.querySelectorAll<HTMLElement>(".themebtn").forEach((b) => b.addEventListener("click", () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark")));
 
 // ---- Star, notes and title search for the open lot ----
-const TITLE_LINKS = [
-  ["Title search by address (Info Broker)", "https://ib.com.au/buy/445/qld-title-search-by-address"],
-  ["Title search by lot/plan (Info Broker)", "https://ib.com.au/buy/425/qld-title-search"],
-  ["Order via Landchecker", "https://app.landchecker.com.au/documents/certificates/title"],
+const TITLE_LINKS: { name: string; dest: Dest }[] = [
+  { name: "Title search by address (Info Broker)", dest: { url: "https://ib.com.au/buy/445/qld-title-search-by-address", copy: "address", field: "the address search" } },
+  { name: "Title search by lot/plan (Info Broker)", dest: { url: "https://ib.com.au/buy/425/qld-title-search", copy: "lotplan", field: "the lot and plan fields" } },
+  { name: "Order via Landchecker", dest: { url: "https://app.landchecker.com.au/documents/certificates/title", copy: "address", field: "the Landchecker address search" } },
 ];
 
 function renderSiteTools() {
@@ -1341,7 +1411,7 @@ function renderSiteTools() {
   const s = sites()[current.parcel.lotplan];
   $("starBtn").textContent = s?.star ? "★" : "☆";
   ($("siteNote") as HTMLTextAreaElement).value = s?.note ?? "";
-  $("titleLinks").innerHTML = TITLE_LINKS.map(([t, u]) => `<a href="${u}" data-url="${u}" data-title="${esc(t)}" class="ext">${esc(t)}</a>`).join(" · ");
+  $("titleLinks").innerHTML = TITLE_LINKS.map((t, i) => destBtn(`title:${i}`, t.name, "", "a").replace("<a ", '<a class="ext" ')).join(" · ");
   $("titleOut").innerHTML = s?.title ? (marked.parse(s.title) as string) : "";
 }
 $("starBtn").addEventListener("click", () => {
@@ -1352,13 +1422,6 @@ $("starBtn").addEventListener("click", () => {
 });
 $("siteNote").addEventListener("input", () => {
   if (current) touchSite(current.parcel, { note: ($("siteNote") as HTMLTextAreaElement).value });
-});
-$("titleLinks").addEventListener("click", (ev) => {
-  const a = (ev.target as HTMLElement).closest("a");
-  if (!a) return;
-  ev.preventDefault();
-  if (current) navigator.clipboard.writeText(current.parcel.lotplan).catch(() => {});
-  openExternal(a.dataset.url!);
 });
 $("titleBtn").addEventListener("click", async () => {
   if (!current) return;
@@ -1425,10 +1488,7 @@ function chargeEstimate(p: any): string {
 
 // ---- Nearby approvals: the site council's DA register (Brisbane: Development.i), address copied for pasting ----
 $("daRegBtn").addEventListener("click", () => {
-  if (!current) return;
-  navigator.clipboard.writeText(current.parcel.address || current.parcel.lotplan).catch(() => {});
-  const c = siteCouncil();
-  openExternal(c.da_url || c.website || c.scheme_url);
+  if (current) void go(`da:${siteCouncil().id}`);
 });
 
 // ---- Statutory clock: rules from knowledge/timeframes.json (each with source); lodgement date and path saved per lot ----
@@ -1579,7 +1639,7 @@ $("suburbBtn").addEventListener("click", async () => {
       <tr><td>Lots 800 m² or more</td><td>${r.pct_800}%</td></tr>
       <tr><td>Lots 900 m² or more (2 × 450 m² by area)</td><td>${r.pct_900}% (${r.count_900.toLocaleString()} lots)</td></tr>
       <tr><td>Lots 1,000 m² or more</td><td>${r.pct_1000}%</td></tr></tbody></table>
-      <p class="meta">${siteCouncil().id === "brisbane" ? "From the Brisbane cadastre in the data pack." : "From the Queensland cadastre in the data pack (lots in this suburb name, all councils)."} Population, income and housing: ${link("https://www.abs.gov.au/census/find-census-data/quickstats", "ABS Census QuickStats")} (search "${esc(sub)}").</p>`;
+      <p class="meta">${siteCouncil().id === "brisbane" ? "From the Brisbane cadastre in the data pack." : "From the Queensland cadastre in the data pack (lots in this suburb name, all councils)."} Population, income and housing: ${destBtn("abs", "ABS Census search by area", "", "a")} (QuickStats for "${esc(sub)}").</p>`;
   } catch (e) {
     out.innerHTML = `<p class="err" role="alert">Suburb report failed: ${esc(String(e))}</p>`;
   } finally {
