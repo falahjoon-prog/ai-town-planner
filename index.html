@@ -286,8 +286,10 @@
         <button type="button" id="saveAi">Save AI settings</button>
         <p class="meta" id="aiMsg"></p>
         <h3 id="sset-backup">Backup</h3>
-        <div class="row"><button type="button" class="ghost" id="backupBtn">Back up my data</button><button type="button" class="ghost" id="restoreBtn">Restore from backup</button></div>
-        <p class="meta" id="backupMsg">Saves your sites, notes, branding, map choices and DA forms to one file.</p>
+        <div class="row"><button type="button" class="ghost" id="backupBtn">Back up saved addresses</button><button type="button" class="ghost" id="restoreBtn">Restore from backup</button></div>
+        <div id="restoreBox" class="row" hidden><span id="restoreText" class="meta"></span><button type="button" id="restoreGo">Merge</button><button type="button" class="ghost" id="restoreCancel">Cancel</button></div>
+        <p class="meta" id="backupMsg">Saves your saved and recent addresses, notes, checklist ticks, forms and settings to one file. API keys are never included.</p>
+        <label class="mapitem"><span><input type="checkbox" id="openLast" checked> Open the last address on start</span></label>
         <h3 id="sset-models">Built-in models</h3>
         <div id="models"></div>
         <button type="button" class="ghost" id="importModel">Import a .gguf model file</button>

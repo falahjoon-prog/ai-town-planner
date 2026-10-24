@@ -103,3 +103,9 @@ Common rules for every thread
 2) Done: legend now 11.5px labels, 10.5px note (wraps, max-width 260px), 10px swatches, 6/8px padding, 3px line gap, 8px radius, 86% panel surface, bottom-left at 8px/64px (just above the style bar). Same #legend container serves flood and power legends, so both get it; content unchanged.
 3) Tests: tsc and vite build pass; headless Chromium at 768/1280/1920, light+dark, injected power legend: no overlap with style bar or attribution (at 768 the pre-existing attribution/bar overlap is unchanged), no clipping, no page errors. Shots: /tmp/claude-0/shots/t13-{before,after}-*.png.
 4) Remaining: map pane is narrow (about 300 px at 768), so the legend cannot sit lower than the style bar's top without overlapping it; it is kept above the bar.
+
+### T14 report
+1) Files changed: index.html, src/main.ts, src/style.css, handoffs/threads.md. No Rust.
+2) Work completed: "Open the last address on start" Settings checkbox (default on; silent if the address no longer resolves; last address, map style and state map were already persisted). Old overwrite-and-reload backup replaced by versioned (v2, v1 files still read) backup `planlens-backup-YYYY-MM-DD.json` (saved/recent addresses, notes, checklist ticks, DA forms, non-secret settings; no keys) and a validated merge restore with a counts confirm (newer ts wins notes/title, stars and ticks unioned, nothing deleted). Reuses existing save/open dialogs and save_text/read_backup.
+3) Tests: tsc clean; vite build OK; headless Chromium (mocked invoke) light and dark 1280: reload restores address and map style; toggle off gives empty start; unresolvable address gives no dialog; backup JSON has no secret; merge and counts correct; 4 corrupt/wrong files show a message and change nothing. Shots /tmp/claude-0/shots/t14-*.
+4) Remaining: CI result pending (Rust untouched); 375/768 not checked; notes only have a lot-level timestamp (site ts), not a per-note one.

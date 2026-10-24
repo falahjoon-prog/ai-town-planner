@@ -225,6 +225,7 @@ $("q").addEventListener("input", () => {
 });
 
 let hasGoogle = false;
+const OPEN_LAST_KEY = "openLast"; // "0" = do not reopen the last address on start
 
 type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string };
 function sites(): Record<string, Site> {
@@ -327,11 +328,11 @@ $("site").addEventListener("click", (ev) => {
   b.setAttribute("aria-expanded", String(open));
 });
 
-async function loadSite(pid: number) {
+async function loadSite(pid: number, silent = false) {
   try {
     current = await invoke<Assessment>("assess", { pid });
   } catch (e) {
-    return alertMsg(e);
+    return silent ? undefined : alertMsg(e);
   }
   const a = current;
   try { localStorage.setItem("lastPid", String(a.parcel.pid)); } catch { /* storage unavailable */ }
@@ -1028,8 +1029,8 @@ refreshStatus().then((s) => {
   if (!s.datapack) return ($("settings") as HTMLDialogElement).showModal();
   // Remember on start: reopen the last site
   let last = 0;
-  try { last = Number(localStorage.getItem("lastPid")); } catch { /* storage unavailable */ }
-  if (last > 0) void loadSite(last);
+  try { if (localStorage.getItem(OPEN_LAST_KEY) !== "0") last = Number(localStorage.getItem("lastPid")); } catch { /* storage unavailable */ }
+  if (last > 0) void loadSite(last, true); // silent: an address that no longer resolves leaves the empty start screen
 });
 
 // Light / dark theme (follows the system until the user picks one)
@@ -1640,37 +1641,114 @@ try {
   if (localStorage.getItem("fullmap") === "1") app.classList.add("fullmap");
 } catch { /* storage unavailable */ }
 
-// ---- Backup and restore (Settings) ----
-const BACKUP_KEYS = ["sites", "brand", MAP_KEY, "base", "theme"];
-$("backupBtn").addEventListener("click", async () => {
-  const data: Record<string, string> = {};
+// ---- Backup and restore (Settings): saved/recent addresses, notes, checklist ticks, forms and non-secret settings. No API keys or tokens. ----
+const BACKUP_SETTINGS = ["brand", MAP_KEY, "base", "theme", OPEN_LAST_KEY];
+const openLastBox = $("openLast") as HTMLInputElement;
+try { openLastBox.checked = localStorage.getItem(OPEN_LAST_KEY) !== "0"; } catch { /* storage unavailable */ }
+openLastBox.addEventListener("change", () => {
+  try { localStorage.setItem(OPEN_LAST_KEY, openLastBox.checked ? "1" : "0"); } catch { /* storage unavailable */ }
+});
+
+type Backup = { app: string; version: number; savedAt: string; sites: Record<string, Site>; checklists: Record<string, string[]>; forms: Record<string, string>; settings: Record<string, string> };
+const backupMsg = (t: string) => { $("backupMsg").textContent = t; };
+let pendingBackup: Backup | null = null;
+
+function backupCounts(b: Backup) {
+  const s = Object.values(b.sites);
+  return { saved: s.filter((x) => x.star).length, recent: s.filter((x) => !x.star).length, notes: s.filter((x) => x.note).length };
+}
+const countText = (c: { saved: number; recent: number; notes: number }) => `${c.saved} saved, ${c.recent} recent, ${c.notes} note${c.notes === 1 ? "" : "s"}`;
+
+function makeBackup(): Backup {
+  const b: Backup = { app: "ai-town-planner", version: 2, savedAt: new Date().toISOString(), sites: sites(), checklists: {}, forms: {}, settings: {} };
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && (BACKUP_KEYS.includes(k) || k.startsWith("daform1:"))) data[k] = localStorage.getItem(k) ?? "";
+      const v = k ? localStorage.getItem(k) : null;
+      if (!k || v === null) continue;
+      if (k.startsWith("checklist:")) { try { b.checklists[k] = JSON.parse(v); } catch { /* skip */ } }
+      else if (k.startsWith("daform1:")) b.forms[k] = v;
+      else if (BACKUP_SETTINGS.includes(k)) b.settings[k] = v;
     }
   } catch { /* storage unavailable */ }
+  return b;
+}
+
+// Checks the shape and version; throws a short message for anything else. Version 1 files (flat key/value data) are converted.
+function parseBackup(text: string): Backup {
+  let p: any;
+  try { p = JSON.parse(text); } catch { throw new Error("That file is not valid JSON."); }
+  if (!p || typeof p !== "object" || p.app !== "ai-town-planner" || typeof p.version !== "number") throw new Error("That is not a backup from this app.");
+  if (p.version > 2 || p.version < 1) throw new Error(`Backup version ${p.version} is not supported by this app.`);
+  const out: Backup = { app: p.app, version: 2, savedAt: String(p.savedAt ?? ""), sites: {}, checklists: {}, forms: {}, settings: {} };
+  if (p.version === 1) {
+    const d = p.data;
+    if (!d || typeof d !== "object") throw new Error("The backup has no data.");
+    p = { sites: safeJson(d.sites), forms: Object.fromEntries(Object.entries(d).filter(([k]) => k.startsWith("daform1:"))), settings: Object.fromEntries(Object.entries(d).filter(([k]) => BACKUP_SETTINGS.includes(k))), checklists: {} };
+  }
+  const isObj = (x: unknown): x is Record<string, any> => !!x && typeof x === "object" && !Array.isArray(x);
+  if (!isObj(p.sites)) throw new Error("The backup has no saved addresses section.");
+  for (const [lp, x] of Object.entries(p.sites)) {
+    if (!isObj(x) || typeof x.pid !== "number" || typeof x.lotplan !== "string" || typeof x.address !== "string") throw new Error("The backup has a damaged address entry.");
+    out.sites[lp] = { pid: x.pid, address: x.address, lotplan: x.lotplan, ts: Number(x.ts) || 0, ...(x.star ? { star: true } : {}), ...(typeof x.note === "string" && x.note ? { note: x.note } : {}), ...(typeof x.title === "string" && x.title ? { title: x.title } : {}) };
+  }
+  if (isObj(p.checklists)) for (const [k, v] of Object.entries(p.checklists)) if (k.startsWith("checklist:") && Array.isArray(v)) out.checklists[k] = v.filter((t) => typeof t === "string");
+  if (isObj(p.forms)) for (const [k, v] of Object.entries(p.forms)) if (k.startsWith("daform1:") && typeof v === "string") out.forms[k] = v;
+  if (isObj(p.settings)) for (const [k, v] of Object.entries(p.settings)) if (BACKUP_SETTINGS.includes(k) && typeof v === "string") out.settings[k] = v;
+  return out;
+}
+function safeJson(s: unknown): unknown { try { return JSON.parse(String(s)); } catch { return undefined; } }
+
+// Merge only: nothing is deleted. The newer entry's note and title win (by timestamp); stars and checklist ticks are unioned.
+function mergeBackup(b: Backup) {
+  const cur = sites();
+  for (const [lp, inc] of Object.entries(b.sites)) {
+    const ex = cur[lp];
+    if (!ex) { cur[lp] = inc; continue; }
+    const newer = inc.ts > ex.ts;
+    cur[lp] = { ...ex, ts: Math.max(ex.ts, inc.ts), star: ex.star || inc.star || undefined, note: newer ? inc.note ?? ex.note : ex.note ?? inc.note, title: newer ? inc.title ?? ex.title : ex.title ?? inc.title };
+  }
+  saveSites(cur);
   try {
-    const path = await save({ defaultPath: `Town_planner_backup_${new Date().toISOString().slice(0, 10)}.json`, filters: [{ name: "Backup", extensions: ["json"] }] });
+    for (const [k, ticks] of Object.entries(b.checklists)) {
+      let have: string[] = [];
+      try { have = JSON.parse(localStorage.getItem(k) ?? "[]"); } catch { /* ignore */ }
+      localStorage.setItem(k, JSON.stringify([...new Set([...have, ...ticks])]));
+    }
+    for (const [k, v] of [...Object.entries(b.forms), ...Object.entries(b.settings)]) if (localStorage.getItem(k) === null) localStorage.setItem(k, v);
+  } catch { /* storage unavailable */ }
+}
+
+$("backupBtn").addEventListener("click", async () => {
+  try {
+    const b = makeBackup();
+    const path = await save({ defaultPath: `planlens-backup-${new Date().toISOString().slice(0, 10)}.json`, filters: [{ name: "Backup", extensions: ["json"] }] });
     if (!path) return;
-    await invoke("save_text", { path, content: JSON.stringify({ app: "ai-town-planner", version: 1, data }) });
-    $("backupMsg").textContent = `Backed up ${Object.keys(data).length} items.`;
-  } catch (e) { $("backupMsg").textContent = String(e); }
+    await invoke("save_text", { path, content: JSON.stringify(b, null, 2) });
+    backupMsg(`Backed up ${countText(backupCounts(b))}.`);
+  } catch (e) { backupMsg(`Backup failed: ${e}`); }
 });
 $("restoreBtn").addEventListener("click", async () => {
+  $("restoreBox").hidden = true;
+  pendingBackup = null;
   try {
     const path = await open({ multiple: false, filters: [{ name: "Backup", extensions: ["json"] }] });
     if (typeof path !== "string") return;
-    const parsed = JSON.parse(await invoke<string>("read_backup", { path }));
-    const data: Record<string, unknown> = parsed && typeof parsed.data === "object" && parsed.data ? parsed.data : {};
-    let n = 0;
-    for (const [k, v] of Object.entries(data)) {
-      if ((BACKUP_KEYS.includes(k) || k.startsWith("daform1:")) && typeof v === "string") { localStorage.setItem(k, v); n++; }
-    }
-    if (!n) throw new Error("No data found in that file.");
-    location.reload();
-  } catch (e) { $("backupMsg").textContent = `Restore failed: ${e}`; }
+    pendingBackup = parseBackup(await invoke<string>("read_backup", { path }));
+    $("restoreText").textContent = `This backup has ${countText(backupCounts(pendingBackup))}. Merge it into your data? Nothing is deleted.`;
+    $("restoreBox").hidden = false;
+    backupMsg("");
+  } catch (e) { backupMsg(`Restore failed: ${e instanceof Error ? e.message : e}`); }
 });
+$("restoreGo").addEventListener("click", () => {
+  if (!pendingBackup) return;
+  mergeBackup(pendingBackup);
+  backupMsg(`Merged ${countText(backupCounts(pendingBackup))}.`);
+  pendingBackup = null;
+  $("restoreBox").hidden = true;
+  renderSiteTools();
+});
+$("restoreCancel").addEventListener("click", () => { pendingBackup = null; $("restoreBox").hidden = true; backupMsg("Restore cancelled. Nothing changed."); });
 
 // ---- Forms page: DA Form 1 (Queensland, version 1.3), numbered as on the PDF ----
 type FItem = { id: string; n: string; q: string; t: "text" | "area" | "radio" | "check" | "note"; o?: string[] };
