@@ -8,26 +8,23 @@
   <body>
     <nav class="menubar" id="menubar" aria-label="Main menu"></nav>
     <div class="app" id="app">
-      <!-- Left column: name, logo and tools stacked -->
+      <!-- Left rail: app icon and tool icons -->
       <aside class="leftcol">
-        <div class="logo">
-          <svg viewBox="0 0 120 120" aria-hidden="true">
-            <rect width="120" height="120" rx="26" fill="#0f5e4b" />
-            <path d="M60 18 C40 18 28 32 28 50 C28 72 60 102 60 102 C60 102 92 72 92 50 C92 32 80 18 60 18 Z" fill="#3fb592" />
-            <path d="M46 56 L60 44 L74 56 L74 70 L46 70 Z" fill="#0f5e4b" />
-            <rect x="56" y="60" width="8" height="10" fill="#3fb592" />
-          </svg>
-          <div class="ltext"><b>PlanLens</b><small>Brisbane planning</small></div>
-        </div>
-        <nav class="toolstack">
-                    <div class="tlabel">Tools</div>
-          <button id="formsBtn" title="Fill in and download DA forms">Forms</button>
-          <button id="apprBtn" title="Development and building approvals by council">Approvals</button>
-          <button id="mapsBtn">Maps</button>
-          <button id="myMapBtn" title="Open the chosen map for this address (opens in your browser)">Open map</button>
-          <button id="cmpBtn">Compare</button>
-          <button id="batchBtn" title="Check a list of addresses from a CSV or text file">Batch check</button>
-          <button id="settingsBtn">Settings</button>
+        <svg class="applogo" viewBox="0 0 120 120" role="img" aria-label="PlanLens, Brisbane planning">
+          <title>PlanLens, Brisbane planning</title>
+          <rect width="120" height="120" rx="26" fill="#0f5e4b" />
+          <path d="M60 18 C40 18 28 32 28 50 C28 72 60 102 60 102 C60 102 92 72 92 50 C92 32 80 18 60 18 Z" fill="#3fb592" />
+          <path d="M46 56 L60 44 L74 56 L74 70 L46 70 Z" fill="#0f5e4b" />
+          <rect x="56" y="60" width="8" height="10" fill="#3fb592" />
+        </svg>
+        <nav class="toolstack" aria-label="Tools">
+          <button type="button" id="formsBtn" title="Forms: Fill in and download DA forms" aria-label="Forms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg></button>
+          <button type="button" id="apprBtn" title="Approvals: Development and building approvals by council" aria-label="Approvals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></button>
+          <button type="button" id="mapsBtn" title="Maps" aria-label="Maps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button>
+          <button type="button" id="myMapBtn" title="Open map: Open the chosen map for this address (opens in your browser)" aria-label="Open map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5H5V6h5"/></svg></button>
+          <button type="button" id="cmpBtn" title="Compare" aria-label="Compare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4v16M16 4v16"/><path d="M4 8h8M12 16h8"/></svg></button>
+          <button type="button" id="batchBtn" title="Batch check: Check a list of addresses from a CSV or text file" aria-label="Batch check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg></button>
+          <button type="button" id="settingsBtn" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
           <div class="tlabel railonly">Map style</div>
           <div class="seg railseg">
             <button data-base="plain" class="on">Plain</button>
@@ -244,7 +241,6 @@
         </div>
       </section>
 
-      <div class="grip l" id="gripL" title="Drag to resize the left column"></div>
       <div class="grip r" id="gripR" title="Drag to resize the right panel"></div>
     </div>
 
