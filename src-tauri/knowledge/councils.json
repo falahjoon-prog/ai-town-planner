@@ -1,0 +1,206 @@
+[
+  {
+    "id": "brisbane",
+    "name": "Brisbane City Council",
+    "short": "Brisbane",
+    "scheme": "Brisbane City Plan 2014",
+    "scheme_url": "https://cityplan.brisbane.qld.gov.au/",
+    "maps_url": "https://cityplan.brisbane.qld.gov.au/eplan/",
+    "da_url": "https://developmenti.brisbane.qld.gov.au/",
+    "da_name": "Development.i",
+    "lodge_url": "https://services.brisbane.qld.gov.au/online-services/development/development-application-lodgement-form",
+    "contact": "Brisbane City Council (07) 3403 8888",
+    "licence": "CC BY 4.0",
+    "attribution": "(c) Brisbane City Council",
+    "rules": "brisbane",
+    "title_prefix": "City Plan 2014 — ",
+    "bbox": [
+      152.66,
+      -27.77,
+      153.47,
+      -27.02
+    ],
+    "pipeline": {
+      "parcels": {
+        "kind": "bcc"
+      },
+      "layers": [
+        {
+          "kind": "bcc_cp14"
+        }
+      ],
+      "test": {
+        "parcel_limit": 2000,
+        "only": [
+          "cp14-zoning-overlay",
+          "cp14-flood-overlay-brisbane-river-flood-planning-area",
+          "cp14-heritage-overlay"
+        ]
+      }
+    },
+    "maps_name": "City Plan online (eplan)",
+    "website": "https://www.brisbane.qld.gov.au/",
+    "lodge_name": "Brisbane: development application lodgement form (online)",
+    "water": {
+      "name": "Urban Utilities",
+      "url": "https://www.urbanutilities.com.au/development/our-services/how-to-connect-water-and-sewerage/standard-connections"
+    }
+  },
+  {
+    "id": "logan",
+    "name": "Logan City Council",
+    "short": "Logan",
+    "scheme": "Logan Planning Scheme 2015",
+    "scheme_url": "https://www.logan.qld.gov.au/planning-scheme-2",
+    "scheme_docs_url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/",
+    "maps_url": "https://www.logan.qld.gov.au/planning-and-building/planning-and-development/logan-planning-scheme/logan-eplan",
+    "maps_name": "Logan ePlan and PD Hub",
+    "da_url": "https://www.logan.qld.gov.au/planning-and-development/pd-online",
+    "da_name": "Logan PD Online",
+    "lodge_url": "https://www.logan.qld.gov.au/planning-and-development/pd-online",
+    "contact": "Logan City Council (07) 3412 3412",
+    "licence": "CC BY 3.0 AU (council mapping service); Queensland cadastre and addresses CC BY 4.0",
+    "attribution": "(c) Logan City Council",
+    "rules": "logan",
+    "title_prefix": "Logan — ",
+    "bbox": [
+      152.8,
+      -28.05,
+      153.35,
+      -27.55
+    ],
+    "pipeline": {
+      "parcels": {
+        "kind": "qld_cadastre",
+        "lga": [
+          "LOGAN CITY"
+        ]
+      },
+      "layers": [
+        {
+          "kind": "arcgis",
+          "root": "https://arcgis.lcc.wspdigital.com/server/rest/services/LoganHub",
+          "services": [
+            "LoganHub/Logan_Planning_Scheme_v\\d+_\\d+(_TLPI_No_1_\\d{4})?_\\d{8}"
+          ],
+          "service_type": "MapServer",
+          "pick": "newest",
+          "groups": [
+            "Zones and Precincts",
+            "Overlays",
+            "Local Plans"
+          ],
+          "zoning": [
+            "^Zones?$",
+            "^Zoning$",
+            "^Zones \\(",
+            "Zone$"
+          ],
+          "skip": [
+            "(?i)label",
+            "(?i)annotation"
+          ]
+        }
+      ],
+      "test": {
+        "bbox": [
+          153.1,
+          -27.62,
+          153.16,
+          -27.57
+        ]
+      }
+    },
+    "samples": [
+      {
+        "number": "6",
+        "street": "GABLE",
+        "locality": ""
+      }
+    ],
+    "website": "https://www.logan.qld.gov.au/",
+    "lodge_name": "Logan City Council: lodge through PD Online",
+    "water": {
+      "name": "Logan Water (Logan City Council)",
+      "url": "https://www.logan.qld.gov.au/"
+    }
+  },
+  {
+    "id": "moreton_bay",
+    "name": "City of Moreton Bay",
+    "short": "Moreton Bay",
+    "scheme": "MBRC Planning Scheme 2016",
+    "scheme_url": "https://www.moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC",
+    "scheme_docs_url": "https://moretonbay.qld.gov.au/Services/Building-Development/Planning-Schemes/MBRC/Document",
+    "maps_url": "https://www.moretonbay.qld.gov.au/mbrcplanningscheme",
+    "maps_name": "MBRC Planning Scheme online and maps",
+    "da_url": "https://www.moretonbay.qld.gov.au/Services/Building-Development",
+    "da_name": "City of Moreton Bay building and development",
+    "lodge_url": "https://www.moretonbay.qld.gov.au/Services/Building-Development",
+    "contact": "City of Moreton Bay (07) 3205 0555",
+    "licence": "City of Moreton Bay Data Hub (see handoffs/councils.md); Queensland cadastre and addresses CC BY 4.0",
+    "attribution": "(c) City of Moreton Bay",
+    "rules": "moreton_bay",
+    "title_prefix": "Moreton Bay — ",
+    "bbox": [
+      152.35,
+      -27.5,
+      153.25,
+      -26.75
+    ],
+    "pipeline": {
+      "parcels": {
+        "kind": "qld_cadastre",
+        "lga": [
+          "MORETON BAY CITY",
+          "MORETON BAY REGIONAL",
+          "MORETON BAY"
+        ]
+      },
+      "layers": [
+        {
+          "kind": "arcgis",
+          "root": "https://services-ap1.arcgis.com/152ojN3Ts9H3cdtl/arcgis/rest/services",
+          "services": [
+            "ZM_Zones_Precincts_WebMercator_OpenData",
+            "MBRC_PlanningScheme_ZM_LocalPlanBoundary",
+            "MBRC_PlanningScheme_ZM_LocalPlanPrecincts",
+            "OM_.*_WebMercator_OpenData",
+            "MBRC_PlanningScheme_(?!ZM_).*",
+            "PlanningScheme_Temporary_Local_Planning_Instruments"
+          ],
+          "service_type": "FeatureServer",
+          "pick": "all",
+          "zoning": [
+            "^ZM_Zones_Precincts"
+          ],
+          "skip": [
+            "(?i)label",
+            "(?i)annotation"
+          ]
+        }
+      ],
+      "test": {
+        "bbox": [
+          152.98,
+          -27.27,
+          153.04,
+          -27.22
+        ]
+      }
+    },
+    "samples": [
+      {
+        "number": "",
+        "street": "",
+        "locality": "KALLANGUR"
+      }
+    ],
+    "website": "https://www.moretonbay.qld.gov.au/",
+    "lodge_name": "City of Moreton Bay: lodge as set out on council's Building and Development page",
+    "water": {
+      "name": "Unitywater",
+      "url": "https://www.unitywater.com/"
+    }
+  }
+]
