@@ -282,7 +282,7 @@ function showRecents(focus = "") {
       if (items.length) rows += `<li class="rgrp" role="presentation">${esc(g === "none" ? "Unfiled" : projLabel(ps.find((p) => p.id === g)!))}</li>${items.map(row).join("")}`;
     }
   } else rows = r.map(row).join("");
-  const ctl = `<li class="rtools" role="presentation"><label for="projSel" class="meta">Project</label><div class="rbar"><select id="projSel" aria-label="Filter by project">${projOptions(projFilter)}</select><button type="button" class="ghost" data-act="new">New</button><button type="button" class="ghost" data-act="edit"${cur ? "" : " disabled"}>Rename</button><button type="button" class="ghost" data-act="del"${cur ? "" : " disabled"}>Delete</button></div>${
+  const ctl = `<li class="rtools" role="presentation"><label for="projSel" class="meta">Project</label><div class="rbar"><select id="projSel" aria-label="Filter by project">${projOptions(projFilter)}</select><button type="button" class="ghost ibtn" data-act="new" title="New project" aria-label="New project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><button type="button" class="ghost ibtn" data-act="edit"${cur ? "" : " disabled"} title="Rename project" aria-label="Rename project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1-4L16 5l3 3L8 19z"/></svg></button><button type="button" class="ghost ibtn" data-act="del"${cur ? "" : " disabled"} title="Delete project" aria-label="Delete project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div>${
     projMode === "new" || (projMode === "edit" && cur)
       ? `<div class="rform"><label>Name<input id="pfName" value="${esc(projMode === "edit" ? cur!.name : "")}" maxlength="60"></label><label>Client (optional)<input id="pfClient" value="${esc(projMode === "edit" ? cur!.client ?? "" : "")}" maxlength="60"></label><label>Note (optional)<input id="pfNote" value="${esc(projMode === "edit" ? cur!.note ?? "" : "")}" maxlength="120"></label><div class="rbar"><button type="button" data-act="save">Save</button><button type="button" class="ghost" data-act="cancel">Cancel</button></div></div>`
       : projMode === "del" && cur
@@ -328,6 +328,7 @@ $("results").addEventListener("click", (ev) => {
 });
 
 // Shared address search (main box and Compare dialog): Google suggestions when a key is set, else the offline typo-tolerant search.
+const NOT_FOUND = "Not found in the Brisbane City Council data pack (Brisbane council area only). It may be in another council area.";
 async function findAddresses(q: string): Promise<{ google?: { place_id: string; text: string }[]; hits?: Hit[]; note?: string }> {
   let note: string | undefined;
   if (hasGoogle) {
@@ -361,7 +362,7 @@ async function runSearch() {
     list.innerHTML = hits
       .map((h) => `<li data-pid="${h.pid}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></li>`)
       .join("");
-    $("hint").textContent = hits.length ? `${hits.length} result${hits.length > 1 ? "s" : ""}` : "No matches.";
+    $("hint").textContent = hits.length ? `${hits.length} result${hits.length > 1 ? "s" : ""}` : NOT_FOUND;
   } catch (e) {
     alertMsg(e);
   }
@@ -391,16 +392,21 @@ async function openSaved(li: HTMLElement) {
 // ---- Site ----
 const PALETTE = ["#c2410c", "#0e7490", "#7c3aed", "#b91c1c", "#15803d", "#a16207", "#be185d", "#1d4ed8"];
 
-// Compact finding card: source badge, title, short description; long text collapses behind a chevron.
+// Compact finding card: source badge, title, short description; long text collapses behind a whole-card toggle ("Show more").
 function fcard(kind: string, authority: string, title: string, sub: string, text: string) {
-  const long = text.length > 120;
-  return `<div class="fcard ${kind}"><div class="fc-top"><span class="auth">${esc(AUTH[authority] ?? authority)}</span><b>${esc(title)}</b>${long ? `<button type="button" class="chev" aria-expanded="false" aria-label="Show more">▾</button>` : ""}</div>${sub ? `<div class="meta fc-sub">${esc(sub)}</div>` : ""}<p class="fc-text">${esc(text)}</p></div>`;
+  const long = text.length > 150;
+  return `<div class="fcard ${kind}${long ? " fold" : ""}"${long ? ` role="button" tabindex="0" aria-expanded="false" title="Show or hide the full description"` : ""}><div class="fc-top"><span class="auth">${esc(AUTH[authority] ?? authority)}</span><b>${esc(title)}</b></div>${sub ? `<div class="meta fc-sub">${esc(sub)}</div>` : ""}<p class="fc-text">${esc(text)}</p>${long ? `<span class="fc-more" aria-hidden="true"></span>` : ""}</div>`;
+}
+function foldCard(c: HTMLElement) {
+  c.setAttribute("aria-expanded", String(c.classList.toggle("open")));
 }
 $("site").addEventListener("click", (ev) => {
-  const b = (ev.target as HTMLElement).closest<HTMLElement>(".chev");
-  if (!b) return;
-  const open = b.closest(".fcard")!.classList.toggle("open");
-  b.setAttribute("aria-expanded", String(open));
+  const c = (ev.target as HTMLElement).closest<HTMLElement>(".fcard.fold");
+  if (c) foldCard(c);
+});
+$("site").addEventListener("keydown", (ev) => {
+  const c = (ev.target as HTMLElement).closest<HTMLElement>(".fcard.fold");
+  if (c && c === ev.target && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); foldCard(c); }
 });
 
 async function loadSite(pid: number, silent = false) {
@@ -496,7 +502,7 @@ let contOn = false;
 const useId = () => ($("useSel") as HTMLSelectElement).value;
 const link = (url: string, text: string) => (url ? `<a href="#" data-url="${esc(url)}" data-title="${esc(text)}">${esc(text)}</a>` : esc(text));
 
-async function loadPotential() {
+async function loadPotential(changed = false) {
   if (!current) return;
   try {
     pot = await invoke<Pot>("potential", { pid: current.parcel.pid, useId: useId() });
@@ -505,6 +511,12 @@ async function loadPotential() {
     return;
   }
   renderPotential();
+  if (changed) {
+    const pb = $("site").querySelector<HTMLElement>(".pbody")!;
+    pb.scrollTop = 0;
+    const f = document.getElementById("useFit");
+    if (f) { f.classList.remove("flash"); void f.offsetWidth; f.classList.add("flash"); }
+  }
   drawDims();
   if (subOn) drawSketch();
 }
@@ -523,17 +535,17 @@ function renderPotential() {
         .join("")}</table>`
     : `<p class="meta">${p.pda ? "PDA site: limits come from the PDA development scheme (EDQ)." : "No sourced numeric provisions for this zone in the app yet. The AI report names the City Plan codes that set them."}</p>`;
   const fit = p.use_fit
-    ? `<div class="${p.use_fit.zone_ok === false ? "flag" : "zone"}"><span class="auth">Proposal</span> <b>${esc(p.use_fit.use_def.name)}</b>
+    ? `<div id="useFit" class="fcard usefit ${p.use_fit.zone_ok === false ? "flag" : "zone"}"><span class="auth">Proposal</span> <b>${esc(p.use_fit.use_def.name)}</b>
        <div class="meta">Planning use term: ${esc(p.use_fit.use_def.term)}</div><p>${esc(p.use_fit.note)}</p>
        ${p.use_fit.rule ? `<p><b>Level of assessment:</b> ${esc(p.use_fit.rule.level)}</p>
          <table class="ptable"><tbody>${p.use_fit.rule.items.map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ' <span class="pill warn">verify</span>' : ""}</td><td class="meta">${i.url ? link(i.url, i.source) : esc(i.source)}</td></tr>`).join("")}</tbody></table>${chargeEstimate(p)}` : ""}
        <ul>${p.use_fit.use_def.checks.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>
        ${(p.use_fit.use_def.sources ?? []).length ? `<div class="meta">Sources: ${p.use_fit.use_def.sources.map((x) => link(x.url, x.name)).join(" · ")}</div>` : ""}</div>`
     : "";
-  $("pot").innerHTML = `<p>${facts}</p>${prov}<h4>Subdivision</h4><ul>${p.subdivision.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+  $("pot").innerHTML = `${fit}<p>${facts}</p>${prov}<h4>Subdivision</h4><ul>${p.subdivision.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
     ${p.power?.length ? `<h4>Nearest power infrastructure</h4><ul>${p.power.map((n) => `<li><b>${esc(n.kind)}</b>: ${km(n.distance_m)} <span class="meta">${esc(brief(n.props))}</span></li>`).join("")}</ul>
       <p class="meta">Source: Geoscience Australia national electricity infrastructure. Energex distribution lines/capacity, water, sewer, recycled water and fibre aren't open data: see Maps → Energex DAPR map and BYDA.</p>` : ""}
-    ${p.sketch.length ? `<p class="meta">Indicative split: ${p.sketch.map((s) => `${Math.round(s.area_m2)} m²`).join(" + ")}. Concept only; a surveyor confirms the layout.</p>` : ""}${fit}`;
+    ${p.sketch.length ? `<p class="meta">Indicative split: ${p.sketch.map((s) => `${Math.round(s.area_m2)} m²`).join(" + ")}. Concept only; a surveyor confirms the layout.</p>` : ""}`;
   $("forms").innerHTML = p.forms
     .map((f) => `<div class="mapitem"><div><b>${esc(f.form.name)}</b><div class="meta">To: ${esc(f.form.to)} · ${esc(f.reason)}</div>
       <div class="meta">Lodge: ${f.form.lodge_url ? link(f.form.lodge_url, f.form.lodge) : esc(f.form.lodge)}</div></div>
@@ -565,7 +577,7 @@ function renderChecklist(p: Pot) {
   };
 }
 
-$("useSel").addEventListener("change", loadPotential);
+$("useSel").addEventListener("change", () => loadPotential(true));
 // Every link in the side panel opens in the browser.
 document.querySelector(".panel")!.addEventListener("click", (ev) => {
   const el = (ev.target as HTMLElement).closest("[data-url]") as HTMLElement | null;
@@ -598,6 +610,7 @@ function drawSketch() {
 
 function toolUi(id: string, on: boolean) {
   $(id).classList.toggle("on", on);
+  $(id).setAttribute("aria-pressed", String(on));
 }
 
 $("dimBtn").addEventListener("click", () => { dimOn = !dimOn; toolUi("dimBtn", dimOn); drawDims(); });
@@ -772,7 +785,7 @@ $("floodBtn").addEventListener("click", async () => {
     type: "geojson",
     data: { type: "FeatureCollection", features: feats.map((f) => ({ type: "Feature", properties: { c: color(f.title) }, geometry: f.geom })) },
   });
-  m.addLayer({ id: "flood", type: "fill", source: "flood", paint: { "fill-color": ["get", "c"], "fill-opacity": 0.35 } }, "lot");
+  m.addLayer({ id: "flood", type: "fill", source: "flood", paint: { "fill-color": ["get", "c"], "fill-opacity": 0.25 } }, "lot");
   m.addLayer({ id: "flood-line", type: "line", source: "flood", paint: { "line-color": ["get", "c"], "line-width": 1 } }, "lot");
   const short = (t: string) => t.replace(/^City Plan 2014 — /, "").replace(/^Queensland — /, "State: ");
   setFloodUi(
@@ -801,7 +814,7 @@ function drawMap(a: Assessment) {
       const color = PALETTE[i % PALETTE.length];
       m.addSource(id, { type: "geojson", data: { type: "Feature", properties: {}, geometry: o.geom } });
       const t = o.geom?.type ?? "";
-      if (t.includes("Polygon")) m.addLayer({ id, type: "fill", source: id, paint: { "fill-color": color, "fill-opacity": 0.22 } });
+      if (t.includes("Polygon")) m.addLayer({ id, type: "fill", source: id, paint: { "fill-color": color, "fill-opacity": 0.15 } });
       else if (t.includes("Line")) m.addLayer({ id, type: "line", source: id, paint: { "line-color": color, "line-width": 3 } });
       else m.addLayer({ id, type: "circle", source: id, paint: { "circle-color": color, "circle-radius": 5 } });
     });
@@ -1483,13 +1496,26 @@ $("envBtn").addEventListener("click", () => {
 });
 
 // ---- Suburb report (from the data pack) ----
+// Suburb from the address text when the parcel has none: last comma part without state/postcode, else the words after the street type.
+function suburbFromAddress(addr: string): string {
+  const clean = (t: string) => t.replace(/\b(QLD|QUEENSLAND)\b/gi, "").replace(/\b\d{4}\b/g, "").replace(/\s+/g, " ").trim();
+  const parts = addr.split(",").map((x) => x.trim()).filter(Boolean);
+  if (parts.length > 1) return clean(parts[parts.length - 1]);
+  const m = clean(addr).match(/\b(?:street|st|road|rd|avenue|ave|drive|dr|court|ct|place|pl|lane|ln|crescent|cres|terrace|tce|parade|pde|way|close|cl|boulevard|blvd|highway|hwy|circuit|cct)\.?\s+(.+)$/i);
+  return m ? m[1].trim() : "";
+}
 $("suburbBtn").addEventListener("click", async () => {
   if (!current) return;
-  const sub = current.parcel.suburb;
+  const out = $("suburbOut");
+  const sub = current.parcel.suburb?.trim() || suburbFromAddress(current.parcel.address || "");
+  if (!sub) { out.innerHTML = `<p class="err" role="alert">Could not work out the suburb for this address, so there is no suburb report.</p>`; return; }
+  out.innerHTML = `<p class="meta" role="status">Loading suburb report for ${esc(sub)}…</p>`;
+  ($("suburbBtn") as HTMLButtonElement).disabled = true;
   try {
     const r = await invoke<any>("suburb_stats", { suburb: sub });
+    if (!r || !r.lots) { out.innerHTML = `<p class="err" role="alert">No lots found in the data pack for "${esc(sub)}". Check the suburb name; the pack covers the Brisbane City Council area only.</p>`; return; }
     const lot = current.parcel.area_m2 ?? 0;
-    $("suburbOut").innerHTML = `<table class="ptable"><tbody>
+    out.innerHTML = `<table class="ptable"><tbody>
       <tr><td>Lots in ${esc(r.suburb)}</td><td><b>${r.lots.toLocaleString()}</b></td></tr>
       <tr><td>Median lot size</td><td><b>${r.median_m2} m²</b> (middle half ${r.p25_m2}–${r.p75_m2} m²)</td></tr>
       <tr><td>This lot</td><td><b>${Math.round(lot)} m²</b> – ${lot >= r.median_m2 ? "larger" : "smaller"} than the suburb median</td></tr>
@@ -1499,7 +1525,9 @@ $("suburbBtn").addEventListener("click", async () => {
       <tr><td>Lots 1,000 m² or more</td><td>${r.pct_1000}%</td></tr></tbody></table>
       <p class="meta">From the Brisbane cadastre in the data pack. Population, income and housing: ${link("https://www.abs.gov.au/census/find-census-data/quickstats", "ABS Census QuickStats")} (search "${esc(sub)}").</p>`;
   } catch (e) {
-    alertMsg(e);
+    out.innerHTML = `<p class="err" role="alert">Suburb report failed: ${esc(String(e))}</p>`;
+  } finally {
+    ($("suburbBtn") as HTMLButtonElement).disabled = false;
   }
 });
 
@@ -1547,7 +1575,7 @@ async function cmpFind() {
     const r = await findAddresses(q);
     const items = r.google ? r.google.map((x) => `<li><button type="button" class="ghost" data-place="${esc(x.place_id)}"><b>${esc(x.text)}</b><span>Google</span></button></li>`)
       : (r.hits ?? []).map((h) => `<li><button type="button" class="ghost" data-pid="${h.pid}" data-addr="${esc(h.address)}" data-lp="${esc(h.lotplan)}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></button></li>`);
-    out.innerHTML = items.length ? items.join("") : `<li class="meta">No matches.</li>`;
+    out.innerHTML = items.length ? items.join("") : `<li class="meta">${NOT_FOUND}</li>`;
   } catch (e) {
     out.innerHTML = `<li class="err">${esc(e)}</li>`;
   }
@@ -1817,7 +1845,7 @@ function drawSetbacks() {
   if (typeof res === "string") { ed.hidden = true; return setFloodUi(floodOn, `<b>Can't draw setbacks for this lot</b><div class="meta">${esc(res)}</div>`); }
   const geom = { type: "Polygon", coordinates: [res.ring] };
   map.addSource("setb", { type: "geojson", data: { type: "Feature", properties: {}, geometry: geom as any } });
-  map.addLayer({ id: "setbf", type: "fill", source: "setb", paint: { "fill-color": "#0f5e4b", "fill-opacity": 0.22 } });
+  map.addLayer({ id: "setbf", type: "fill", source: "setb", paint: { "fill-color": "#0f5e4b", "fill-opacity": 0.15 } });
   map.addLayer({ id: "setb", type: "line", source: "setb", paint: { "line-color": "#0f5e4b", "line-width": 2, "line-dasharray": [3, 2] } });
   for (const l of res.labels) {
     const el = document.createElement("div");
@@ -2335,6 +2363,18 @@ $("fvBack").addEventListener("click", closeFormView);
 $("fvClose").addEventListener("click", closeFormView);
 $("formsView").addEventListener("click", (e) => { if (e.target === $("formsView")) closeFormView(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && app.classList.contains("formsmode") && !document.querySelector("dialog[open]")) closeFormView(); });
+// Left tool strip: clicking an open tool's icon again closes it; state shown with aria-pressed.
+const TOOL_DLG: Record<string, string> = { settingsBtn: "settings", mapsBtn: "mapsDlg", apprBtn: "apprDlg", cmpBtn: "cmpDlg", batchBtn: "batchDlg" };
+for (const [bid, did] of Object.entries(TOOL_DLG)) {
+  const d = $(did) as HTMLDialogElement;
+  const sync = () => { $(bid).setAttribute("aria-pressed", String(d.open)); $(bid).classList.toggle("on", d.open); };
+  $(bid).setAttribute("aria-pressed", "false");
+  new MutationObserver(sync).observe(d, { attributes: true, attributeFilter: ["open"] });
+  $(bid).addEventListener("click", (ev) => { if (d.open) { ev.stopImmediatePropagation(); d.close(); } }, true);
+}
+$("formsBtn").setAttribute("aria-pressed", "false");
+$("formsBtn").addEventListener("click", (ev) => { if (app.classList.contains("formsmode")) { ev.stopImmediatePropagation(); closeFormView(); } }, true);
+new MutationObserver(() => { const o = app.classList.contains("formsmode"); $("formsBtn").setAttribute("aria-pressed", String(o)); $("formsBtn").classList.toggle("on", o); }).observe(app, { attributes: true, attributeFilter: ["class"] });
 // any map tool returns to the map
 ["dimBtn","subBtn","setbackBtn","measDBtn","measABtn","contBtn","floodBtn","powerBtn","envBtn","markBtn"].forEach((id) =>
   $(id).addEventListener("click", () => { if (app.classList.contains("formsmode")) closeFormView(); }));
@@ -2368,7 +2408,18 @@ function setChat(on: boolean) {
   ($("botWin") as HTMLElement).hidden = !on;
   $("rightcol").classList.toggle("chatopen", on);
   $("rail").querySelectorAll<HTMLElement>("button").forEach((b) => b.classList.toggle("on", on ? b.dataset.sec === "assistant" : b.dataset.sec === curSec));
-  if (on) { renderChat(); $("chatInput").focus(); }
+  if (on) { setRcol(false); renderChat(); $("chatInput").focus(); }
+  syncRail();
+}
+// Right panel collapses to its icon rail; clicking the active rail icon toggles it.
+function syncRail() {
+  const shut = app.classList.contains("rcol");
+  $("rail").querySelectorAll<HTMLElement>("button").forEach((b) => b.setAttribute("aria-pressed", String(!shut && b.classList.contains("on"))));
+}
+function setRcol(on: boolean) {
+  app.classList.toggle("rcol", on);
+  syncRail();
+  resizeMap();
 }
 // Right-panel rail: one section group shown at a time
 const SEC_GROUPS: Record<string, [string, string[]]> = {
@@ -2391,12 +2442,14 @@ function showSec(k: string) {
   $("secTitle").textContent = g[0];
   $("secSub").textContent = k === "constraints" ? "Council · State" : "";
   $("rail").querySelectorAll<HTMLElement>("button").forEach((b) => b.classList.toggle("on", b.dataset.sec === k));
+  setRcol(false);
   $("site").querySelector(".pbody")!.scrollTop = 0;
 }
 $("rail").addEventListener("click", (ev) => {
   const b = (ev.target as HTMLElement).closest<HTMLElement>("button");
   if (!b) return;
-  if (b.dataset.sec === "assistant") setChat(($("botWin") as HTMLElement).hidden);
+  if (b.classList.contains("on") && !app.classList.contains("rcol")) { setRcol(true); return; }
+  if (b.dataset.sec === "assistant") setChat(($("botWin") as HTMLElement).hidden || app.classList.contains("rcol"));
   else showSec(b.dataset.sec!);
 });
 showSec("zoning");
@@ -2406,7 +2459,7 @@ $("recentBtn").addEventListener("click", () => { if ($("results").innerHTML) $("
 new MutationObserver(() => {
   const open = !!$("results").firstElementChild;
   $("recentBtn").setAttribute("aria-expanded", String(open));
-  if (!open && !$("hint").classList.contains("err") && $("hint").textContent !== "No matches.") $("hint").textContent = "";
+  if (!open && !$("hint").classList.contains("err") && $("hint").textContent !== NOT_FOUND) $("hint").textContent = "";
 }).observe($("results"), { childList: true });
 document.addEventListener("mousedown", (ev) => {
   if (!$("results").firstElementChild) return;
