@@ -52,6 +52,9 @@ jobs:
           report() { { grep -B2 -A14 -E "^(error|.*error TS|CMake Error)" "$1" || tail -80 "$1"; } | head -160 | awk '{printf "%s%%0A", $0}' | sed "s/^/::error title=$2::/"; echo; exit 1; }
           npm run build > web.log 2>&1 || report web.log Frontend
           cd src-tauri && cargo build --release > ../rust.log 2>&1 || report ../rust.log Rust
+      - name: Rust unit tests
+        if: runner.os == 'Linux'
+        run: cd src-tauri && cargo test --release --lib
       - name: Bundle installers
         shell: bash
         run: |
