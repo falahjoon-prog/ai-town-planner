@@ -44,3 +44,12 @@ Rule: every external button opens the exact page/result for its purpose. A param
 - "Website" and "DA applications" buttons for the ~70 other Queensland councils in maps.json (home pages or generic pages; not researched one by one).
 - Queensland Heritage Register, QSpatial catalogue, EPBC Protected Matters Search: tool landing pages with no documented parameters; the heritage register URL is an old `environment.ehp.qld.gov.au` address that was not re-checked.
 - Moreton Bay "My Property Look Up" (`moretonbay.qld.gov.au/mbrc-planning-scheme/mplu/`) is listed by a third party but could not be opened here, so it is not used.
+
+## T23 verified lot-level links (live-tested 2026-10-25; resolved at click time, copy + open fallback on any failure)
+| Target | Lookup | Opens | Notes |
+|---|---|---|---|
+| Brisbane, Redland, Ipswich DA registers (Development.i; site panel and Approvals) | Rust command `devi_land_number(host, term)` (no CORS): `GET https://<host>/Geo/AddressCompoundSearch?searchTerm=<lotplan>` -> `LotPlan[0].id`; if empty, the same search with the address (and the short "10 Fenton" form) -> `Address[0].id`. Host limited to the three developmenti.*.qld.gov.au hosts. | `https://<host>/Home/FilterDirect?filters=LandNumber=<id>` | Verified Brisbane 32RP850593 -> 10881172 ("28 Eden Elm St Calamvale"), Redland 111168 ("5 Bayford St Birkdale"). Ipswich lookup returns ids (1A Brisbane St -> 92879); FilterDirect assumed identical (same product). |
+| Logan DA register and council map buttons | ArcGIS `Property_Report_LPS2015/FeatureServer/0/query` (CORS ok, TS fetch): `where=Formatted_Lot_Plan='Lot 9 RP 148066'` (app lotplan 9RP148066; prefer `Address_Type='P'`) -> `Property_Key` | `https://pdhub.logan.qld.gov.au/property-report/?propertyKey=<key>` | Verified 6 Gable St Rochedale South -> 220766: full property report (zoning, overlays, applications, survey plan, flood report). |
+| Moreton Bay My Property Look Up / DA Tracker | none | copy + open | CMS page with captcha form; no deep link found. |
+
+Code: `src/sitelink.ts` (`resolverFor`, `loganLotPlan`, `loganPropertyKey`, `resolveLotUrl`), `go()` in `src/main.ts`, `devi_land_number` in `src-tauri/src/lib.rs`. Tests: `npm test`.

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "test": "esbuild tests/sitelink.test.ts --bundle --platform=node --outfile=node_modules/.cache/sitelink.test.cjs --log-level=warning && node node_modules/.cache/sitelink.test.cjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

@@ -10,7 +10,7 @@ import TIMEFRAMES_DATA from "../src-tauri/knowledge/timeframes.json";
 import REFERRALS_DATA from "../src-tauri/knowledge/referrals.json";
 import COUNCILS_DATA from "../src-tauri/knowledge/councils.json";
 import COUNCIL_RULES from "../src-tauri/knowledge/council_rules.json";
-import { siteLink, destLabel, type Dest, type SiteRef } from "./sitelink";
+import { siteLink, destLabel, resolveLotUrl, resolverFor, type Dest, type SiteRef } from "./sitelink";
 import "./style.css";
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string; council?: string };
@@ -457,7 +457,7 @@ async function loadSite(pid: number, silent = false) {
   $("tZoneLbl").textContent = `Zone · ${cn.short}`;
   const daName = cn.da_name ?? "DA register";
   $("daRegBtn").textContent = `Open ${cn.short} DA register (${daName})`;
-  $("daRegNote").textContent = `The ${cn.da_copy === "short" ? "house number and street name are" : "address is"} copied. Paste ${cn.da_copy === "short" ? "them" : "it"} into ${cn.da_field ?? "the search"} on ${daName} to see applications and decisions on this lot and next door.`;
+  $("daRegNote").textContent = resolverFor(cn.da_url ?? "") ? `Opens ${daName} at this lot to see applications and decisions on it and next door. If the lot cannot be found, the ${cn.da_copy === "short" ? "house number and street name are" : "address is"} copied instead.` : `The ${cn.da_copy === "short" ? "house number and street name are" : "address is"} copied. Paste ${cn.da_copy === "short" ? "them" : "it"} into ${cn.da_field ?? "the search"} on ${daName} to see applications and decisions on this lot and next door.`;
   $("tLot").textContent = a.parcel.area_m2 ? `${Math.round(a.parcel.area_m2).toLocaleString()} m²` : "–";
   $("tZone").textContent = a.zones[0] ? zoneTitle(a.zones[0]) : zonesMissing(cn) ? "Not loaded" : "–";
   $("tZone").title = a.zones.length ? `${a.zones.map(zoneTitle).join(", ")} (${cn.scheme})` : zonesMissing(cn) ? `${NO_ZONE} (${cn.scheme})` : cn.scheme;
@@ -1253,7 +1253,7 @@ function destBtn(key: string, base: string, cls = "", tag: "button" | "a" = "but
   const r = resolveDest(key);
   if (!r) return "";
   const text = destLabel(base, r.d, !!r.site);
-  const tip = r.site ? siteLink(r.d, r.site).toast || (r.d.site_url ? "Opens zoomed to this lot" : "") : "";
+  const tip = r.site ? (resolverFor(r.d.url) ? "Opens the page for this lot; if it cannot be found, the address is copied" : siteLink(r.d, r.site).toast || (r.d.site_url ? "Opens zoomed to this lot" : "")) : "";
   return tag === "a"
     ? `<a href="#" data-dest="${esc(key)}" title="${esc(tip)}">${esc(text)}</a>`
     : `<button type="button" class="${cls}" data-dest="${esc(key)}" title="${esc(tip)}">${esc(text)}</button>`;
@@ -1271,6 +1271,10 @@ function toast(msg: string) {
 async function go(key: string) {
   const r = resolveDest(key);
   if (!r) return;
+  if (r.site && resolverFor(r.d.url)) {
+    const url = await resolveLotUrl(r.d, r.site, { devi: (host, term) => invoke<string | null>("devi_land_number", { host, term }) });
+    if (url) { openExternal(url); return; }
+  }
   const l = siteLink(r.d, r.site);
   if (l.copyText) {
     try { await navigator.clipboard.writeText(l.copyText); toast(l.toast); } catch { toast(`Could not copy – type ${l.copyText} into ${r.d.field ?? "the search box"}`); }

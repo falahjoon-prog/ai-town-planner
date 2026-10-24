@@ -654,6 +654,37 @@ fn open_external(url: String) -> Result<(), String> {
     child.map(|_| ()).map_err(e)
 }
 
+/// Development.i land number for a lot/plan or address (the register's search has no CORS, so the app asks from here).
+/// Lot/plan terms use `LotPlan[0]`, address terms `Address[0]`. Only the three Development.i hosts are allowed.
+#[tauri::command]
+async fn devi_land_number(host: String, term: String) -> Option<String> {
+    const HOSTS: [&str; 3] = [
+        "developmenti.brisbane.qld.gov.au",
+        "developmenti.redland.qld.gov.au",
+        "developmenti.ipswich.qld.gov.au",
+    ];
+    if !HOSTS.contains(&host.as_str()) || term.trim().is_empty() {
+        return None;
+    }
+    let v: serde_json::Value = reqwest::Client::new()
+        .get(format!("https://{host}/Geo/AddressCompoundSearch"))
+        .query(&[("searchTerm", term.trim())])
+        .timeout(std::time::Duration::from_secs(10))
+        .send()
+        .await
+        .ok()?
+        .json()
+        .await
+        .ok()?;
+    let is_lotplan = !term.contains(' ') && term.chars().any(|c| c.is_ascii_digit());
+    let id = if is_lotplan { &v["LotPlan"][0]["id"] } else { &v["Address"][0]["id"] };
+    match id {
+        serde_json::Value::String(s) if !s.is_empty() => Some(s.clone()),
+        serde_json::Value::Number(n) => Some(n.to_string()),
+        _ => None,
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -669,6 +700,7 @@ pub fn run() {
             status,
             assistant,
             open_external,
+            devi_land_number,
             import_datapack,
             download_datapack,
             search,
