@@ -1581,12 +1581,20 @@ document.querySelectorAll<HTMLElement>(".seg [data-base]").forEach((b) =>
 );
 syncBase();
 
+// Right panel may grow to ~80% of the window; the map keeps >= 20% (never below 200 px) beside the 94 px of side chrome
+const maxRight = () => Math.max(340, innerWidth - 94 - Math.max(200, innerWidth * 0.2));
+function clampRight() {
+  const cur = parseFloat(document.documentElement.style.getPropertyValue("--right"));
+  if (cur > maxRight()) { document.documentElement.style.setProperty("--right", `${Math.floor(maxRight())}px`); resizeMap(); }
+}
+addEventListener("resize", clampRight);
+
 function drag(el: HTMLElement) {
   el.addEventListener("pointerdown", (e) => {
     e.preventDefault();
     el.setPointerCapture(e.pointerId);
     const move = (ev: PointerEvent) => {
-      const px = clampN(innerWidth - ev.clientX - 6, 340, 700);
+      const px = clampN(innerWidth - ev.clientX - 6, 340, maxRight());
       document.documentElement.style.setProperty("--right", `${px}px`);
       resizeMap();
     };
@@ -1603,6 +1611,7 @@ drag($("gripR"));
 try {
   const r = localStorage.getItem("colRight");
   if (r && /^\d+(\.\d+)?px$/.test(r)) document.documentElement.style.setProperty("--right", r);
+  clampRight();
   if (localStorage.getItem("fullmap") === "1") app.classList.add("fullmap");
 } catch { /* storage unavailable */ }
 

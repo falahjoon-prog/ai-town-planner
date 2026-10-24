@@ -73,3 +73,9 @@ Common rules for every thread
 2) Done: address search input in Compare dialog using new shared `findAddresses()` (main search `runSearch` now uses it too, no second search); picked result is added as a checked row, max 3, limit message, Remove button on added rows, Compare disabled until 2-3 ticked; dialog width min(940px, 92vw), max 85vh, larger rows/font, title/X pinned; comparison output code unchanged.
 3) Tests: `tsc --noEmit` and `vite build` pass; headless Chromium (mocked invoke) at 768/1280, light/dark: dialog fully inside viewport, no horizontal scroll, add/remove/limit/disable verified; shots /tmp/claude-0/shots/t8-before-* and t8-after-*. Not tested: Google suggest path (no key), real Windows build.
 4) Remaining: none known; 375 px not checked.
+
+## T9 report – wider right panel
+1) Files: src/main.ts (maxRight/clampRight, drag clamp), src/style.css (.rcontent container, two-column cards >=900px), handoffs/threads.md.
+2) Done: grip drags to max = window - 94px chrome - max(200px, 20%) (about 75-78%, map keeps >=20%/200px); min stays 340; resize and stored-width restore clamp to the new max; old fixed 700 clamp removed; no grip double-click reset existed (Window > Reset panel widths unchanged); zone/flag cards go 2 columns when content is over 900px, tiles stay 3 across.
+3) Tests: tsc and vite build clean; headless Chromium 1280/1920 light+dark: max (930/1442 px), min (340), shrink 1920->1000 clamps 1442->706, reload keeps clamp; no horizontal scroll, no page errors, map visible (>=206 px) and grip reachable. Shots /tmp/claude-0/shots/t9-*.
+4) Remaining: map minimum counts side chrome so max is about 75% not a flat 80%; chat view only checked for no errors at max width.

@@ -60,7 +60,7 @@ input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 .rail button.on { background: var(--chip); color: var(--ink); font-weight: 700; }
 .rail button.on svg { color: var(--accent); }
 .railgap { flex: 1; }
-.rcontent { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+.rcontent { container-type: inline-size; flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
 .searchrow { display: flex; gap: 6px; align-items: center; }
 .sqbtn { flex: none; width: 40px; height: 40px; padding: 0; display: grid; place-items: center; font-size: 16px; line-height: 1; }
 .sqbtn svg { width: 18px; height: 18px; }
@@ -242,6 +242,12 @@ dialog.wide { width: min(820px, 94vw); }
 .fans { padding: 6px 0; }
 .letter { background: #fff; color: #1f2937; font: 14px/1.7 Georgia, "Times New Roman", serif; padding: 36px 44px; border-radius: 4px; min-height: 380px; box-shadow: 0 1px 8px rgba(0,0,0,.3); }
 .cmp th, .cmp td { vertical-align: top; text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+
+/* Wide panel (dragged out): cards flow into two columns */
+@container (min-width: 900px) {
+  #zones, #flags { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px; align-items: start; }
+  #zones > p, #flags > p { grid-column: 1 / -1; }
+}
 
 /* Narrow windows: keep both sides usable */
 @media (max-width: 900px) {
