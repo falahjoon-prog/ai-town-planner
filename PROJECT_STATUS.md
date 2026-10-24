@@ -2,8 +2,8 @@
 
 ## Architecture
 - **App:** Tauri 2 (Rust core + Vite/TypeScript UI). One codebase for desktop (Windows/Mac/Linux), with Android/iOS to follow.
-- **Data pack:** SQLite built by `pipeline/build_datapack.py` (GitHub Action "Build data pack", published as a release asset `datapack.sqlite.gz`). It holds BCC parcels with addresses, plus every `cp14-*` City Plan 2014 spatial dataset, using an R*Tree index. Data © Brisbane City Council, CC BY 4.0.
-- **Rules engine:** `src-tauri/src/rules.rs` gives deterministic zone identification and overlay flags from `knowledge/zones.json` and `knowledge/rules.json`.
+- **Data pack:** SQLite built by `pipeline/build_datapack.py` (GitHub Action "Build data pack", published as a release asset `datapack.sqlite.gz`), driven by the council registry `src-tauri/knowledge/councils.json` (Brisbane, Logan, Moreton Bay; more councils by config, see handoffs/councils.md). Brisbane: BCC parcels + every `cp14-*` City Plan 2014 dataset. Logan and Moreton Bay: Queensland cadastre + address points filtered to the LGA, and the councils' planning scheme ArcGIS services. `council` column on parcels and layers; R*Tree index.
+- **Rules engine:** `src-tauri/src/rules.rs` gives deterministic zone identification and overlay flags from `knowledge/zones.json` and `knowledge/rules.json` (Brisbane) and `knowledge/council_rules.json` (other councils, via `council.rs`).
 - **Spatial:** `src-tauri/src/data.rs` finds overlays by lot/feature area overlap (geo crate), which avoids false hits from boundaries that only touch.
 - **AI:** `src-tauri/src/llm.rs` runs llama.cpp on-device (`llama-cpp-2` crate; Metal on Mac, CPU elsewhere). The GGUF model downloads once from Settings: Qwen3 4B (compact) or Qwen2.5 7B (professional). ChatML prompt.
 - **Builds:** GitHub Action "Build app" uses tauri-action and publishes installers to a release tagged `app-vX.Y.Z`.
@@ -20,6 +20,8 @@
 - v0.4.2 setbacks section: rows from knowledge/setbacks.json (Queensland Housing Code Chapter 2, lots 450 m² and over, flagged verify); other lots say check with council.
 - v0.4.2 (cont.): window size and fit, remembers last site/map/columns, backup and restore, batch address check (CSV), lodgement checklist, setback area drawn on the map (indicative, convex lots with one frontage only).
 
+- v0.5 (T19): Logan City Council and City of Moreton Bay: search across councils, council name and scheme on header, cards, reports, forms and links; Logan/MB zones, precincts, overlays, local plans; sourced Logan (LPS 2015 v9.2) and MB (council info sheets, v7) rule rows, all flagged verify; discover/test modes in the data pack workflow.
+
 ## Current issues
 - No package registry access in the cloud workspace: compile and test happen only in GitHub Actions; the app is not run by the developer – the user tests on Windows.
 - Windows AI is CPU-only (Vulkan later).
@@ -29,6 +31,8 @@
 - Setback distances per zone are not in the data pack; need verified City Plan values before showing numbers.
 - Forms page not yet tested on Windows; helper uses the existing chat command with form context.
 - Frontage fix assumes BCC parcel type/tenure fields mark roads; unconfirmed until tested on 28 Eden Elm St.
+
+- Logan/Moreton Bay rule rows are verify=true (read through a summarising fetch or council info sheets); MBRC scheme PDFs could not be opened from the workspace.
 
 ## Next steps
 1. User testing of v0.4.0 on Windows (report, chat, PDF, aerial, 3D, compare).

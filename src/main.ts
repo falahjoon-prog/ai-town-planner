@@ -1161,13 +1161,14 @@ function reportBody(a: Assessment, full = true): string {
   let mapImg = "";
   try { if (full && map) mapImg = `<img class="rmap" src="${markedPng || map.getCanvas().toDataURL("image/png")}" alt="Site map">`; } catch { /* map not ready */ }
   const byAuth = (k: string) => a.flags.filter((f) => f.rule.authority === k);
-  const auths: [string, string][] = [["council", "Council"], ["sara", "State (SARA)"], ["pda", "Economic Development Queensland (PDA)"], ["state", "State interests"], ["other", "Other agencies and services"]];
+  const cn = siteCouncil(a);
+  const auths: [string, string][] = [["council", `Council (${cn.name}, ${cn.scheme})`], ["sara", "State (SARA)"], ["pda", "Economic Development Queensland (PDA)"], ["state", "State interests"], ["other", "Other agencies and services"]];
   const head = b.logo || b.company
     ? `<div class="rbrand">${b.logo ? `<img src="${b.logo}" alt="">` : ""}<div><b>${esc(b.company ?? "")}</b>${b.by ? `<br><small>Prepared by ${esc(b.by)}</small>` : ""}</div></div>` : "";
   return `${head}<h1>Planning assessment: ${esc(a.parcel.address || a.parcel.lotplan)}</h1>
-<small>${esc(a.parcel.lotplan)}${a.parcel.area_m2 ? ` · ${Math.round(a.parcel.area_m2).toLocaleString()} m²` : ""} · Data pack ${esc(a.manifest.built_at)} · ${new Date().toLocaleDateString("en-AU")}</small>
+<small>${esc(a.parcel.lotplan)}${a.parcel.area_m2 ? ` · ${Math.round(a.parcel.area_m2).toLocaleString()} m²` : ""} · ${esc(cn.name)} · Data pack ${esc(a.manifest.built_at)} · ${new Date().toLocaleDateString("en-AU")}</small>
 ${mapImg}
-${full ? `<h2>Zoning</h2><ul>${a.zones.map((z) => `<li><b>${esc(z.zone.name)}</b> (${esc(z.authority)})${z.coverage_pct != null ? ` – ${Math.round(z.coverage_pct)}% of lot` : ""}</li>`).join("")}</ul>
+${full ? `<h2>Zoning (${esc(cn.scheme)})</h2><ul>${a.zones.map((z) => `<li><b>${esc(zoneTitle(z))}</b> (${esc(z.authority)})${z.coverage_pct != null ? ` – ${Math.round(z.coverage_pct)}% of lot` : ""}</li>`).join("")}</ul>
 <h2>Constraints by authority</h2>${auths.filter(([k]) => byAuth(k).length).map(([k, t]) => `<h3>${t}</h3><ul>${byAuth(k).map((f) => `<li><b>${esc(f.rule.title)}</b> – ${esc(f.rule.note)}</li>`).join("")}</ul>`).join("") || "<p>No mapped constraints.</p>"}
 <h2>Development potential</h2>${$("pot").innerHTML}
 ${site?.title ? `<h2>Title search summary</h2>${marked.parse(site.title)}` : ""}
@@ -1671,7 +1672,7 @@ $("cmpGo").addEventListener("click", async () => {
     <tr><td>Lot/plan</td>${cell((r) => esc(r.a.parcel.lotplan))}</tr>
     <tr><td>Area</td>${cell((r) => `${Math.round(r.p.area_m2)} m²`)}</tr>
     <tr><td>Frontage</td>${cell((r) => (r.p.frontage_m != null ? `${r.p.frontage_m} m` : "–"))}</tr>
-    <tr><td>Zone</td>${cell((r) => esc(r.a.zones.map((z) => z.zone.name).join(", ") || "–"))}</tr>
+    <tr><td>Zone</td>${cell((r) => esc(r.a.zones.map(zoneTitle).join(", ") || "–"))}</tr>
     <tr><td>Height</td>${cell((r) => esc(height(r.p)))}</tr>
     <tr><td>Lots by area</td>${cell((r) => (r.p.lots_by_area ? String(r.p.lots_by_area) : "1"))}</tr>
     <tr><td>Level of assessment</td>${cell((r) => esc(r.p.use_fit?.rule?.level ?? "Choose a proposal type"))}</tr>
@@ -1700,7 +1701,7 @@ $("batchPick").addEventListener("click", async () => {
   if (lines.length && /^(input|address|lot ?\/? ?plan)\b/i.test(lines[0])) lines.shift();
   if (!lines.length) { out.innerHTML = `<p class="meta">No lines found in that file.</p>`; return; }
   ($("batchSave") as HTMLButtonElement).disabled = true;
-  const rows: string[][] = [["input", "matched address", "lot/plan", "area m2", "zone(s)", "number of constraints", "constraint titles"]];
+  const rows: string[][] = [["input", "matched address", "lot/plan", "council", "area m2", "zone(s)", "number of constraints", "constraint titles"]];
   const shown: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     out.innerHTML = `<p class="meta">Checking ${i + 1} of ${lines.length}…</p>${shown.join("")}`;
@@ -1709,11 +1710,11 @@ $("batchPick").addEventListener("click", async () => {
       const h = (await invoke<Hit[]>("search", { q }))[0];
       if (!h) throw new Error("no match");
       const a = await invoke<Assessment>("assess", { pid: h.pid });
-      rows.push([q, a.parcel.address, a.parcel.lotplan, a.parcel.area_m2 != null ? String(Math.round(a.parcel.area_m2)) : "",
-        a.zones.map((z) => z.zone.name).join("; "), String(a.flags.length), a.flags.map((f) => f.rule.title).join("; ")]);
+      rows.push([q, a.parcel.address, a.parcel.lotplan, siteCouncil(a).name, a.parcel.area_m2 != null ? String(Math.round(a.parcel.area_m2)) : "",
+        a.zones.map(zoneTitle).join("; "), String(a.flags.length), a.flags.map((f) => f.rule.title).join("; ")]);
       shown.push(`<div class="mapitem"><span><b>${esc(a.parcel.address || a.parcel.lotplan)}</b> <span class="meta">${esc(q)}</span></span><span class="meta">${a.flags.length} constraint(s)</span></div>`);
     } catch {
-      rows.push([q, "", "", "", "", "", ""]);
+      rows.push([q, "", "", "", "", "", "", ""]);
       shown.push(`<div class="mapitem"><span>${esc(q)}</span><span class="meta">no match</span></div>`);
     }
   }
@@ -2344,7 +2345,8 @@ function formContext(): string {
   return [
     "TASK: Help the applicant complete the Queensland DA Form 1 (version 1.3). Explain questions in plain words, say what to check with council or its planning scheme, and suggest wording when asked. Do not tick declarations, do not fill in Part 9, and do not say an answer is correct.",
     `SITE: ${current?.parcel.address ?? ""} · ${current?.parcel.lotplan ?? ""}${current?.parcel.area_m2 ? ` · ${Math.round(current.parcel.area_m2)} m²` : ""}`,
-    `ZONES: ${current?.zones.map((z) => z.zone.name).join(", ") || "not identified"}`,
+    `COUNCIL: ${current ? `${siteCouncil().name} (${siteCouncil().scheme})` : "not known"}`,
+    `ZONES: ${current?.zones.map(zoneTitle).join(", ") || "not identified"}`,
     `CURRENT QUESTION: ${fvCtx.n} ${fvCtx.q} (${fvCtx.part})`,
     "ANSWERS SO FAR:",
     ...(answers.length ? answers : ["(none yet)"]),
