@@ -14,8 +14,11 @@ import "./style.css";
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string; council?: string };
 // Council registry entry (src-tauri/knowledge/councils.json, shared with the data pack pipeline)
-type Council = { id: string; name: string; short: string; scheme: string; scheme_url: string; maps_url?: string; maps_name?: string; website?: string; da_url?: string; da_name?: string; water?: { name: string; url: string }; title_prefix?: string };
+type Council = { id: string; name: string; short: string; scheme: string; scheme_url: string; maps_url?: string; maps_name?: string; website?: string; da_url?: string; da_name?: string; water?: { name: string; url: string }; title_prefix?: string; zones_loaded?: boolean };
 const COUNCILS = COUNCILS_DATA as unknown as Council[];
+/** Councils with no zone or overlay data in the pack (zones_loaded false in the registry) say so instead of showing blank or wrong data. */
+const NO_ZONE = "Zone not loaded for this council yet";
+const zonesMissing = (c: Council) => c.zones_loaded === false;
 const councilOf = (id?: string): Council => COUNCILS.find((c) => c.id === (id || "brisbane")) ?? COUNCILS[0];
 type Overlay = { authority: string; council?: string | null; distance_m: number | null; dataset_id: string; title: string; props: Record<string, unknown>; coverage_pct: number | null; geom: any };
 type Assessment = {
@@ -348,7 +351,11 @@ $("results").addEventListener("click", (ev) => {
 });
 
 // Shared address search (main box and Compare dialog): Google suggestions when a key is set, else the offline typo-tolerant search.
-const notFound = () => `Not found in the data pack. It covers ${packCouncils().join(", ")}. The address may be in another council area.`;
+const notFound = () => {
+  const all = COUNCILS.map((c) => c.name), pack = packCouncils();
+  const missing = all.filter((n) => !pack.includes(n));
+  return `Not found in the data pack. The app covers ${all.slice(0, -1).join(", ")} and ${all[all.length - 1]}.${missing.length ? ` Your installed data pack does not include ${missing.join(", ")}: import a newer pack in Settings.` : ""} The address may be in another council area.`;
+};
 async function findAddresses(q: string): Promise<{ google?: { place_id: string; text: string }[]; hits?: Hit[]; note?: string }> {
   let note: string | undefined;
   if (hasGoogle) {
@@ -451,15 +458,17 @@ async function loadSite(pid: number, silent = false) {
   $("daRegBtn").textContent = `Open ${cn.short} DA register (${daName})`;
   $("daRegNote").textContent = `The address is copied. Paste it into the search on ${daName} to see applications and decisions on this lot and next door.`;
   $("tLot").textContent = a.parcel.area_m2 ? `${Math.round(a.parcel.area_m2).toLocaleString()} m²` : "–";
-  $("tZone").textContent = a.zones[0] ? zoneTitle(a.zones[0]) : "–";
-  $("tZone").title = `${a.zones.map(zoneTitle).join(", ")} (${cn.scheme})`;
+  $("tZone").textContent = a.zones[0] ? zoneTitle(a.zones[0]) : zonesMissing(cn) ? "Not loaded" : "–";
+  $("tZone").title = a.zones.length ? `${a.zones.map(zoneTitle).join(", ")} (${cn.scheme})` : zonesMissing(cn) ? `${NO_ZONE} (${cn.scheme})` : cn.scheme;
   $("tFlags").textContent = String(a.flags.length + a.overlays.length);
   $("tFlags").title = `${a.flags.length} constraints, ${a.overlays.length} mapped layers`;
   $("zones").innerHTML = a.zones.length
     ? a.zones
         .map((z) => fcard("zone", z.authority, zoneTitle(z), [z.authority === "council" ? cn.scheme : "", z.coverage_pct != null && z.coverage_pct < 99 ? `${z.coverage_pct}% of lot` : ""].filter(Boolean).join(" · "), z.zone.purpose + (z.zone.source ? ` (Source: ${z.zone.source}${z.zone.verify ? "; verify" : ""})` : "")))
         .join("")
-    : `<p class="meta">Zone not identified from the data pack. Check the zoning layer attributes below, or ${link(cn.scheme_url, cn.scheme)}.</p>`;
+    : zonesMissing(cn)
+      ? `<p class="meta"><b>${NO_ZONE}.</b> ${esc(cn.name)} does not publish its zoning as open data, so this lot's zone and overlays are not in the app. Look the lot up on ${cn.maps_url ? link(cn.maps_url, cn.maps_name ?? "the council's online map") : "the council's online map"} or in the ${link(cn.scheme_url, cn.scheme)}.</p>`
+      : `<p class="meta">Zone not identified from the data pack. Check the zoning layer attributes below, or ${link(cn.scheme_url, cn.scheme)}.</p>`;
   $("flags").innerHTML = a.flags.length
     ? a.flags
         .map((f) => fcard("flag", f.rule.authority, f.rule.title, f.rule.authority === "council" ? `${cn.scheme}: ${f.rule.code}` : f.rule.code, f.rule.note))
@@ -1168,7 +1177,7 @@ function reportBody(a: Assessment, full = true): string {
   return `${head}<h1>Planning assessment: ${esc(a.parcel.address || a.parcel.lotplan)}</h1>
 <small>${esc(a.parcel.lotplan)}${a.parcel.area_m2 ? ` · ${Math.round(a.parcel.area_m2).toLocaleString()} m²` : ""} · ${esc(cn.name)} · Data pack ${esc(a.manifest.built_at)} · ${new Date().toLocaleDateString("en-AU")}</small>
 ${mapImg}
-${full ? `<h2>Zoning (${esc(cn.scheme)})</h2><ul>${a.zones.map((z) => `<li><b>${esc(zoneTitle(z))}</b> (${esc(z.authority)})${z.coverage_pct != null ? ` – ${Math.round(z.coverage_pct)}% of lot` : ""}</li>`).join("")}</ul>
+${full ? `<h2>Zoning (${esc(cn.scheme)})</h2><ul>${a.zones.length || !zonesMissing(cn) ? "" : `<li>${NO_ZONE}: check ${esc(cn.maps_name ?? "the council online map")}.</li>`}${a.zones.map((z) => `<li><b>${esc(zoneTitle(z))}</b> (${esc(z.authority)})${z.coverage_pct != null ? ` – ${Math.round(z.coverage_pct)}% of lot` : ""}</li>`).join("")}</ul>
 <h2>Constraints by authority</h2>${auths.filter(([k]) => byAuth(k).length).map(([k, t]) => `<h3>${t}</h3><ul>${byAuth(k).map((f) => `<li><b>${esc(f.rule.title)}</b> – ${esc(f.rule.note)}</li>`).join("")}</ul>`).join("") || "<p>No mapped constraints.</p>"}
 <h2>Development potential</h2>${$("pot").innerHTML}
 ${site?.title ? `<h2>Title search summary</h2>${marked.parse(site.title)}` : ""}
@@ -1232,19 +1241,22 @@ $("myMapBtn").addEventListener("click", () => openExternal(mapUrlFor(chosenMap()
 function renderMaps() {
   const f = val("mapsFilter").toLowerCase();
   const ok = (n: string) => !f || n.toLowerCase().includes(f);
-  const c = current ? siteCouncil() : null;
-  $("siteCouncilMaps").innerHTML = c
-    ? `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">This site's council · ${esc(c.scheme)}</div></div><div class="model-act">
+  const mine = current ? siteCouncil().id : "";
+  // Councils covered by the app (the registry): the site's council first.
+  $("siteCouncilMaps").innerHTML = [...COUNCILS].sort((a, b) => Number(b.id === mine) - Number(a.id === mine))
+    .filter((c) => ok(c.name) || ok(c.short))
+    .map((c) => `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">${c.id === mine ? "This site's council · " : ""}${esc(c.scheme)}</div></div><div class="model-act">
         ${c.maps_url ? `<button type="button" data-url="${esc(c.maps_url)}" data-title="${esc(c.maps_name ?? c.name)}">${esc(c.maps_name ?? "Interactive map")}</button>` : ""}
         <button type="button" class="ghost" data-url="${esc(c.scheme_url)}" data-title="${esc(c.scheme)}">Planning scheme</button>
-        ${c.website ? `<button type="button" class="ghost" data-url="${esc(c.website)}" data-title="${esc(c.name)}">Website</button>` : ""}</div></div>`
-    : "";
+        ${c.website ? `<button type="button" class="ghost" data-url="${esc(c.website)}" data-title="${esc(c.name)}">Website</button>` : ""}</div></div>`)
+    .join("");
   $("stateMaps").innerHTML = MAPS.state
     .filter((m) => ok(m.name))
     .map((m) => `<div class="mapitem"><div><b>${esc(m.name)}</b><div class="meta">${esc(m.desc)}</div></div><button type="button" data-url="${esc(m.url)}" data-title="${esc(m.name)}">Open</button></div>`)
     .join("");
+  const inApp = new Set(COUNCILS.map((c) => c.short.toLowerCase()));
   $("councilMaps").innerHTML = MAPS.councils
-    .filter((c) => ok(c.name))
+    .filter((c) => ok(c.name) && !inApp.has(c.name.toLowerCase()))
     .map(
       (c) => `<div class="mapitem"><b>${esc(c.name)}</b><div class="model-act">
         ${c.map ? `<button type="button" data-url="${esc(c.map)}" data-title="${esc(c.name)} mapping">Interactive map</button>` : ""}
@@ -1672,7 +1684,7 @@ $("cmpGo").addEventListener("click", async () => {
     <tr><td>Lot/plan</td>${cell((r) => esc(r.a.parcel.lotplan))}</tr>
     <tr><td>Area</td>${cell((r) => `${Math.round(r.p.area_m2)} m²`)}</tr>
     <tr><td>Frontage</td>${cell((r) => (r.p.frontage_m != null ? `${r.p.frontage_m} m` : "–"))}</tr>
-    <tr><td>Zone</td>${cell((r) => esc(r.a.zones.map(zoneTitle).join(", ") || "–"))}</tr>
+    <tr><td>Zone</td>${cell((r) => esc(r.a.zones.map(zoneTitle).join(", ") || (zonesMissing(siteCouncil(r.a)) ? "Not loaded" : "–")))}</tr>
     <tr><td>Height</td>${cell((r) => esc(height(r.p)))}</tr>
     <tr><td>Lots by area</td>${cell((r) => (r.p.lots_by_area ? String(r.p.lots_by_area) : "1"))}</tr>
     <tr><td>Level of assessment</td>${cell((r) => esc(r.p.use_fit?.rule?.level ?? "Choose a proposal type"))}</tr>
@@ -1711,7 +1723,7 @@ $("batchPick").addEventListener("click", async () => {
       if (!h) throw new Error("no match");
       const a = await invoke<Assessment>("assess", { pid: h.pid });
       rows.push([q, a.parcel.address, a.parcel.lotplan, siteCouncil(a).name, a.parcel.area_m2 != null ? String(Math.round(a.parcel.area_m2)) : "",
-        a.zones.map(zoneTitle).join("; "), String(a.flags.length), a.flags.map((f) => f.rule.title).join("; ")]);
+        a.zones.map(zoneTitle).join("; ") || (zonesMissing(siteCouncil(a)) ? NO_ZONE : ""), String(a.flags.length), a.flags.map((f) => f.rule.title).join("; ")]);
       shown.push(`<div class="mapitem"><span><b>${esc(a.parcel.address || a.parcel.lotplan)}</b> <span class="meta">${esc(q)}</span></span><span class="meta">${a.flags.length} constraint(s)</span></div>`);
     } catch {
       rows.push([q, "", "", "", "", "", "", ""]);
@@ -1756,7 +1768,7 @@ function renderSetbacks(a: Assessment) {
     ? `<button type="button" class="ghost" data-url="https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones">Open the City Plan fact sheet</button>`
     : `<button type="button" class="ghost" data-url="${esc(cn.scheme_url)}">Open the ${esc(cn.scheme)}</button>`;
   if (!set) {
-    $("setbacks").innerHTML = `<div class="card"><div class="meta">Zone: ${esc(zones.join(", ") || "not identified")}${area != null ? ` · ${Math.round(area)} m²` : ""}</div>
+    $("setbacks").innerHTML = `<div class="card"><div class="meta">Zone: ${esc(zones.join(", ") || (zonesMissing(cn) ? NO_ZONE.toLowerCase() : "not identified"))}${area != null ? ` · ${Math.round(area)} m²` : ""}</div>
       <p>Setback distances for this zone and lot size aren't in the app yet, so none are shown. Check with ${esc(cn.name)}.</p>${fact}</div>`;
     return;
   }
@@ -2346,7 +2358,7 @@ function formContext(): string {
     "TASK: Help the applicant complete the Queensland DA Form 1 (version 1.3). Explain questions in plain words, say what to check with council or its planning scheme, and suggest wording when asked. Do not tick declarations, do not fill in Part 9, and do not say an answer is correct.",
     `SITE: ${current?.parcel.address ?? ""} · ${current?.parcel.lotplan ?? ""}${current?.parcel.area_m2 ? ` · ${Math.round(current.parcel.area_m2)} m²` : ""}`,
     `COUNCIL: ${current ? `${siteCouncil().name} (${siteCouncil().scheme})` : "not known"}`,
-    `ZONES: ${current?.zones.map(zoneTitle).join(", ") || "not identified"}`,
+    `ZONES: ${current?.zones.map(zoneTitle).join(", ") || (current && zonesMissing(siteCouncil(current)) ? NO_ZONE.toLowerCase() : "not identified")}`,
     `CURRENT QUESTION: ${fvCtx.n} ${fvCtx.q} (${fvCtx.part})`,
     "ANSWERS SO FAR:",
     ...(answers.length ? answers : ["(none yet)"]),

@@ -730,6 +730,13 @@ def discover(councils):
         except Exception as e:  # noqa: BLE001
             print("  cadastre/address check failed:", e)
         for src in p.get("layers", []):
+            if src.get("kind") == "bcc_cp14":
+                try:
+                    for did, title in cp14_datasets():
+                        print(f"   {did}: {title}")
+                except Exception as e:  # noqa: BLE001
+                    print("  cp14 catalogue failed:", e)
+                continue
             if src.get("kind") != "arcgis":
                 print(f"  source kind {src.get('kind')} (built in)")
                 continue

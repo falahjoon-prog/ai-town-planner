@@ -214,8 +214,8 @@
     "scheme": "Ipswich City Plan 2025",
     "scheme_url": "https://ipswich.isoplan.com.au/eplan",
     "scheme_docs_url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Supporting-Resources/Planning-Scheme-Supporting-Documents",
-    "maps_url": "https://www.ipswich.qld.gov.au/About-Council/Statistics-and-Facts/Maps",
-    "maps_name": "Ipswich council maps (City Plan 2025 online scheme: ISOPlan)",
+    "maps_url": "https://ipswich.isoplan.com.au/eplan",
+    "maps_name": "Ipswich City Plan 2025 online (ISOPlan, includes scheme maps)",
     "da_url": "https://developmenti.ipswich.qld.gov.au/",
     "da_name": "Ipswich Development.i",
     "lodge_url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Development-Assessment",
@@ -248,13 +248,6 @@
         ]
       }
     },
-    "samples": [
-      {
-        "number": "",
-        "street": "",
-        "locality": "IPSWICH"
-      }
-    ],
     "website": "https://www.ipswich.qld.gov.au/",
     "water": {
       "name": "Urban Utilities",
@@ -305,10 +298,12 @@
           ],
           "skip": [
             "(?i)label",
-            "(?i)annotation"
+            "(?i)annotation",
+            "Zones - Precinct Boundary$"
           ],
           "zone_field": "QPP_Description",
-          "precinct_field": "QPP_Precinct"
+          "precinct_field": "QPP_Precinct",
+          "title_strip": "^City Plan - "
         }
       ],
       "test": {
@@ -320,13 +315,6 @@
         ]
       }
     },
-    "samples": [
-      {
-        "number": "",
-        "street": "",
-        "locality": "CLEVELAND"
-      }
-    ],
     "website": "https://www.redland.qld.gov.au/",
     "water": {
       "name": "Redland City Council (water and wastewater)",
@@ -377,7 +365,9 @@
           ],
           "skip": [
             "(?i)label",
-            "(?i)annotation"
+            "(?i)annotation",
+            "^Property boundaries",
+            "^Context$"
           ],
           "zone_field": "LVL1_ZONE",
           "precinct_field": "ZONE_PRECINCT"
@@ -392,13 +382,6 @@
         ]
       }
     },
-    "samples": [
-      {
-        "number": "",
-        "street": "",
-        "locality": "SURFERS PARADISE"
-      }
-    ],
     "website": "https://www.goldcoast.qld.gov.au/",
     "water": {
       "name": "City of Gold Coast (Gold Coast Water)",
@@ -446,13 +429,6 @@
         ]
       }
     },
-    "samples": [
-      {
-        "number": "",
-        "street": "",
-        "locality": "MACKAY"
-      }
-    ],
     "website": "https://www.mackay.qld.gov.au/",
     "water": {
       "name": "Mackay Regional Council (water and waste)",
