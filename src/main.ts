@@ -539,13 +539,14 @@ const link = (url: string, text: string) => (url ? `<a href="#" data-url="${esc(
 
 async function loadPotential(changed = false) {
   if (!current) return;
+  $("pot").innerHTML = `<p class="meta">Loading…</p>`;
   try {
     pot = await invoke<Pot>("potential", { pid: current.parcel.pid, useId: useId() });
+    renderPotential();
   } catch (e) {
-    $("pot").innerHTML = `<p class="err">${esc(e)}</p>`;
+    $("pot").innerHTML = `<p class="err">Development potential could not be shown: ${esc(e)}</p>`;
     return;
   }
-  renderPotential();
   if (changed) {
     const pb = $("site").querySelector<HTMLElement>(".pbody")!;
     pb.scrollTop = 0;
