@@ -179,10 +179,18 @@
               </div>
             </details>
             <details class="sec" id="s-approvals">
-              <summary>Approvals nearby</summary>
+              <summary>Approvals, clock &amp; referrals</summary>
               <div class="sbody">
                 <div class="report-bar"><button type="button" class="ghost" id="daRegBtn">Open Council DA register (Development.i)</button></div>
                 <div class="meta">The address is copied. Paste it into Development.i's search to see applications and decisions on this lot and next door.</div>
+                <h4 class="subh">Statutory clock</h4>
+                <div class="clockform">
+                  <label class="meta">Lodgement date <input type="date" id="clkDate"></label>
+                  <label class="meta">Assessment path <select id="clkPath"><option value="code">Code assessment</option><option value="impact">Impact assessment</option></select></label>
+                </div>
+                <div id="clockOut"></div>
+                <h4 class="subh">Possible referrals</h4>
+                <div id="referralOut"></div>
               </div>
             </details>
             <!-- Lodgement checklist (thread C) -->

@@ -6,6 +6,8 @@ import { marked } from "marked";
 import MAPS from "./maps.json";
 import FORMS from "../src-tauri/knowledge/forms.json";
 import SETBACKS_DATA from "../src-tauri/knowledge/setbacks.json";
+import TIMEFRAMES_DATA from "../src-tauri/knowledge/timeframes.json";
+import REFERRALS_DATA from "../src-tauri/knowledge/referrals.json";
 import "./style.css";
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string };
@@ -13,7 +15,7 @@ type Overlay = { authority: string; distance_m: number | null; dataset_id: strin
 type Assessment = {
   parcel: { pid: number; lotplan: string; address: string; suburb: string; area_m2: number | null; geom: any };
   zones: { authority: string; zone: { name: string; purpose: string; typical: string }; coverage_pct: number | null }[];
-  flags: { rule: { authority: string; title: string; code: string; note: string; checklist: string[] }; layers: string[] }[];
+  flags: { rule: { id: string; authority: string; title: string; code: string; note: string; checklist: string[] }; layers: string[] }[];
   overlays: Overlay[];
   manifest: Record<string, string>;
 };
@@ -227,7 +229,7 @@ $("q").addEventListener("input", () => {
 let hasGoogle = false;
 const OPEN_LAST_KEY = "openLast"; // "0" = do not reopen the last address on start
 
-type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string; project?: string; marks?: Mark[] };
+type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string; project?: string; marks?: Mark[]; lodged?: string; path?: string };
 function sites(): Record<string, Site> {
   try { return JSON.parse(localStorage.getItem("sites") ?? "{}"); } catch { return {}; }
 }
@@ -236,7 +238,7 @@ function saveSites(m: Record<string, Site>) {
   const all = Object.values(m).sort((x, y) => y.ts - x.ts);
   let n = 0;
   const keep: Record<string, Site> = {};
-  for (const x of all) if (x.star || x.note || x.title || x.project || x.marks?.length || n++ < 20) keep[x.lotplan] = x;
+  for (const x of all) if (x.star || x.note || x.title || x.project || x.marks?.length || x.lodged || n++ < 20) keep[x.lotplan] = x;
   try { localStorage.setItem("sites", JSON.stringify(keep)); } catch { /* storage unavailable */ }
 }
 function touchSite(p: { pid: number; address: string; lotplan: string }, patch: Partial<Site> = {}) {
@@ -432,6 +434,8 @@ async function loadSite(pid: number, silent = false) {
         .join("")
     : `<p class="meta">No overlay constraints mapped on this lot.</p>`;
   renderSetbacks(a);
+  renderClock();
+  renderReferrals(a);
   $("ovSummary").textContent = `All mapped layers (${a.overlays.length})`;
   $("overlays").innerHTML = a.overlays
     .map(
@@ -1357,6 +1361,80 @@ $("daRegBtn").addEventListener("click", () => {
   navigator.clipboard.writeText(current.parcel.address || current.parcel.lotplan).catch(() => {});
   openExternal("https://developmenti.brisbane.qld.gov.au/");
 });
+
+// ---- Statutory clock: rules from knowledge/timeframes.json (each with source); lodgement date and path saved per lot ----
+type TfRule = { id: string; label: string; days: number | null; months: number | null; day_type: string; applies_to: string[]; start: string; start_by_path?: Record<string, string>; exclude_md_ranges?: string[][]; source: { name: string; url: string }; verify: boolean; note: string };
+const TF = TIMEFRAMES_DATA as unknown as { holidays_source: { name: string; url: string }; holidays_cover: string[]; holidays: { date: string; name: string; scope: string }[]; notes: string[]; rules: TfRule[] };
+const HOLIDAYS = new Set(TF.holidays.map((h) => h.date));
+const isoD = (d: Date) => d.toISOString().slice(0, 10);
+const parseD = (s: string) => { const [y, m, d] = s.split("-").map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+const plusDays = (d: Date, n: number) => new Date(d.getTime() + n * 86400000);
+function nonBusiness(d: Date, ranges: string[][]): boolean {
+  const dow = d.getUTCDay(), iso = isoD(d), md = iso.slice(5);
+  return dow === 0 || dow === 6 || HOLIDAYS.has(iso) || ranges.some(([a, b]) => (a <= b ? md >= a && md <= b : md >= a || md <= b));
+}
+/** Counts n business days starting the day after `start`. */
+function addBusiness(start: Date, n: number, ranges: string[][] = []): Date {
+  let d = start;
+  for (let c = 0; c < n; ) { d = plusDays(d, 1); if (!nonBusiness(d, ranges)) c++; }
+  return d;
+}
+function addMonths(d: Date, n: number): Date {
+  const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1));
+  x.setUTCDate(Math.min(d.getUTCDate(), new Date(Date.UTC(x.getUTCFullYear(), x.getUTCMonth() + 1, 0)).getUTCDate()));
+  return x;
+}
+function clockDates(lodged: string, path: string): { rule: TfRule; date: Date }[] {
+  const out: { rule: TfRule; date: Date }[] = [];
+  const at: Record<string, Date> = { lodgement: parseD(lodged) };
+  for (const r of TF.rules) {
+    if (!r.applies_to.includes(path)) continue;
+    const from = at[r.start_by_path?.[path] ?? r.start];
+    if (!from) continue;
+    const d = r.months ? addMonths(from, r.months) : r.day_type === "business" ? addBusiness(from, r.days ?? 0, r.exclude_md_ranges) : plusDays(from, r.days ?? 0);
+    at[r.id] = d;
+    out.push({ rule: r, date: d });
+  }
+  return out;
+}
+const fmtD = (d: Date) => d.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+function renderClock() {
+  if (!current) return;
+  const s = sites()[current.parcel.lotplan];
+  const dateEl = $("clkDate") as HTMLInputElement, pathEl = $("clkPath") as HTMLSelectElement;
+  if (document.activeElement !== dateEl) dateEl.value = s?.lodged ?? "";
+  pathEl.value = s?.path === "impact" ? "impact" : "code";
+  const out = $("clockOut");
+  if (!TF.rules.length) { out.innerHTML = `<p class="meta">No sourced rules loaded yet.</p>`; return; }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateEl.value)) { out.innerHTML = `<p class="meta">Enter the lodgement date to see the key dates.</p>`; return; }
+  const rows = clockDates(dateEl.value, pathEl.value);
+  const last = TF.holidays_cover[TF.holidays_cover.length - 1];
+  const beyond = rows.some((r) => String(r.date.getUTCFullYear()) > last) || dateEl.value.slice(0, 4) < TF.holidays_cover[0];
+  const link = (u: { name: string; url: string }) => `<a href="${esc(u.url)}" data-url="${esc(u.url)}" class="ext">${esc(u.name)}</a>`;
+  out.innerHTML = `<table class="ptable"><tbody>${rows.map(({ rule: r, date }) => `<tr><td><b>${esc(fmtD(date))}</b><div>${esc(r.label)}</div><div class="meta">${r.months ? `${r.months} months` : `${r.days} ${r.day_type} days`} · ${link(r.source)}${r.verify ? ` <span class="pill warn">verify</span>` : ""}</div>${r.note ? `<div class="meta">${esc(r.note)}</div>` : ""}</td></tr>`).join("")}</tbody></table>
+    <p class="meta">Latest dates, assuming no referral agency. Business days skip weekends and Queensland and Brisbane public holidays (${esc(TF.holidays_cover.join(", "))}; ${link(TF.holidays_source)}).${beyond ? " Some dates fall outside the loaded holiday years, so holidays may be missing." : ""}</p>
+    ${TF.notes.map((n) => `<p class="meta">${esc(n)}</p>`).join("")}`;
+}
+function saveClock() {
+  if (!current) return;
+  touchSite(current.parcel, { lodged: ($("clkDate") as HTMLInputElement).value, path: ($("clkPath") as HTMLSelectElement).value });
+  renderClock();
+}
+$("clkDate").addEventListener("input", saveClock);
+$("clkPath").addEventListener("change", saveClock);
+
+// ---- Possible referrals: constraints detected on the lot matched to rows in knowledge/referrals.json (rows need a primary source) ----
+type RefRow = { flag_id: string; agency: string; trigger: string; description: string; source: { name: string; url: string }; verify: boolean };
+const REFERRALS = (REFERRALS_DATA as unknown as { rows: RefRow[] }).rows;
+function renderReferrals(a: Assessment) {
+  const label = `<p class="meta">Indicative only: confirm with the State Assessment and Referral Agency (SARA) or council.</p>`;
+  if (!REFERRALS.length) { $("referralOut").innerHTML = `<p class="meta">No sourced rules loaded yet.</p>${label}`; return; }
+  const ids = new Set(a.flags.map((f) => f.rule.id));
+  const hit = REFERRALS.filter((r) => ids.has(r.flag_id));
+  $("referralOut").innerHTML = (hit.length
+    ? hit.map((r) => `<div class="card"><b>${esc(r.agency)}</b> ${r.verify ? `<span class="pill warn">verify</span>` : ""}<div class="meta">${esc(r.trigger)}</div><p>${esc(r.description)}</p><a href="${esc(r.source.url)}" data-url="${esc(r.source.url)}" class="ext">${esc(r.source.name)}</a></div>`).join("")
+    : `<p class="meta">No known referral triggers matched the constraints detected on this lot.</p>`) + label;
+}
 
 // ---- Report branding (Settings) ----
 function showBrand() {
@@ -2298,7 +2376,7 @@ const SEC_GROUPS: Record<string, [string, string[]]> = {
   setbacks: ["Setbacks", ["s-setbacks"]],
   constraints: ["Constraints", ["s-constraints"]],
   potential: ["Development potential", ["s-potential"]],
-  approvals: ["Approvals nearby", ["s-approvals"]],
+  approvals: ["Approvals, clock & referrals", ["s-approvals"]],
   checklist: ["Lodgement checklist", ["s-checklist", "s-title"]],
   forms: ["Forms & lodgement", ["s-forms"]],
   report: ["AI planner report", ["s-report"]],
