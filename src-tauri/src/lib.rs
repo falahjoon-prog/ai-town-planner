@@ -599,6 +599,11 @@ fn delete_model(app: AppHandle, file: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn save_bytes(path: String, bytes: Vec<u8>) -> Result<(), String> {
+    fs::write(path, bytes).map_err(e)
+}
+
+#[tauri::command]
 fn save_text(path: String, content: String) -> Result<(), String> {
     fs::write(path, content).map_err(e)
 }
@@ -659,6 +664,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            save_bytes,
             status,
             assistant,
             open_external,

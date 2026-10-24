@@ -227,7 +227,7 @@ $("q").addEventListener("input", () => {
 let hasGoogle = false;
 const OPEN_LAST_KEY = "openLast"; // "0" = do not reopen the last address on start
 
-type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string; project?: string };
+type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string; project?: string; marks?: Mark[] };
 function sites(): Record<string, Site> {
   try { return JSON.parse(localStorage.getItem("sites") ?? "{}"); } catch { return {}; }
 }
@@ -236,7 +236,7 @@ function saveSites(m: Record<string, Site>) {
   const all = Object.values(m).sort((x, y) => y.ts - x.ts);
   let n = 0;
   const keep: Record<string, Site> = {};
-  for (const x of all) if (x.star || x.note || x.title || x.project || n++ < 20) keep[x.lotplan] = x;
+  for (const x of all) if (x.star || x.note || x.title || x.project || x.marks?.length || n++ < 20) keep[x.lotplan] = x;
   try { localStorage.setItem("sites", JSON.stringify(keep)); } catch { /* storage unavailable */ }
 }
 function touchSite(p: { pid: number; address: string; lotplan: string }, patch: Partial<Site> = {}) {
@@ -788,6 +788,7 @@ function drawMap(a: Assessment) {
     attributionControl: { compact: true },
     canvasContextAttributes: { preserveDrawingBuffer: true }, // lets the PDF include a map snapshot
   });
+  markAttach();
   map.on("load", () => {
     const m = map!;
     setBase(baseKind());
@@ -861,6 +862,7 @@ function measReset() {
 }
 function measSet(mode: "" | "d" | "a") {
   measMode = measMode === mode ? "" : mode;
+  if (measMode && markOn) markSet(false);
   toolUi("measDBtn", measMode === "d"); toolUi("measABtn", measMode === "a");
   measReset();
   ($("measOut") as HTMLElement).hidden = !measMode;
@@ -870,6 +872,140 @@ function measSet(mode: "" | "d" | "a") {
 $("measDBtn").addEventListener("click", () => measSet("d"));
 $("measABtn").addEventListener("click", () => measSet("a"));
 $("measUndo").addEventListener("click", measUndo);
+
+// ---- Map markup: arrows, boxes, labels and freehand drawn over the map. Points are stored as lng/lat per lot (site.marks) so they follow pan/zoom. ----
+type MarkKind = "arrow" | "rect" | "text" | "pen";
+type Mark = { k: MarkKind; c: string; p: [number, number][]; s?: string };
+let marks: Mark[] = [];
+let markOn = false;
+let markTool: MarkKind = "arrow";
+let markCol = "#b91c1c";
+let markDraft: Mark | null = null;
+let markedPng = "";
+const markEl = () => document.getElementById("markSvg") as SVGSVGElement | null;
+function markSvg(list: Mark[]): string {
+  if (!map) return "";
+  return list.map((m) => {
+    const q = m.p.map((l) => map!.project(l));
+    const a = q[0], b = q[q.length - 1];
+    const two = (tag: string, at: string) => `<${tag} ${at} fill="none" stroke="#111" stroke-opacity=".55" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><${tag} ${at} fill="none" stroke="${m.c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    if (m.k === "arrow") {
+      const ang = Math.atan2(b.y - a.y, b.x - a.x), L = 14;
+      const h = (d: number) => `${(b.x - L * Math.cos(ang + d)).toFixed(1)} ${(b.y - L * Math.sin(ang + d)).toFixed(1)}`;
+      return two("path", `d="M${a.x.toFixed(1)} ${a.y.toFixed(1)}L${b.x.toFixed(1)} ${b.y.toFixed(1)}M${h(0.45)}L${b.x.toFixed(1)} ${b.y.toFixed(1)}L${h(-0.45)}"`);
+    }
+    if (m.k === "rect") return two("rect", `x="${Math.min(a.x, b.x).toFixed(1)}" y="${Math.min(a.y, b.y).toFixed(1)}" width="${Math.abs(b.x - a.x).toFixed(1)}" height="${Math.abs(b.y - a.y).toFixed(1)}"`);
+    if (m.k === "pen") return two("polyline", `points="${q.map((r) => `${r.x.toFixed(1)},${r.y.toFixed(1)}`).join(" ")}"`);
+    const t = m.s ?? "", w = t.length * 8.5 + 14, white = m.c === "#ffffff";
+    return `<rect x="${a.x.toFixed(1)}" y="${(a.y - 18).toFixed(1)}" width="${w.toFixed(1)}" height="24" rx="4" fill="${m.c}" stroke="#111" stroke-opacity=".55" stroke-width="1.5"/><text x="${(a.x + 7).toFixed(1)}" y="${(a.y - 1).toFixed(1)}" fill="${white ? "#111" : "#fff"}" ${white ? "" : 'stroke="#111" stroke-width="2.5" paint-order="stroke"'}>${esc(t)}</text>`;
+  }).join("");
+}
+function markRender() {
+  const s = markEl();
+  if (s) s.innerHTML = markSvg(markDraft ? [...marks, markDraft] : marks);
+}
+function markSave() {
+  if (!current) return;
+  const m = sites()[current.parcel.lotplan];
+  if (!m && !marks.length) return;
+  touchSite(current.parcel, { marks: marks.length ? marks : undefined });
+}
+function markAttach() {
+  markEl()?.remove();
+  markOn = false; markDraft = null;
+  ($("markBar") as HTMLElement).hidden = true; toolUi("markBtn", false);
+  const host = $("map").parentElement!;
+  const s = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement;
+  s.id = "markSvg"; s.setAttribute("aria-hidden", "true");
+  host.appendChild(s);
+  marks = (current && sites()[current.parcel.lotplan]?.marks) || [];
+  const at = (e: PointerEvent): [number, number] => {
+    const r = s.getBoundingClientRect();
+    const l = map!.unproject([e.clientX - r.left, e.clientY - r.top]);
+    return [l.lng, l.lat];
+  };
+  s.addEventListener("pointerdown", (e) => {
+    if (!markOn || !map) return;
+    e.preventDefault();
+    const p = at(e);
+    if (markTool === "text") {
+      marks.push({ k: "text", c: markCol, p: [p], s: ($("markTxt") as HTMLInputElement).value.trim() || "Label" });
+      markSave(); markRender(); return;
+    }
+    markDraft = { k: markTool, c: markCol, p: markTool === "pen" ? [p] : [p, p] };
+    s.setPointerCapture(e.pointerId);
+  });
+  s.addEventListener("pointermove", (e) => {
+    if (!markDraft || !map) return;
+    const p = at(e);
+    if (markDraft.k === "pen") markDraft.p.push(p); else markDraft.p[1] = p;
+    markRender();
+  });
+  const end = () => {
+    if (!markDraft || !map) return;
+    const q = markDraft.p.map((l) => map!.project(l));
+    const moved = Math.hypot(q[q.length - 1].x - q[0].x, q[q.length - 1].y - q[0].y) > 4;
+    if (moved) marks.push(markDraft);
+    markDraft = null; markSave(); markRender();
+  };
+  s.addEventListener("pointerup", end);
+  s.addEventListener("pointercancel", () => { markDraft = null; markRender(); });
+  s.addEventListener("wheel", (e) => { map?.getCanvas().dispatchEvent(new WheelEvent("wheel", e)); e.preventDefault(); }, { passive: false });
+  map!.on("move", markRender);
+  markRender();
+}
+function markSet(on: boolean) {
+  if (on && (!current || !map)) return;
+  markOn = on;
+  toolUi("markBtn", on);
+  ($("markBar") as HTMLElement).hidden = !on;
+  markEl()?.classList.toggle("on", on);
+  if (on) measSet("");
+}
+function markUi() {
+  document.querySelectorAll<HTMLElement>("#markBar [data-mk]").forEach((b) => { const o = b.dataset.mk === markTool; b.classList.toggle("on", o); b.setAttribute("aria-pressed", String(o)); });
+  document.querySelectorAll<HTMLElement>("#markBar [data-col]").forEach((b) => b.classList.toggle("on", b.dataset.col === markCol));
+  ($("markTxt") as HTMLElement).hidden = markTool !== "text";
+}
+// Same map capture as the client PDF (map.getCanvas()), with the vector marks drawn on top at canvas resolution.
+async function markedMapUrl(force = false): Promise<string> {
+  if (!map || (!marks.length && !force)) return "";
+  const cv = map.getCanvas(), w = cv.clientWidth, h = cv.clientHeight;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${cv.width}" height="${cv.height}" viewBox="0 0 ${w} ${h}" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700">${markSvg(marks)}</svg>`;
+  const img = new Image();
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+  await img.decode();
+  const o = document.createElement("canvas");
+  o.width = cv.width; o.height = cv.height;
+  const g = o.getContext("2d")!;
+  g.drawImage(cv, 0, 0); g.drawImage(img, 0, 0, cv.width, cv.height);
+  return o.toDataURL("image/png");
+}
+$("markBtn").addEventListener("click", () => markSet(!markOn));
+$("markDone").addEventListener("click", () => markSet(false));
+$("markUndo").addEventListener("click", () => { marks.pop(); markSave(); markRender(); });
+$("markClear").addEventListener("click", () => { marks = []; markSave(); markRender(); });
+$("markBar").addEventListener("click", (e) => {
+  const t = (e.target as HTMLElement).closest("button") as HTMLElement | null;
+  if (!t) return;
+  if (t.dataset.mk) { markTool = t.dataset.mk as MarkKind; markUi(); }
+  if (t.dataset.col) { markCol = t.dataset.col; markUi(); }
+});
+$("markPng").addEventListener("click", async () => {
+  if (!current || !map) return;
+  try {
+    const url = await markedMapUrl(true);
+    const name = (current.parcel.address || current.parcel.lotplan).replace(/[^\w]+/g, "_").slice(0, 60);
+    const path = await save({ defaultPath: `Map_${name}.png`, filters: [{ name: "PNG image", extensions: ["png"] }] });
+    if (!path) return;
+    const bin = atob(url.split(",")[1]);
+    const bytes = Array.from({ length: bin.length }, (_, i) => bin.charCodeAt(i));
+    await invoke("save_bytes", { path, bytes });
+    $("hint").textContent = "Map image saved.";
+  } catch (e) { alertMsg(e); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && markOn && !document.querySelector("dialog[open]")) markSet(false); });
+
 $("measClear").addEventListener("click", () => { measPts = []; measDraw(); });
 
 // ---- Report (one tab per authority) ----
@@ -973,7 +1109,7 @@ function reportBody(a: Assessment, full = true): string {
   const b = brand();
   const site = sites()[a.parcel.lotplan];
   let mapImg = "";
-  try { if (full && map) mapImg = `<img class="rmap" src="${map.getCanvas().toDataURL("image/png")}" alt="Site map">`; } catch { /* map not ready */ }
+  try { if (full && map) mapImg = `<img class="rmap" src="${markedPng || map.getCanvas().toDataURL("image/png")}" alt="Site map">`; } catch { /* map not ready */ }
   const byAuth = (k: string) => a.flags.filter((f) => f.rule.authority === k);
   const auths: [string, string][] = [["council", "Council"], ["sara", "State (SARA)"], ["pda", "Economic Development Queensland (PDA)"], ["state", "State interests"], ["other", "Other agencies and services"]];
   const head = b.logo || b.company
@@ -995,6 +1131,7 @@ const REPORT_CSS = "font:14px/1.55 Georgia,serif;color:#1f2937";
 $("saveBtn").addEventListener("click", async () => {
   if (!current) return;
   const name = (current.parcel.address || current.parcel.lotplan).replace(/[^\w]+/g, "_").slice(0, 60);
+  markedPng = await markedMapUrl().catch(() => "");
   const path = await save({ defaultPath: `Planning_report_${name}.html`, filters: [{ name: "HTML report", extensions: ["html"] }] });
   if (!path) return;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Planning report: ${esc(current.parcel.address)}</title>
@@ -1004,8 +1141,9 @@ $("saveBtn").addEventListener("click", async () => {
 });
 
 // PDF: print only the report; choose "Save as PDF" / "Microsoft Print to PDF" in the print dialog.
-$("pdfBtn").addEventListener("click", () => {
+$("pdfBtn").addEventListener("click", async () => {
   if (!current) return;
+  markedPng = await markedMapUrl().catch(() => "");
   $("printArea").innerHTML = reportBody(current);
   window.print();
 });
@@ -2120,7 +2258,7 @@ $("fvClose").addEventListener("click", closeFormView);
 $("formsView").addEventListener("click", (e) => { if (e.target === $("formsView")) closeFormView(); });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && app.classList.contains("formsmode") && !document.querySelector("dialog[open]")) closeFormView(); });
 // any map tool returns to the map
-["dimBtn","subBtn","setbackBtn","measDBtn","measABtn","contBtn","floodBtn","powerBtn","envBtn"].forEach((id) =>
+["dimBtn","subBtn","setbackBtn","measDBtn","measABtn","contBtn","floodBtn","powerBtn","envBtn","markBtn"].forEach((id) =>
   $(id).addEventListener("click", () => { if (app.classList.contains("formsmode")) closeFormView(); }));
 
 function printForm() {
@@ -2217,7 +2355,7 @@ const MENUS: [string, MI[]][] = [
   ["File", [["Back up my data…", () => openSettings("sset-backup")], ["Restore from backup…", () => openSettings("sset-backup")], "-", ["Batch check…", clickId("batchBtn")], ["Client PDF", clickId("footPdf")], "-", ["Report branding…", () => openSettings("sset-brand")], ["Data pack…", () => openSettings("sset-data")], ["Address search key…", () => openSettings("sset-search")]]],
   ["AI", [["AI engine…", () => openSettings("sset-ai")], ["Built-in models…", () => openSettings("sset-models")], "-", ["Generate AI report", clickId("footReport")], ["Ask the assistant", () => setChat(true)]]],
   ["Forms", [["Open DA forms", clickId("formsBtn")], ["Approvals", clickId("apprBtn")]]],
-  ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
+  ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], ["Annotate map", clickId("markBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
   ["Window", [["Full map on/off", () => setFull(!app.classList.contains("fullmap"))], "-", ["Plain map", setBaseTo("plain")], ["Street map", setBaseTo("street")], ["Aerial photo", setBaseTo("sat")], "-", ["Light / dark", clickId("themeBtn")], ["Reset panel widths", () => { document.documentElement.style.removeProperty("--right"); try { localStorage.removeItem("colRight"); } catch { /* storage unavailable */ } resizeMap(); }], "-", ["Settings…", () => openSettings()]]],
 ];
 const mbar = $("menubar");
