@@ -13,8 +13,8 @@ provisions.json, uses.json, setbacks.json).
 | Address points | same service, layer `0` (Addresses) | CC BY 4.0, State of Queensland | lotplan, unit_number, street_number / street_no_1(+suffix) / street_no_2, street_name, street_type, street_suffix, locality, local_authority |
 | State layers | `STATE_LAYERS` in the pipeline (SARA triggers, koala, wetlands, vegetation, coastal, PDA, SEQ land use, protected plants, easements, GA electricity) | CC BY 4.0 | resolved by layer name |
 
-LGA names as they appear in the data (checked with the discover run): `shire_name` / `local_authority` =
-"Brisbane City", "Logan City", "Moreton Bay City". The pipeline matches these values exactly (with upper- and title-case variants).
+LGA names as they appear in the data (checked with the discover runs): `shire_name` / `local_authority` =
+"Brisbane City", "Logan City", "Moreton Bay City", "Ipswich City", "Redland City", "Gold Coast City", "Mackay Regional". The pipeline matches these values exactly (with upper- and title-case variants).
 
 ## Brisbane City Council (unchanged)
 
@@ -73,13 +73,55 @@ LGA names as they appear in the data (checked with the discover run): `shire_nam
 - Scheme text: the PDF parts on moretonbay.qld.gov.au could not be opened from this workspace (blocked; owner away);
   rule rows use council info sheets (`.../Planning-Schemes/MBRC/Info-Sheets/...`) and are all `verify: true`.
 
-## Leads for the councils other threads are researching (not added here)
+## Ipswich City Council (T20: lots and addresses only)
 
-- Gold Coast: `https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/arcgis/rest/services` has `City_Plan_Version_8/10/11/12/13_Open_Data`
-  FeatureServers (pattern `City_Plan_Version_\d+_Open_Data`, pick newest), plus Flood_Risk_Overlay_2026, Bushfire_Risk_2026,
-  Landslide_Susceptibility_Extent_2026.
-- Ipswich: Ipswich City Plan 2025 commenced 1 July 2025 (ipswich.isoplan.com.au). Only 2006-scheme data was found as open
-  data (data.gov.au "Ipswich Planning Scheme"); no City Plan 2025 service found.
+- Planning scheme: Ipswich City Plan 2025 (commenced 1 July 2025), online in ISOPlan (`ipswich.isoplan.com.au/eplan`).
+- Parcels and addresses: Queensland cadastre filtered by `Ipswich City`. Bbox from the state LGA layer (lga_code 3960).
+- No zone or overlay endpoint: the council's ArcGIS server was not reachable and data.gov.au only has the superseded 2006 scheme.
+  Registry `zones_loaded: false` and `layers: []`; the app shows "Zone not loaded for this council yet" with a link to the ISOPlan map.
+- Rules: secondary dwelling and dual occupancy summaries from the council "Housing in Ipswich" page (not scheme text, verify). An always-on rule lists the
+  overlays to check by hand. Part 5, zone codes and the Dwelling and Dual Occupancy Code were not readable.
+
+## Redland City Council (T20)
+
+- Planning scheme: Redland City Plan, Version 14 (commenced 10 November 2025); the new Redlands Coast City Plan is not in effect.
+- Parcels and addresses: Queensland cadastre filtered by `Redland City`.
+- Zones and overlays: Redland open data FeatureServer `Current_Version_<n>_City_Plan_Zones_and_Overlays` on `services7.arcgis.com/VGRM775aS3HJEeB7`
+  (newest version picked). Zone layer `City Plan - Zones` (`QPP_Description` zone, `QPP_Precinct` precinct such as LDR2); all other layers are overlays
+  (bushfire, flood and storm tide, landslide, coastal, environmental significance, waterways and wetlands, heritage, airport, noise, extractive, catchments,
+  regional infrastructure). The precinct boundary layer is skipped. Licence is not stated on the service: confirm with council before redistributing.
+- Rules: council zone checklists, a 2019 minor-amendment report and the MDR code review; every row verify. Part 5, 6 and 9 of the scheme PDF were not readable.
+
+## City of Gold Coast (T20)
+
+- Planning scheme: Gold Coast City Plan Version 13 (commenced 9 December 2025). A third-party site claims a Version 14: not confirmed.
+- Parcels and addresses: Queensland cadastre filtered by `Gold Coast City` (the council's cadastre copy is dated October 2024 and is not used).
+- Zones and overlays: `City_Plan_Version_<n>_Open_Data` FeatureServer on `services-ap1.arcgis.com/lnVW0dLI3fvST2hd` (newest version), CC BY 4.0. Zone layer `Zone`
+  (`LVL1_ZONE`, `ZONE_PRECINCT`); the property boundaries layer and Context are skipped; all other layers are overlays, including Minimum lot size (`MLS`),
+  Residential density (`RESIDENTIAL_DENSITY`), Building height (`HEIGHT_IN_METRES`), Dwelling house overlay area, Flood assessment required, Bushfire hazard area, Heritage place.
+- Not loaded: the non-statutory Flood Risk Overlay 2026, Bushfire_Risk_2026 and Landslide_Susceptibility_Extent_2026 services (licence not stated).
+- Rules: council Dwellings page and a consultant report quoting the scheme (Neighbourhood centre); third-party (landintel.com.au) rows are labelled and verify.
+
+## Mackay Regional Council (T20: lots and addresses only)
+
+- Planning scheme: Mackay Region Planning Scheme 2017, version 5.0 (commenced 15 June 2026).
+- Parcels and addresses: Queensland cadastre filtered by `Mackay Regional`. The research bbox (148.149..152.678) includes offshore sea, so it is clipped to
+  [148.15, -21.77, 149.7, -20.37]; state layers are loaded for that envelope only.
+- No zone or overlay endpoint (MiMAPS has no public REST service; zone and overlay maps are PDFs). Registry `zones_loaded: false`; the app links to MiMAPS.
+- Rules: council user guides (secondary summaries), shown zone by zone under each proposed use because the lot's zone is unknown; all rows verify.
+
+## Brisbane v37 (T20)
+
+- Heritage overlay datasets in the catalogue are now `cp14-heritage-overlay-state-heritage-area`, `...-local-heritage-area` and `...-area-adjoining`
+  (the old `cp14-heritage-overlay` id is gone); the Brisbane test build uses the local heritage area one.
+- `council_rules.json` has a `brisbane` entry for values the main files have no row for (dwelling house in Medium density residential, multiple dwellings and
+  reconfiguring a lot in Low-medium density residential, lot-size thresholds in Low density and Rural residential, Queensland Housing Code setbacks for
+  Low-medium and Medium density lots of 450 m² and over). The app only uses them where uses.json / setbacks.json have no zone-specific row; existing
+  Brisbane data is never overwritten.
+
+## Other leads
+
+- Gold Coast, Ipswich, Redland and Mackay are in the registry (above). Any other council: follow "Adding a council".
 
 ## Registry format (`src-tauri/knowledge/councils.json`)
 
@@ -94,6 +136,7 @@ One object per council; the array order sets parcel ids (`pid = index * 100,000,
 | `da_url`, `da_name` | app | DA register button |
 | `lodge_name`, `lodge_url` | app (dev.rs) | DA Form 1/2 lodgement text and link |
 | `water` `{name,url}` | app (dev.rs) | Water and sewer provider for the forms list and charge note |
+| `zones_loaded` | app, dev.rs | `false` when the council has no zone or overlay data in the pack (Ipswich, Mackay): the app says "Zone not loaded for this council yet" and links `maps_url` |
 | `licence`, `attribution` | pipeline manifest, docs | Licence summary |
 | `title_prefix` | both | Prefix of layer titles (e.g. "Logan — "); the flood legend strips it |
 | `bbox` `[minx,miny,maxx,maxy]` | pipeline | WGS84 envelope; parcels are filtered by LGA name inside it, and state layers are loaded once per council bbox (so a council outside SEQ, e.g. Mackay, just needs its own bbox) |
