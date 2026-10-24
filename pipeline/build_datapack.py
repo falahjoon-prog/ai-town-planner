@@ -361,7 +361,7 @@ def cadastre_where(field, names):
 def load_addresses(lga, bbox):
     """lotplan -> sorted address list, plus points without a matching lot (for a spatial join)."""
     by_lp, n = {}, 0
-    for f in arcgis_features(ADDRESS_URL, "objectid", bbox, cadastre_where("local_authority", lga), 2000, True):
+    for f in arcgis_features(ADDRESS_URL, "objectid", bbox_str(bbox), cadastre_where("local_authority", lga), 2000, True):
         a = f.get("properties") or {}
         lp = (a.get("lotplan") or "").upper().strip()
         g = f.get("geometry") or {}
@@ -385,7 +385,7 @@ def load_parcels_cadastre(db, cid, cidx, src, bbox, limit=None):
     lga = src["lga"]
     addrs = load_addresses(lga, bbox)
     used, n, rows, idx = set(), 0, [], []
-    for f in arcgis_features(CADASTRE_URL, "objectid", bbox, cadastre_where("shire_name", lga), 2000, True,
+    for f in arcgis_features(CADASTRE_URL, "objectid", bbox_str(bbox), cadastre_where("shire_name", lga), 2000, True,
                              "objectid,lot,plan,lotplan,tenure,lot_area,excl_area,parcel_typ,cover_typ,locality,shire_name,feat_name"):
         a = f.get("properties") or {}
         g, b = clean_geom(f.get("geometry"))
