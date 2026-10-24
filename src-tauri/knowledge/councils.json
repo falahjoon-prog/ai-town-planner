@@ -34,7 +34,7 @@
         "only": [
           "cp14-zoning-overlay",
           "cp14-flood-overlay-brisbane-river-flood-planning-area",
-          "cp14-heritage-overlay"
+          "cp14-heritage-overlay-local-heritage-area"
         ]
       }
     },
@@ -205,6 +205,234 @@
     "water": {
       "name": "Unitywater",
       "url": "https://www.unitywater.com/"
+    }
+  },
+  {
+    "id": "ipswich",
+    "name": "Ipswich City Council",
+    "short": "Ipswich",
+    "scheme": "Ipswich City Plan 2025",
+    "scheme_url": "https://ipswich.isoplan.com.au/eplan",
+    "scheme_docs_url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Supporting-Resources/Planning-Scheme-Supporting-Documents",
+    "maps_url": "https://ipswich.isoplan.com.au/eplan",
+    "maps_name": "Ipswich City Plan 2025 online (ISOPlan, includes scheme maps)",
+    "da_url": "https://developmenti.ipswich.qld.gov.au/",
+    "da_name": "Ipswich Development.i",
+    "lodge_url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Development-Assessment",
+    "lodge_name": "Ipswich: see council's Development Assessment page for how to lodge (route not confirmed)",
+    "licence": "Queensland cadastre and addresses CC BY 4.0 (State of Queensland). No City Plan 2025 zone or overlay data: council publishes none as open data.",
+    "attribution": "(c) Ipswich City Council",
+    "rules": "ipswich",
+    "title_prefix": "Ipswich — ",
+    "bbox": [
+      152.3827,
+      -27.8655,
+      152.9409,
+      -27.4903
+    ],
+    "zones_loaded": false,
+    "pipeline": {
+      "parcels": {
+        "kind": "qld_cadastre",
+        "lga": [
+          "Ipswich City"
+        ]
+      },
+      "layers": [],
+      "test": {
+        "bbox": [
+          152.75,
+          -27.63,
+          152.79,
+          -27.6
+        ]
+      }
+    },
+    "website": "https://www.ipswich.qld.gov.au/",
+    "water": {
+      "name": "Urban Utilities",
+      "url": "https://www.urbanutilities.com.au/development/our-services/how-to-connect-water-and-sewerage/standard-connections"
+    }
+  },
+  {
+    "id": "redland",
+    "name": "Redland City Council",
+    "short": "Redland",
+    "scheme": "Redland City Plan",
+    "scheme_url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents",
+    "scheme_docs_url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents",
+    "maps_url": "https://www.redland.qld.gov.au/Planning-building-and-development/Development-tools-and-advice/Red-e-map",
+    "maps_name": "Red-e-map (Redland City Plan mapping)",
+    "da_url": "https://developmenti.redland.qld.gov.au/",
+    "da_name": "Redland Development.i",
+    "lodge_url": "https://www.redland.qld.gov.au/Planning-building-and-development/Development-tools-and-advice/Development-application-process",
+    "lodge_name": "Redland: development application process and online lodgement",
+    "licence": "Redland City Council Open Data (ArcGIS Online); no licence is stated on the service, so check with council before redistributing. Queensland cadastre and addresses CC BY 4.0.",
+    "attribution": "(c) Redland City Council",
+    "rules": "redland",
+    "title_prefix": "Redland — ",
+    "bbox": [
+      153.171,
+      -27.741,
+      153.548,
+      -27.388
+    ],
+    "pipeline": {
+      "parcels": {
+        "kind": "qld_cadastre",
+        "lga": [
+          "Redland City"
+        ]
+      },
+      "layers": [
+        {
+          "kind": "arcgis",
+          "root": "https://services7.arcgis.com/VGRM775aS3HJEeB7/arcgis/rest/services",
+          "services": [
+            "Current_Version_\\d+_City_Plan_Zones_and_Overlays"
+          ],
+          "service_type": "FeatureServer",
+          "pick": "newest",
+          "zoning": [
+            "^City Plan - Zones$"
+          ],
+          "skip": [
+            "(?i)label",
+            "(?i)annotation",
+            "Zones - Precinct Boundary$"
+          ],
+          "zone_field": "QPP_Description",
+          "precinct_field": "QPP_Precinct",
+          "title_strip": "^City Plan - "
+        }
+      ],
+      "test": {
+        "bbox": [
+          153.25,
+          -27.545,
+          153.29,
+          -27.52
+        ]
+      }
+    },
+    "website": "https://www.redland.qld.gov.au/",
+    "water": {
+      "name": "Redland City Council (water and wastewater)",
+      "url": "https://www.redland.qld.gov.au/"
+    }
+  },
+  {
+    "id": "gold_coast",
+    "name": "City of Gold Coast",
+    "short": "Gold Coast",
+    "scheme": "Gold Coast City Plan",
+    "scheme_url": "https://cityplan.goldcoast.qld.gov.au/eplan/",
+    "scheme_docs_url": "https://www.goldcoast.qld.gov.au/Planning-building/Planning-our-city/City-Plan-amendments",
+    "maps_url": "https://www.goldcoast.qld.gov.au/Planning-building/Planning-our-city",
+    "maps_name": "Gold Coast City Plan online (ePlan and mapping)",
+    "da_url": "https://integrations.goldcoast.qld.gov.au/pdonline/",
+    "da_name": "Gold Coast PD Online",
+    "lodge_url": "https://www.goldcoast.qld.gov.au/Planning-building/Development-applications",
+    "lodge_name": "Gold Coast: development applications page (how to lodge)",
+    "licence": "CC BY 4.0 (City Plan Version 13 Open Data, City of Gold Coast); Queensland cadastre and addresses CC BY 4.0",
+    "attribution": "(c) City of Gold Coast",
+    "rules": "gold_coast",
+    "title_prefix": "Gold Coast — ",
+    "bbox": [
+      153.1689,
+      -28.2652,
+      153.5523,
+      -27.6919
+    ],
+    "pipeline": {
+      "parcels": {
+        "kind": "qld_cadastre",
+        "lga": [
+          "Gold Coast City"
+        ]
+      },
+      "layers": [
+        {
+          "kind": "arcgis",
+          "root": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services",
+          "services": [
+            "City_Plan_Version_\\d+_Open_Data"
+          ],
+          "service_type": "FeatureServer",
+          "pick": "newest",
+          "zoning": [
+            "^Zone$"
+          ],
+          "skip": [
+            "(?i)label",
+            "(?i)annotation",
+            "^Property boundaries",
+            "^Context$"
+          ],
+          "zone_field": "LVL1_ZONE",
+          "precinct_field": "ZONE_PRECINCT"
+        }
+      ],
+      "test": {
+        "bbox": [
+          153.41,
+          -28.01,
+          153.44,
+          -27.98
+        ]
+      }
+    },
+    "website": "https://www.goldcoast.qld.gov.au/",
+    "water": {
+      "name": "City of Gold Coast (Gold Coast Water)",
+      "url": "https://www.goldcoast.qld.gov.au/"
+    }
+  },
+  {
+    "id": "mackay",
+    "name": "Mackay Regional Council",
+    "short": "Mackay",
+    "scheme": "Mackay Region Planning Scheme 2017",
+    "scheme_url": "https://www.mackay.qld.gov.au/Business/Building-Planning-and-Development/Planning-Schemes/Mackay-Region-Planning-Scheme-2017-Version-50",
+    "scheme_docs_url": "https://www.mackay.qld.gov.au/Business/Building-Planning-and-Development/Planning-Schemes/Mackay-Region-Planning-Scheme-2017-Version-50",
+    "maps_url": "https://mimaps.mackay.qld.gov.au/",
+    "maps_name": "MiMAPS (Mackay Region Planning Scheme 2017 zones and overlays)",
+    "da_url": "https://www.mackay.qld.gov.au/Business/Building-Planning-and-Development/Mapping-and-Online-Services/eApplications",
+    "da_name": "Mackay eApplications",
+    "lodge_url": "https://www.mackay.qld.gov.au/Business/Building-Planning-and-Development/Mapping-and-Online-Services/eApplications",
+    "lodge_name": "Mackay: lodge through council eApplications",
+    "licence": "Queensland cadastre and addresses CC BY 4.0 (State of Queensland). No zone or overlay data: council publishes none as open data.",
+    "attribution": "(c) Mackay Regional Council",
+    "rules": "mackay",
+    "title_prefix": "Mackay — ",
+    "bbox": [
+      148.15,
+      -21.77,
+      149.7,
+      -20.37
+    ],
+    "zones_loaded": false,
+    "pipeline": {
+      "parcels": {
+        "kind": "qld_cadastre",
+        "lga": [
+          "Mackay Regional"
+        ]
+      },
+      "layers": [],
+      "test": {
+        "bbox": [
+          149.17,
+          -21.16,
+          149.21,
+          -21.13
+        ]
+      }
+    },
+    "website": "https://www.mackay.qld.gov.au/",
+    "water": {
+      "name": "Mackay Regional Council (water and waste)",
+      "url": "https://www.mackay.qld.gov.au/"
     }
   }
 ]

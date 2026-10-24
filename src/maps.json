@@ -206,7 +206,8 @@
   {
    "name": "Gold Coast",
    "website": "https://www.goldcoast.qld.gov.au/",
-   "map": "https://www.goldcoast.qld.gov.au/Planning-building/Planning-our-city"
+   "map": "https://www.goldcoast.qld.gov.au/Planning-building/Planning-our-city",
+   "da": "https://integrations.goldcoast.qld.gov.au/pdonline/"
   },
   {
    "name": "Goondiwindi",
@@ -232,7 +233,7 @@
   {
    "name": "Ipswich",
    "website": "https://www.ipswich.qld.gov.au/",
-   "map": "https://ipswich.qld.gov.au/residents/planning-and-development",
+   "map": "https://ipswich.isoplan.com.au/eplan",
    "da": "https://developmenti.ipswich.qld.gov.au/"
   },
   {
@@ -277,8 +278,8 @@
   {
    "name": "Mackay",
    "website": "https://www.mackay.qld.gov.au/",
-   "map": null,
-   "da": "https://www.mackay.qld.gov.au/business/planning_and_development/development_applications_and_assessment"
+   "map": "https://mimaps.mackay.qld.gov.au/",
+   "da": "https://www.mackay.qld.gov.au/Business/Building-Planning-and-Development/Mapping-and-Online-Services/eApplications"
   },
   {
    "name": "Mapoon",
@@ -365,7 +366,7 @@
   {
    "name": "Redland",
    "website": "https://www.redland.qld.gov.au/",
-   "map": "https://redland.qld.gov.au/CityPlanDocuments",
+   "map": "https://www.redland.qld.gov.au/Planning-building-and-development/Development-tools-and-advice/Red-e-map",
    "da": "https://developmenti.redland.qld.gov.au/"
   },
   {

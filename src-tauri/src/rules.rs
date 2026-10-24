@@ -125,7 +125,7 @@ fn add_flag(flags: &mut Vec<Flag>, r: &Rule, layer: Option<&str>) {
 /// `precinct` comes from a separate precinct layer when the zoning layer has none (e.g. Logan's ZM-02 precinct map).
 fn council_zone(h: &OverlayHit, cid: &str, precinct_layer: Option<String>) -> Option<ZoneMatch> {
     let s = |k: &str| h.props.get(k).and_then(Value::as_str).map(str::trim).filter(|v| !v.is_empty()).map(String::from);
-    let name = s("zone").filter(|z| !z.eq_ignore_ascii_case("not applicable")); // e.g. Moreton Bay roads
+    let name = s("zone").filter(|z| !z.eq_ignore_ascii_case("not applicable") && !z.eq_ignore_ascii_case("unzoned")); // e.g. Moreton Bay roads, Redland and Gold Coast unzoned land
     let precinct = s("precinct").or(precinct_layer).filter(|p| Some(p) != name.as_ref());
     let text = norm(&format!("{} {}", name.clone().unwrap_or_else(|| prop_text(&h.props)), precinct.clone().unwrap_or_default()));
     let best = council::kb(cid).and_then(|kb| {

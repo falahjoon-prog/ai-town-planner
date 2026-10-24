@@ -2090,5 +2090,2264 @@
     }
    ]
   }
+ },
+ "ipswich": {
+  "zones": [],
+  "rules": [
+   {
+    "id": "ip-water",
+    "authority": "other",
+    "keywords": [],
+    "title": "Water and sewer (Urban Utilities)",
+    "code": "Urban Utilities connections",
+    "note": "New or intensified development needs water and sewer connection approval from Urban Utilities and may attract infrastructure charges.",
+    "checklist": [
+     "Ask Urban Utilities about connections and services",
+     "Check for water or sewer mains through the lot before siting buildings"
+    ],
+    "url": "https://www.urbanutilities.com.au/development/our-services/how-to-connect-water-and-sewerage/standard-connections",
+    "always": true
+   },
+   {
+    "id": "ip-overlays",
+    "authority": "council",
+    "keywords": [],
+    "always": true,
+    "title": "Ipswich City Plan 2025 overlays (not mapped in the app)",
+    "code": "Ipswich City Plan 2025 overlays",
+    "note": "Council publishes no City Plan 2025 zone or overlay data as open data, so the app cannot say which overlays affect this lot. Look the lot up in the online scheme (ISOPlan) and check the overlays in the checklist. Overlays can change the level of assessment.",
+    "checklist": [
+     "Check the Biodiversity Overlay",
+     "Check the Bushfire Prone Areas Overlay",
+     "Check the Character Places and Areas Overlay",
+     "Check the Difficult Topography and Landslide Overlay",
+     "Check the Flood Risk and Overland Flow Overlay",
+     "Check the Building Height and Density Overlay",
+     "Check the Urban Growth Management Overlay",
+     "Check the Waterways and Wetlands Overlay",
+     "Check the Ripley Valley PDA Development Scheme and the Springfield Structure Plan if the lot is in those areas (separate instruments)"
+    ],
+    "url": "https://edoc.ipswich.qld.gov.au/objective/download.php?id=A10472990&ext=pdf&env=iccecm&plat=pdonline"
+   }
+  ],
+  "provisions": [],
+  "uses": {
+   "house": {
+    "zones": [],
+    "checks": [
+     "The zone is not loaded for this council yet, so the app cannot give the level of assessment for a dwelling house. Check the City Plan 2025 table of assessment for the lot's zone."
+    ],
+    "sources": [
+     {
+      "name": "Ipswich City Council: Housing in Ipswich",
+      "url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Planning/Housing-in-Ipswich"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Dwelling house: not loaded yet (Part 5 and the zone codes were not readable). Secondary dwelling: Accepted development: Council: since 1 July 2025 planning approval generally not required in established suburban areas if requirements met; max GFA by lot size: >450-600 m2 = 60 m2; >600-800 m2 = 90 m2; >800 m2 = 120 m2; setbacks, height, parking still apply; cannot be separately titled; building/plumbing approvals still needed",
+      "items": [
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Accepted development in established suburban residential zones if requirements are met (exact zones not confirmed)",
+        "source": "Council web page 'Housing in Ipswich' (summary, not scheme text) (clause: Dwelling and Dual Occupancy Code (https://ipswich.isoplan.com.au/eplan/rules/0/404/0/0/0/199) and Part 5 table of assessment - not read)",
+        "url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Planning/Housing-in-Ipswich",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: conditions",
+        "value": "Council: since 1 July 2025 planning approval generally not required in established suburban areas if requirements met; max GFA by lot size: >450-600 m2 = 60 m2; >600-800 m2 = 90 m2; >800 m2 = 120 m2; setbacks, height, parking still apply; cannot be separately titled; building/plumbing approvals still needed",
+        "source": "Council web page 'Housing in Ipswich' (summary, not scheme text) (clause: Dwelling and Dual Occupancy Code (https://ipswich.isoplan.com.au/eplan/rules/0/404/0/0/0/199) and Part 5 table of assessment - not read)",
+        "url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Planning/Housing-in-Ipswich",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "dual": {
+    "zones": [],
+    "checks": [
+     "The zone is not loaded for this council yet. Check the Dwelling and Dual Occupancy Code and the table of assessment for the lot's zone."
+    ],
+    "sources": [
+     {
+      "name": "Ipswich City Council: Housing in Ipswich",
+      "url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Planning/Housing-in-Ipswich"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Accepted development in established suburban residential zones, within lot-size limits (council web summary, not scheme text; exact zones not confirmed).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development in established suburban residential zones, subject to the lot-size limits below (exact zones not confirmed)",
+        "source": "Council web page 'Housing in Ipswich' (summary, not scheme text) (clause: Dwelling and Dual Occupancy Code; Part 5 table - not read)",
+        "url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Planning/Housing-in-Ipswich",
+        "verify": true
+       },
+       {
+        "label": "Conditions",
+        "value": "lot >450-600 m2 not allowed as accepted; >600-800 m2 max GFA 120 m2; >800 m2 max GFA 150 m2; may be strata titled; draft plan said accepted 'in most residential zones'",
+        "source": "Council web page 'Housing in Ipswich' (summary, not scheme text) (clause: Dwelling and Dual Occupancy Code; Part 5 table - not read)",
+        "url": "https://www.ipswich.qld.gov.au/Services/Planning-and-Building/Planning/Housing-in-Ipswich",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "redland": {
+  "zones": [
+   {
+    "name": "Low Density Residential",
+    "keywords": [
+     "low density residential"
+    ],
+    "purpose": "Not loaded yet – see Redland City Plan (https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents)",
+    "typical": "Precincts: LDR1 Large lot residential; LDR2 Park residential; LDR3 Point Lookout residential; LDR4 Kinross Road; LDR5 Canal and lakeside estates (Raby Bay, Aquatic Paradise, Sovereign Waters).",
+    "source": "Redland City Council zone checklists (precinct meanings)",
+    "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+    "verify": true
+   },
+   {
+    "name": "Character Residential",
+    "keywords": [
+     "character residential"
+    ],
+    "purpose": "Not loaded yet – see Redland City Plan (https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents)",
+    "typical": "Covers the Southern Moreton Bay Islands (it was SMBI Residential in the 2006 scheme). Council says detached dwellings are supported in Character Residential, Rural and Environmental Management zones.",
+    "source": "Redland City Council: Southern Moreton Bay Islands fact sheet",
+    "url": "https://www.redland.qld.gov.au/download/downloads/id/3171/fact_sheet_-_souther_moreton_bay_islands_smbi.pdf",
+    "verify": true
+   }
+  ],
+  "rules": [
+   {
+    "id": "re-water",
+    "authority": "other",
+    "keywords": [],
+    "title": "Water and sewer (Redland City Council (water and wastewater))",
+    "code": "Redland City Council (water and wastewater) connections",
+    "note": "New or intensified development needs water and sewer connection approval from Redland City Council (water and wastewater) and may attract infrastructure charges.",
+    "checklist": [
+     "Ask Redland City Council (water and wastewater) about connections and services",
+     "Check for water or sewer mains through the lot before siting buildings"
+    ],
+    "url": "https://www.redland.qld.gov.au/",
+    "always": true
+   },
+   {
+    "id": "re-bushfire",
+    "authority": "council",
+    "keywords": [
+     "bushfire hazard"
+    ],
+    "title": "Bushfire hazard overlay",
+    "code": "Redland City Plan (Version 14): Bushfire hazard overlay code (Part 8)",
+    "note": "Mapped in the Bushfire hazard overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layer classes: Very High / High / Medium Potential Bushfire Intensity and Potential Impact Buffer.",
+    "checklist": [
+     "Read the bushfire hazard overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-flood",
+    "authority": "council",
+    "keywords": [
+     "flood and storm tide"
+    ],
+    "title": "Flood and storm tide hazard overlay",
+    "code": "Redland City Plan (Version 14): Flood and storm tide hazard overlay code (Part 8)",
+    "note": "Mapped in the Flood and storm tide hazard overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layer classes: Drainage Constrained Land; 2016 Storm Tide Inundation Area; 2016-2100 Storm Tide Inundation Area; Flood Regulation Line.",
+    "checklist": [
+     "Read the flood and storm tide hazard overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-landslide",
+    "authority": "council",
+    "keywords": [
+     "landslide hazard"
+    ],
+    "title": "Landslide hazard overlay",
+    "code": "Redland City Plan (Version 14): Landslide hazard overlay code (Part 8)",
+    "note": "Mapped in the Landslide hazard overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layer risk classes: Very High, High, Medium, Low.",
+    "checklist": [
+     "Read the landslide hazard overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-coastal",
+    "authority": "council",
+    "keywords": [
+     "coastal protection overlay"
+    ],
+    "title": "Coastal protection overlay",
+    "code": "Redland City Plan (Version 14): Coastal protection overlay code (Part 8)",
+    "note": "Mapped in the Coastal protection overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layers: Erosion Prone Area and Coastal Management District.",
+    "checklist": [
+     "Read the coastal protection overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-esa",
+    "authority": "council",
+    "keywords": [
+     "environmental significance"
+    ],
+    "title": "Environmental significance overlay",
+    "code": "Redland City Plan (Version 14): Environmental significance overlay code (Part 8)",
+    "note": "Mapped in the Environmental significance overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layers: MSES and MLES.",
+    "checklist": [
+     "Read the environmental significance overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-waterway",
+    "authority": "council",
+    "keywords": [
+     "waterway corridors and wetlands"
+    ],
+    "title": "Waterway corridors and wetlands overlay",
+    "code": "Redland City Plan (Version 14): Waterway corridors and wetlands overlay code (Part 8)",
+    "note": "Mapped in the Waterway corridors and wetlands overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply.",
+    "checklist": [
+     "Read the waterway corridors and wetlands overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-heritage",
+    "authority": "council",
+    "keywords": [
+     "heritage overlay"
+    ],
+    "title": "Heritage overlay",
+    "code": "Redland City Plan (Version 14): Heritage overlay code (Part 8)",
+    "note": "Mapped in the Heritage overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layers: Local Heritage Place and Local Heritage Place (Significant Trees).",
+    "checklist": [
+     "Read the heritage overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-airport",
+    "authority": "council",
+    "keywords": [
+     "airport environs"
+    ],
+    "title": "Airport environs overlay",
+    "code": "Redland City Plan (Version 14): Airport environs overlay code (Part 8)",
+    "note": "Mapped in the Airport environs overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layer classes include Mt Hardgrave Radar/VHF zones, Wildlife Hazard Buffer 13k, Obstacle Limitation Surface and Birkdale Areas A-E.",
+    "checklist": [
+     "Read the airport environs overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-noise",
+    "authority": "council",
+    "keywords": [
+     "transport noise corridor"
+    ],
+    "title": "Transport noise corridor overlay",
+    "code": "Redland City Plan (Version 14): Transport noise corridor overlay code (Part 8)",
+    "note": "Mapped in the Transport noise corridor overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layers: railway, State road and local road noise corridors.",
+    "checklist": [
+     "Read the transport noise corridor overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-extractive",
+    "authority": "council",
+    "keywords": [
+     "extractive resources"
+    ],
+    "title": "Extractive resources overlay",
+    "code": "Redland City Plan (Version 14): Extractive resources overlay code (Part 8)",
+    "note": "Mapped in the Extractive resources overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply.",
+    "checklist": [
+     "Read the extractive resources overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-catchment",
+    "authority": "council",
+    "keywords": [
+     "water resource catchments"
+    ],
+    "title": "Water resource catchments overlay",
+    "code": "Redland City Plan (Version 14): Water resource catchments overlay code (Part 8)",
+    "note": "Mapped in the Water resource catchments overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply.",
+    "checklist": [
+     "Read the water resource catchments overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   },
+   {
+    "id": "re-infra",
+    "authority": "council",
+    "keywords": [
+     "regional infrastructure corridors"
+    ],
+    "title": "Regional infrastructure corridors and substations overlay",
+    "code": "Redland City Plan (Version 14): Regional infrastructure corridors and substations overlay code (Part 8)",
+    "note": "Mapped in the Regional infrastructure corridors and substations overlay. Development is assessed against the overlay code (Part 8) and the Part 5 tables (s5.9 overlays). The overlay code text was not read for this app, so check which codes apply. Layers include wastewater treatment plants and buffers, water supply pipelines, pump stations, reservoirs, Energex substations, a 110kV powerline and electricity easements.",
+    "checklist": [
+     "Read the regional infrastructure corridors and substations overlay code and its assessment benchmarks in the Redland City Plan",
+     "Ask Redland City Council about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+   }
+  ],
+  "provisions": [
+   {
+    "zone": [
+     "low density residential"
+    ],
+    "precinct": [],
+    "title": "Low density residential (Redland City Plan)",
+    "items": [
+     {
+      "label": "Minimum frontage – dual occupancy site (not LDR1, LDR2, LDR4)",
+      "value": "20 m",
+      "source": "LDR checklist v2 (AO2.1, AO2.2), LDR zone code 6.2.1.3 AO2.1, AO2.2",
+      "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+      "verify": true
+     },
+     {
+      "label": "Density – dual occupancy site",
+      "value": "max 1 dwelling per 400m2 of site area (so about 800m2 for two dwellings)",
+      "source": "LDR checklist v2 (AO2.1, AO2.2), LDR zone code 6.2.1.3 AO2.1, AO2.2",
+      "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+      "verify": true
+     },
+     {
+      "label": "LDR1 lot sizes (a court observation, not a code minimum)",
+      "value": "Most LDR1 lots exceed 2,000 m². The reconfiguring a lot minimum lot sizes were not read.",
+      "source": "Planning and Environment Court case on Redland City Plan v5 (CBP article): Court noted most LDR1 lots exceed 2,000m2 but this is a factual observation, not a code minimum. Actual RAL minimum lot sizes sit in Part 9.3.4 / zone code tables - NOT read., RAL code 9.3.4 / LDR code 6.2.1.2 overall outcome (3); PO20",
+      "url": "https://www.cbp.com.au/insights/publications/reconfiguring-a-lot-into-four-lots-in-a-low-density-residential-zone-approved-on-appeal-to-the-plann",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "medium density residential"
+    ],
+    "precinct": [],
+    "title": "Medium density residential (Redland City Plan)",
+    "items": [
+     {
+      "label": "Assumed density (not a code minimum lot size)",
+      "value": "44 dwellings/ha (up to 3 storeys), as assumed in council's MDR code review report",
+      "source": "Council MDR code review report, Attachment 1",
+      "url": "https://www.redland.qld.gov.au/download/meetings/id/1005/confidential_release_item_191_medium_density_residential_zone_code_review_-_preliminary_findings_and_recommendations",
+      "verify": true
+     }
+    ]
+   }
+  ],
+  "uses": {
+   "house": {
+    "zones": [
+     "low density residential",
+     "low medium density residential",
+     "medium density residential",
+     "character residential"
+    ],
+    "checks": [
+     "Overlays (bushfire, flood and storm tide, landslide, coastal, environmental significance, heritage) can change the level of assessment.",
+     "Redland City Plan Part 5 tables of assessment and Part 6 zone codes were not readable for this app: every row below is to be verified against the scheme.",
+     "Non-compliance with some acceptable outcomes triggers code-assessable building work or a concurrence referral to council (Schedule 9)."
+    ],
+    "sources": [
+     {
+      "name": "Redland City Plan (Version 14)",
+      "url": "https://www.redland.qld.gov.au/Planning-building-and-development/Redland-City-Plan/Redland-City-Plan-documents"
+     },
+     {
+      "name": "Redland City Council zone checklists and amendment report",
+      "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low density residential"
+      ],
+      "level": "Accepted subject to requirements (LDR zone code AOs apply) per 2019 amendment report Table 5.4.1; ambiguous source layout: requirements text appears to apply in precincts LDR2, LDR3, LDR4 or in canal estates (Raby Bay, Aquatic Paradise, Sovereign Waters) adjoining a canal/artificial water body. Treat as 'accepted subject to requirements', not plain accepted. Non-compliance with some AOs triggers code-assessable building work or concurrence referral to Council (Schedule 9).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Redland Council report: RCP minor amendment - dual occupancy provisions (Table 5.4.1); LDR zone checklist v2, Table 5.4.1; zone code Table 6.2.1.3.1",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height",
+        "value": "Precinct LDR3: max building height 8.5m on slopes up to 15% (roofs/pergolas over decks may reach 10m if covering no more than 10m2, one per detached component, not enclosed). Dual occupancy general LDR: height 8.5m or less to be accepted subject to requirements. LDR3 floor levels max 3m above ground (first level) and 5.1m (uppermost level).",
+        "source": "LDR checklist v2 AO13.1, AO14.1; Table 5.4.1, 6.2.1.3 AO13.1, AO14.1",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+        "verify": true
+       },
+       {
+        "label": "Site cover",
+        "value": "30% of site area max in LDR1 and LDR2 (AO6.1, dwelling houses) and in LDR3 (AO11.1, concurrence referral if not met). Other LDR precincts follow QDC MP1.1/1.2 (not read).",
+        "source": "LDR checklist v2, 6.2.1.3 AO6.1, AO11.1",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback",
+        "value": "LDR2 park residential: 10m from road frontage (dwelling houses incl outbuildings). LDR4 Kinross Road: 5m from lot boundaries shared with existing lots accessed from Milner Place. LDR3: landscape strip min 2m wide along full road frontage (AO17.1). Standard LDR lots: QDC MP1.1/MP1.2 (not read).",
+        "source": "LDR checklist v2, 6.2.1.3 AO4.1, AO5.1, AO17.1",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+        "verify": true
+       },
+       {
+        "label": "Side",
+        "value": "LDR2: 10m from side or rear boundary. LDR5 canal estates: 1m minimum side access along full length of one side (AO8.2). LDR3: detached building components separated by at least 4m (AO12.2).",
+        "source": "LDR checklist v2, 6.2.1.3 AO4.1, AO8.2, AO12.2",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+        "verify": true
+       },
+       {
+        "label": "Rear",
+        "value": "LDR5 (Raby Bay, Aquatic Paradise, Sovereign Waters): development set back min 9m from boundary adjoining a canal or lake (AO9.1, excludes in-ground pools, concurrence referral if not met); 9m from boundary adjoining a revetment wall (AO7.1) with min 2m maintenance setback (AO8.1). LDR2: 10m rear.",
+        "source": "LDR checklist v2, 6.2.1.3 AO7.1, AO8.1, AO9.1",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+        "verify": true
+       },
+       {
+        "label": "Site cover (more)",
+        "value": "LDR3 additional: building component size max 150m2 (height up to 4.5m) or 140m2 (height over 4.5m) (AO12.1); max cut/fill 1.2m (AO10.1); retaining walls max 600mm at street frontage (AO10.2); fences max 1.5m, open timber, not forward of front building line (AO15.1).",
+        "source": "LDR checklist v2, 6.2.1.3 AO10-AO15",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback (more)",
+        "value": "Not obtained for general residential zones. Dual occupancy and secondary dwelling siting defer to Queensland Development Code MP1.3 (duplex), MP1.1 (lots under 450m2) and MP1.2 (450m2 and over).",
+        "source": "Council web pages and zone checklists, QDC MP1.1, MP1.2, MP1.3",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Queensland-Development-Code",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Code assessment (not confirmed). Council says the level depends on zone and overlays under Part 5 (some secondary dwellings need only building/plumbing approval). GFA limits: lot under 1,000m2 max 85m2; lot 1,000m2 or more max 112m2; rural zone lot 6,000m2 or more max 160m2. Must meet QDC MP1.1 (lots under 450m2) or MP1.2 (450m2 or more). Secondary dwellings can be rented to anyone. Treat as 'depends on Part 5' in the app.",
+        "source": "Council web page: Dual living - secondary dwelling, Amenity and Aesthetics Guideline Item 4 (P1/P2); Planning Regulation 2017",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Residential-projects/Dwellings/Dual-living-secondary-dwelling",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "low medium density residential"
+      ],
+      "level": "Accepted development.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Council report (Table 5.4.2), Table 5.4.2",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height",
+        "value": "8.5m or less for multiple dwelling to be code assessable; dual occupancy per QDC MP1.3. Zone code height table not read.",
+        "source": "Council report Table 5.4.2, Table 5.4.2",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback",
+        "value": "Not obtained for general residential zones. Dual occupancy and secondary dwelling siting defer to Queensland Development Code MP1.3 (duplex), MP1.1 (lots under 450m2) and MP1.2 (450m2 and over).",
+        "source": "Council web pages and zone checklists, QDC MP1.1, MP1.2, MP1.3",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Queensland-Development-Code",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Code assessment (not confirmed). Council says the level depends on zone and overlays under Part 5 (some secondary dwellings need only building/plumbing approval). GFA limits: lot under 1,000m2 max 85m2; lot 1,000m2 or more max 112m2; rural zone lot 6,000m2 or more max 160m2. Must meet QDC MP1.1 (lots under 450m2) or MP1.2 (450m2 or more). Secondary dwellings can be rented to anyone. Treat as 'depends on Part 5' in the app.",
+        "source": "Council web page: Dual living - secondary dwelling, Amenity and Aesthetics Guideline Item 4 (P1/P2); Planning Regulation 2017",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Residential-projects/Dwellings/Dual-living-secondary-dwelling",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "medium density residential"
+      ],
+      "level": "Accepted development.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Council report (Table 5.4.3), Table 5.4.3",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height",
+        "value": "PRE-v14 figures from council MDR review report (Attachment 1): MDR8 and MDR9 = 2 storeys / 8.5m; MDR general and MDR6 = 3 storeys / 13m; MDR7 = 4 storeys / 16m; MDR2, MDR4, MDR5 = 5 storeys / 19m; MDR1 and MDR3 = 6 storeys / 22m. v14 (Nov 2025) amended the MDR code, so recheck Table 5.4.4.",
+        "source": "Council MDR zone code review report, Table 5.4.4 (as reported in Attachment 1)",
+        "url": "https://www.redland.qld.gov.au/download/meetings/id/1005/confidential_release_item_191_medium_density_residential_zone_code_review_-_preliminary_findings_and_recommendations",
+        "verify": true
+       },
+       {
+        "label": "Site cover",
+        "value": "PRE-v14: acceptable outcome allowed 75% site cover where building height is 13m or less. v14 may have changed this.",
+        "source": "Council MDR zone code review report (clause: MDR zone code acceptable outcome (clause number not given))",
+        "url": "https://www.redland.qld.gov.au/download/meetings/id/1005/confidential_release_item_191_medium_density_residential_zone_code_review_-_preliminary_findings_and_recommendations",
+        "verify": true
+       },
+       {
+        "label": "Side",
+        "value": "PRE-v14: side setback acceptable outcome 3m to 3.5m for buildings 7.5m to 13m high. Front/rear: no figure found.",
+        "source": "Council MDR zone code review report (clause: MDR zone code (clause not given))",
+        "url": "https://www.redland.qld.gov.au/download/meetings/id/1005/confidential_release_item_191_medium_density_residential_zone_code_review_-_preliminary_findings_and_recommendations",
+        "verify": true
+       },
+       {
+        "label": "Front setback",
+        "value": "Not obtained for general residential zones. Dual occupancy and secondary dwelling siting defer to Queensland Development Code MP1.3 (duplex), MP1.1 (lots under 450m2) and MP1.2 (450m2 and over).",
+        "source": "Council web pages and zone checklists, QDC MP1.1, MP1.2, MP1.3",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Queensland-Development-Code",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Code assessment (not confirmed). Council says the level depends on zone and overlays under Part 5 (some secondary dwellings need only building/plumbing approval). GFA limits: lot under 1,000m2 max 85m2; lot 1,000m2 or more max 112m2; rural zone lot 6,000m2 or more max 160m2. Must meet QDC MP1.1 (lots under 450m2) or MP1.2 (450m2 or more). Secondary dwellings can be rented to anyone. Treat as 'depends on Part 5' in the app.",
+        "source": "Council web page: Dual living - secondary dwelling, Amenity and Aesthetics Guideline Item 4 (P1/P2); Planning Regulation 2017",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Residential-projects/Dwellings/Dual-living-secondary-dwelling",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "character residential"
+      ],
+      "level": "Accepted development (not confirmed from the scheme text). Council SMBI fact sheet says detached dwellings are supported in Character Residential, Rural and Environmental Management zones; actual level/conditions need Table 5.4.x (Character residential).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Council SMBI fact sheet (clause: Part 5 (character residential table) - not read)",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3171/fact_sheet_-_souther_moreton_bay_islands_smbi.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback",
+        "value": "Not obtained for general residential zones. Dual occupancy and secondary dwelling siting defer to Queensland Development Code MP1.3 (duplex), MP1.1 (lots under 450m2) and MP1.2 (450m2 and over).",
+        "source": "Council web pages and zone checklists, QDC MP1.1, MP1.2, MP1.3",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Queensland-Development-Code",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Code assessment (not confirmed). Council says the level depends on zone and overlays under Part 5 (some secondary dwellings need only building/plumbing approval). GFA limits: lot under 1,000m2 max 85m2; lot 1,000m2 or more max 112m2; rural zone lot 6,000m2 or more max 160m2. Must meet QDC MP1.1 (lots under 450m2) or MP1.2 (450m2 or more). Secondary dwellings can be rented to anyone. Treat as 'depends on Part 5' in the app.",
+        "source": "Council web page: Dual living - secondary dwelling, Amenity and Aesthetics Guideline Item 4 (P1/P2); Planning Regulation 2017",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Residential-projects/Dwellings/Dual-living-secondary-dwelling",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [],
+      "level": "Not loaded for this zone. Secondary dwelling: Code assessment (not confirmed). Council says the level depends on zone and overlays under Part 5 (some secondary dwellings need only building/plumbing approval). GFA limits: lot under 1,000m2 max 85m2; lot 1,000m2 or more max 112m2; rural zone lot 6,000m2 or more max 160m2. Must meet QDC MP1.1 (lots under 450m2) or MP1.2 (450m2 or more). Secondary dwellings can be rented to anyone. Treat as 'depends on Part 5' in the app.",
+      "items": [
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Depends on Part 5 (zone and overlays); not confirmed",
+        "source": "Council web page: Dual living - secondary dwelling, Amenity and Aesthetics Guideline Item 4 (P1/P2); Planning Regulation 2017",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Residential-projects/Dwellings/Dual-living-secondary-dwelling",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: conditions",
+        "value": "NOT CONFIRMED. Council says the level depends on zone and overlays under Part 5 (some secondary dwellings need only building/plumbing approval). GFA limits: lot under 1,000m2 max 85m2; lot 1,000m2 or more max 112m2; rural zone lot 6,000m2 or more max 160m2. Must meet QDC MP1.1 (lots under 450m2) or MP1.2 (450m2 or more). Secondary dwellings can be rented to anyone. Treat as 'depends on Part 5' in the app.",
+        "source": "Council web page: Dual living - secondary dwelling, Amenity and Aesthetics Guideline Item 4 (P1/P2); Planning Regulation 2017",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Residential-projects/Dwellings/Dual-living-secondary-dwelling",
+        "verify": true
+       },
+       {
+        "label": "Front setback",
+        "value": "Not obtained for general residential zones. Dual occupancy and secondary dwelling siting defer to Queensland Development Code MP1.3 (duplex), MP1.1 (lots under 450m2) and MP1.2 (450m2 and over).",
+        "source": "Council web pages and zone checklists, QDC MP1.1, MP1.2, MP1.3",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Queensland-Development-Code",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "dual": {
+    "zones": [
+     "low density residential",
+     "low medium density residential",
+     "medium density residential"
+    ],
+    "checks": [
+     "Dual occupancy must meet all QDC MP1.3 acceptable solutions, otherwise a concurrence referral to council applies.",
+     "In LDR1, LDR2 and LDR4 dual occupancy is not provided for (it falls to impact assessment by default; verify)."
+    ],
+    "sources": [
+     {
+      "name": "Redland City Council amendment report (dual occupancy provisions)",
+      "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf"
+     },
+     {
+      "name": "Redland LDR zone checklist",
+      "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_density_residential_zone_v2.pdf"
+     },
+     {
+      "name": "Redland LMDR zone checklist",
+      "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_medium_density_residential_zone.pdf"
+     },
+     {
+      "name": "Redland MDR zone checklist",
+      "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_medium_density_residential_zone.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low density residential"
+      ],
+      "level": "Accepted subject to requirements if: not in precincts LDR1, LDR2 or LDR4 AND building height 8.5m or less AND density no more than 1 dwelling per 400m2 of site area. Otherwise code assessable if not in LDR1, LDR2, LDR4. In LDR1, LDR2, LDR4 dual occupancy is not provided for (falls to impact by default as unlisted use - verify). Also AO3.1: must meet all QDC MP1.3 acceptable solutions, else concurrence referral.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Council report (Table 5.4.1, s6.2.1.3) and LDR checklist, Table 5.4.1; AO1.1, AO2.1, AO2.2, AO3.1 of LDR code 6.2.1.3",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "low medium density residential"
+      ],
+      "level": "Accepted subject to requirements: AO1.1 must comply with all QDC MP1.3 acceptable solutions, else concurrence referral to Council (Sch 9). Source text itself looked internally inconsistent (shows both accepted and ASR).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Council report; LMDR checklist, Table 5.4.2; Table 6.2.2.3.1 AO1.1",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_low_medium_density_residential_zone.pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "medium density residential"
+      ],
+      "level": "Accepted / accepted subject to requirements; code assessable if not in precincts MDR1-MDR5 and not meeting ASR (older overview: accepted in general MDR and MDR6-9). Must meet QDC MP1.3 (AO3.1) or concurrence referral.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "Council report; MDR checklist; zone overview, Table 5.4.3; Table 6.2.3.3.1 AO3.1",
+        "url": "https://www.redland.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/forms-for-planning-and-development/checklists/checklist_medium_density_residential_zone.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "md": {
+    "zones": [
+     "low medium density residential",
+     "medium density residential"
+    ],
+    "checks": [
+     "Benchmarks include the Multiple Dwelling Design Guide (Planning Scheme Policy 7).",
+     "Taller than the Table 5.4.4 height is expected to be impact assessable (verify)."
+    ],
+    "sources": [
+     {
+      "name": "Redland City Council amendment report (Tables 5.4.2, 5.4.3)",
+      "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low medium density residential"
+      ],
+      "level": "Code assessment: If building height is 8.5m or less (above that: not confirmed, likely impact). Benchmarks: LMDR zone code plus healthy waters, infrastructure works, landscape, transport/servicing/access/parking codes.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Code assessment",
+        "source": "Council report (Table 5.4.2), Table 5.4.2",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "medium density residential"
+      ],
+      "level": "Code assessment: If building height does not exceed that in Table 5.4.4 Building height (see height rows). Over that height: assume impact (verify). Benchmarks include MDR zone code and the Multiple Dwelling Design Guide (Planning Scheme Policy 7, added by amendment 04/20 / v14).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Code assessment",
+        "source": "Council report (Table 5.4.3); MDR code review, Table 5.4.3, Table 5.4.4",
+        "url": "https://www.redland.qld.gov.au/download/downloads/id/3215/rcp_minor_amendment_-_dual_occupancy_provisions.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "rol": {
+    "zones": [],
+    "checks": [
+     "Minimum lot sizes sit in Part 9.3.4 Reconfiguring a lot code and the zone code tables, which were not readable for this app."
+    ],
+    "sources": [
+     {
+      "name": "Redland City Council: Plan of Subdivision",
+      "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Plan-of-Subdivision"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Code assessment (not confirmed). Part 5 s5.5 (p.102) holds RAL assessment levels; Council web page says plans of subdivision are assessed under Schedule 18 Planning Regulation 2017. In Character Residential (SMBI) reconfiguration is restricted unless it keeps or increases lot sizes (amalgamation).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Not confirmed (Part 5 s5.5 not read)",
+        "source": "Council web pages (Plan of Subdivision; SMBI fact sheet); scheme contents list, Part 5 s5.5; Part 9.3.4 Reconfiguring a lot code (p.403)",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Plan-of-Subdivision",
+        "verify": true
+       },
+       {
+        "label": "Conditions",
+        "value": "NOT CONFIRMED. Part 5 s5.5 (p.102) holds RAL assessment levels; Council web page says plans of subdivision are assessed under Schedule 18 Planning Regulation 2017. In Character Residential (SMBI) reconfiguration is restricted unless it keeps or increases lot sizes (amalgamation).",
+        "source": "Council web pages (Plan of Subdivision; SMBI fact sheet); scheme contents list, Part 5 s5.5; Part 9.3.4 Reconfiguring a lot code (p.403)",
+        "url": "https://www.redland.qld.gov.au/Planning-building-and-development/What-approvals-do-I-need/Plan-of-Subdivision",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size: LDR – LDR1 large lot",
+        "value": "Planning and Environment Court case on Redland City Plan v5 (CBP article): Court noted most LDR1 lots exceed 2,000m2 but this is a factual observation, not a code minimum. Actual RAL minimum lot sizes sit in Part 9.3.4 / zone code tables - NOT read.",
+        "source": "Planning and Environment Court case on Redland City Plan v5 (CBP article): Court noted most LDR1 lots exceed 2,000m2 but this is a factual observation, not a code minimum. Actual RAL minimum lot sizes sit in Part 9.3.4 / zone code tables - NOT read., RAL code 9.3.4 / LDR code 6.2.1.2 overall outcome (3); PO20",
+        "url": "https://www.cbp.com.au/insights/publications/reconfiguring-a-lot-into-four-lots-in-a-low-density-residential-zone-approved-on-appeal-to-the-plann",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size: MDR – general",
+        "value": "Council MDR review report cites 44 dwellings/ha assumed density for MDR (up to 3 storeys); not a code minimum lot size.",
+        "source": "Council MDR code review report, Attachment 1",
+        "url": "https://www.redland.qld.gov.au/download/meetings/id/1005/confidential_release_item_191_medium_density_residential_zone_code_review_-_preliminary_findings_and_recommendations",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "gold_coast": {
+  "zones": [],
+  "rules": [
+   {
+    "id": "go-water",
+    "authority": "other",
+    "keywords": [],
+    "title": "Water and sewer (City of Gold Coast (Gold Coast Water))",
+    "code": "City of Gold Coast (Gold Coast Water) connections",
+    "note": "New or intensified development needs water and sewer connection approval from City of Gold Coast (Gold Coast Water) and may attract infrastructure charges.",
+    "checklist": [
+     "Ask City of Gold Coast (Gold Coast Water) about connections and services",
+     "Check for water or sewer mains through the lot before siting buildings"
+    ],
+    "url": "https://www.goldcoast.qld.gov.au/",
+    "always": true
+   },
+   {
+    "id": "go-bushfire",
+    "authority": "council",
+    "keywords": [
+     "bushfire hazard area"
+    ],
+    "title": "Bushfire hazard area",
+    "code": "Gold Coast City Plan Version 13: Bushfire hazard area (open data layer)",
+    "note": "Mapped in the Bushfire hazard area layer (classes: Medium, High and Very High Potential Bushfire Intensity, and Potential Impact Buffer). Assessed against the City Plan bushfire hazard overlay code; the code text was not read for this app.",
+    "checklist": [
+     "Read the bushfire hazard area code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/35"
+   },
+   {
+    "id": "go-flood",
+    "authority": "council",
+    "keywords": [
+     "flood assessment required"
+    ],
+    "title": "Flood assessment required",
+    "code": "Gold Coast City Plan Version 13: Flood assessment required (open data layer)",
+    "note": "Mapped in the City Plan statutory 'Flood assessment required' layer (flood hazard overlay). A flood assessment is needed for development here; the code text was not read for this app. The council's non-statutory Flood Risk Overlay 2026 is a separate map that is not loaded.",
+    "checklist": [
+     "Read the flood assessment required code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/81"
+   },
+   {
+    "id": "go-heritage",
+    "authority": "council",
+    "keywords": [
+     "heritage place"
+    ],
+    "title": "Heritage place",
+    "code": "Gold Coast City Plan Version 13: Heritage place (open data layer)",
+    "note": "Mapped in the Heritage place layer (local heritage place or Queensland heritage place). Heritage provisions of the City Plan apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the heritage place code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/83"
+   },
+   {
+    "id": "go-proximity",
+    "authority": "council",
+    "keywords": [
+     "in proximity to a local heritage"
+    ],
+    "title": "Place in proximity to a local heritage place",
+    "code": "Gold Coast City Plan Version 13: Place in proximity to a local heritage place (open data layer)",
+    "note": "Mapped as in proximity to a local heritage place. Heritage provisions of the City Plan may apply to development next to a local heritage place; the code text was not read for this app.",
+    "checklist": [
+     "Read the place in proximity to a local heritage place code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-dho",
+    "authority": "council",
+    "keywords": [
+     "dwelling house overlay"
+    ],
+    "title": "Dwelling house overlay area",
+    "code": "Gold Coast City Plan Version 13: Dwelling house overlay area (open data layer)",
+    "note": "Mapped in the Dwelling house overlay area layer (Development Parameters). The overlay changes how a dwelling house is assessed; the code text was not read for this app.",
+    "checklist": [
+     "Read the dwelling house overlay area code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/43"
+   },
+   {
+    "id": "go-height",
+    "authority": "council",
+    "keywords": [
+     "building height boundary"
+    ],
+    "title": "Building height",
+    "code": "Gold Coast City Plan Version 13: Building height (open data layer)",
+    "note": "Mapped in the Building height layer. The HEIGHT_IN_METRES and STOREY_NUMBER values on the layer (for example 9 m, 14 m, 24 m up to 140 m) set the building height outcome for this lot; check the value on the layer.",
+    "checklist": [
+     "Read the building height code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/33"
+   },
+   {
+    "id": "go-mls",
+    "authority": "council",
+    "keywords": [
+     "minimum lot size"
+    ],
+    "title": "Minimum lot size",
+    "code": "Gold Coast City Plan Version 13: Minimum lot size (open data layer)",
+    "note": "Mapped in the Minimum lot size layer. The MLS value on the layer (values seen: 400, 2000, 2500, 3500 and 4000 m²) is the minimum lot size for reconfiguring this lot; check the value on the layer.",
+    "checklist": [
+     "Read the minimum lot size code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/101"
+   },
+   {
+    "id": "go-rdo",
+    "authority": "council",
+    "keywords": [
+     "residential density"
+    ],
+    "title": "Residential density overlay",
+    "code": "Gold Coast City Plan Version 13: Residential density overlay (open data layer)",
+    "note": "Mapped in the Residential density layer. Values (from the layer legend): LDR1 up to 12.5 dwellings/ha (1 per 800 m²); LDR2 16.6 (1 per 600 m²); RD1 25 (1 per 400 m²); RD2 33 (1 per 300 m²); RD3 40 (1 per 250 m²); RD4 50 (1 per 200 m²); RD4A 66 (1 per 150 m²); RD5 200 bedrooms/ha; RD6 300; RD7 400; RD8 769. Check the lot's value on the layer; it drives dual occupancy and multiple dwelling yield.",
+    "checklist": [
+     "Read the residential density overlay code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/115"
+   },
+   {
+    "id": "go-landslide",
+    "authority": "council",
+    "keywords": [
+     "landslide hazard"
+    ],
+    "title": "Landslide hazard",
+    "code": "Gold Coast City Plan Version 13: Landslide hazard (open data layer)",
+    "note": "Mapped in the Landslide hazard layer. Landslide hazard provisions of the City Plan apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the landslide hazard code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-biodiv",
+    "authority": "council",
+    "keywords": [
+     "koala habitat",
+     "substantial remnants",
+     "habitat system",
+     "critical corridors",
+     "local significant species",
+     "state significant species",
+     "regulated vegetation",
+     "vegetation management",
+     "vegetation protection order",
+     "protected areas"
+    ],
+    "title": "Biodiversity and vegetation",
+    "code": "Gold Coast City Plan Version 13: Biodiversity and vegetation (open data layer)",
+    "note": "Mapped in a City Plan biodiversity or vegetation layer (habitat systems, corridors, significant species, koala habitat areas, regulated vegetation, vegetation management or protection). Environmental provisions of the City Plan apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the biodiversity and vegetation code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-wetland",
+    "authority": "council",
+    "keywords": [
+     "significant wetlands",
+     "waterways",
+     "canal",
+     "lake",
+     "buffer area",
+     "waterfront development control"
+    ],
+    "title": "Waterways, wetlands and waterfront",
+    "code": "Gold Coast City Plan Version 13: Waterways, wetlands and waterfront (open data layer)",
+    "note": "Mapped in a City Plan waterway, wetland, canal, lake or waterfront layer. Waterway and wetland provisions of the City Plan apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the waterways, wetlands and waterfront code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-noise",
+    "authority": "council",
+    "keywords": [
+     "transport noise corridor",
+     "airport noise exposure"
+    ],
+    "title": "Transport and airport noise",
+    "code": "Gold Coast City Plan Version 13: Transport and airport noise (open data layer)",
+    "note": "Mapped in a transport noise corridor or airport noise exposure layer. Noise provisions of the City Plan and the State transport noise corridor rules may apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the transport and airport noise code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-acid",
+    "authority": "council",
+    "keywords": [
+     "land at or below 5m",
+     "land at or below 20m"
+    ],
+    "title": "Land at or below 5 m / 20 m AHD",
+    "code": "Gold Coast City Plan Version 13: Land at or below 5 m / 20 m AHD (open data layer)",
+    "note": "Mapped in the City Plan layer for land at or below 5 m AHD (acid sulfate soils) or 20 m AHD. The code text was not read for this app.",
+    "checklist": [
+     "Read the land at or below 5 m / 20 m ahd code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-ridges",
+    "authority": "council",
+    "keywords": [
+     "ridges and significant hills"
+    ],
+    "title": "Ridges and significant hills protection",
+    "code": "Gold Coast City Plan Version 13: Ridges and significant hills protection (open data layer)",
+    "note": "Mapped in the Ridges and significant hills protection layer. The code text was not read for this app.",
+    "checklist": [
+     "Read the ridges and significant hills protection code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-infra",
+    "authority": "council",
+    "keywords": [
+     "water supply pipeline",
+     "major electricity infrastructure",
+     "ferry road high voltage",
+     "water reservoir",
+     "water treatment plant",
+     "water storage",
+     "railway corridor",
+     "pacific motorway service road"
+    ],
+    "title": "Infrastructure corridors and facilities",
+    "code": "Gold Coast City Plan Version 13: Infrastructure corridors and facilities (open data layer)",
+    "note": "Mapped in a City Plan layer for water, electricity or transport infrastructure (pipelines and buffers, high voltage corridors, reservoirs, railway corridor buffer). Provisions to protect the infrastructure apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the infrastructure corridors and facilities code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-interface",
+    "authority": "council",
+    "keywords": [
+     "industry interface",
+     "community infrastructure",
+     "agriculture land",
+     "separation area",
+     "special management area",
+     "resource area",
+     "party house",
+     "mudgeeraba village"
+    ],
+    "title": "Interface and character areas",
+    "code": "Gold Coast City Plan Version 13: Interface and character areas (open data layer)",
+    "note": "Mapped in a City Plan interface or character layer (industry, community infrastructure or agriculture interface, separation or resource areas, party house area, Mudgeeraba village character). The related City Plan provisions apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the interface and character areas code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   },
+   {
+    "id": "go-lightrail",
+    "authority": "council",
+    "keywords": [
+     "light rail"
+    ],
+    "title": "Light rail",
+    "code": "Gold Coast City Plan Version 13: Light rail (open data layer)",
+    "note": "Mapped in a light rail layer (stations, route or urban renewal area). Light rail provisions of the City Plan may apply; the code text was not read for this app.",
+    "checklist": [
+     "Read the light rail code and its assessment benchmarks in the Gold Coast City Plan",
+     "Ask City of Gold Coast about the overlay for this lot if the mapping looks wrong"
+    ],
+    "url": "https://cityplan.goldcoast.qld.gov.au/eplan/"
+   }
+  ],
+  "provisions": [
+   {
+    "zone": [
+     "neighbourhood centre"
+    ],
+    "precinct": [],
+    "title": "Neighbourhood centre (Gold Coast City Plan v13)",
+    "items": [
+     {
+      "label": "Minimum lot size (third-party source)",
+      "value": "1,000 m²",
+      "source": "ITP26009 Town Planning Report quoting City Plan v13 Neighbourhood Centre Zone Code, AO12.1 and AO12.2, Table 6.2.5-2",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+      "verify": true,
+      "key": "min_front",
+      "n": 1000.0
+     },
+     {
+      "label": "Minimum frontage (third-party source)",
+      "value": "18 m",
+      "source": "ITP26009 Town Planning Report quoting City Plan v13 Neighbourhood Centre Zone Code, AO12.1 and AO12.2, Table 6.2.5-2",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+      "verify": true
+     },
+     {
+      "label": "Front setback",
+      "value": "0 m (max 2 m) for buildings up to 9.5 m and not more than 2 storeys; 2 m above that",
+      "source": "ITP26009 consultant report quoting City Plan v13, AO1, Table 6.2.5-2",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+      "verify": true
+     },
+     {
+      "label": "Side setback",
+      "value": "0 m where site abuts Centre/Neighbourhood centre/Mixed use zone, else 2 m; above 9.5 m add 0.5 m per 3 m of height",
+      "source": "ITP26009, AO1, Table 6.2.5-2",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+      "verify": true
+     },
+     {
+      "label": "Rear setback",
+      "value": "2 m up to 9.5 m; 6 m above 9.5 m",
+      "source": "ITP26009, AO1, Table 6.2.5-2",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+      "verify": true
+     },
+     {
+      "label": "Height",
+      "value": "2 storeys, max 14 m, or as shown on Building height overlay map",
+      "source": "ITP26009, AO3, Table 6.2.5-2",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+      "verify": true
+     },
+     {
+      "label": "Site cover",
+      "value": "80%",
+      "source": "ITP26009, AO2, Table 6.2.5-2",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+      "verify": true
+     }
+    ]
+   }
+  ],
+  "uses": {
+   "house": {
+    "zones": [
+     "low density residential",
+     "medium density residential",
+     "high density residential"
+    ],
+    "checks": [
+     "Overlays can raise the level of assessment (for example bushfire, flood assessment required, heritage, Dwelling house overlay).",
+     "Building approval is still required through a certifier."
+    ],
+    "sources": [
+     {
+      "name": "City of Gold Coast: Dwellings",
+      "url": "https://www.goldcoast.qld.gov.au/Planning-building/Building-applications/Domestic-building-works/Dwellings"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low density residential"
+      ],
+      "level": "Accepted development: Council Dwellings page: 'Most of the time, you don't need a development application' for a dwelling house (and secondary dwelling) in a residential zone if it meets the secondary dwelling code / other applicable codes. Building approval still required via a certifier. Overlays can raise the level.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development",
+        "source": "City of Gold Coast - Dwellings (council web page, paraphrase not scheme text) (clause: Table of assessment not read (Part 5, City Plan) - clause number unknown)",
+        "url": "https://www.goldcoast.qld.gov.au/Planning-building/Building-applications/Domestic-building-works/Dwellings",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Accepted development",
+        "source": "Council Dwellings page + landintel.com.au (third party) (clause: Secondary dwelling code (Part 9) - number unknown)",
+        "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: conditions",
+        "value": "Accepted subject to requirements (secondary dwelling code). Third party (landintel.com.au, claims verified vs v14, UNCONFIRMED): up to 80 m2 GFA, attached or within 10 m of primary dwelling, shares driveway; building application referred to council, not DA, if no overlay lifts category and no basement.",
+        "source": "Council Dwellings page + landintel.com.au (third party) (clause: Secondary dwelling code (Part 9) - number unknown)",
+        "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning",
+        "verify": true
+       },
+       {
+        "label": "Site cover (third-party source, unconfirmed)",
+        "value": "50% (third-party only, UNCONFIRMED)",
+        "source": "landintel.com.au (clause: unknown)",
+        "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "medium density residential",
+       "high density residential"
+      ],
+      "level": "Dwelling house: not loaded yet. Secondary dwelling: Accepted development: <=80 m2 GFA accepted subject to requirements; >80 m2 code assessable (third party).",
+      "items": [
+       {
+        "label": "Secondary dwelling: level of assessment",
+        "value": "Accepted development",
+        "source": "landintel.com.au (clause: unknown)",
+        "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: conditions (third-party source)",
+        "value": "<=80 m2 GFA accepted subject to requirements; >80 m2 code assessable (third party).",
+        "source": "landintel.com.au (clause: unknown)",
+        "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "dual": {
+    "zones": [
+     "low density residential",
+     "medium density residential",
+     "high density residential"
+    ],
+    "checks": [
+     "Check the lot's value on the Residential density layer and whether the site has dual road frontage.",
+     "Third-party (landintel.com.au) statements are unconfirmed; check the Dual occupancy code and Part 5 of the City Plan."
+    ],
+    "sources": [
+     {
+      "name": "City of Gold Coast: Dwellings",
+      "url": "https://www.goldcoast.qld.gov.au/Planning-building/Building-applications/Domestic-building-works/Dwellings"
+     },
+     {
+      "name": "landintel.com.au (third-party)",
+      "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "low density residential"
+      ],
+      "level": "Accepted (subject to requirements) ONLY if site has dual road frontage OR Residential density overlay is RD1 or greater (1 dwelling/400 m2); otherwise impact assessable (landintel; align planning). Unmapped lot needs >=800 m2 per landintel. Other City Plan checks may still apply.",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Accepted development (subject to requirements) only if the site has dual road frontage or the Residential density overlay is RD1 or greater",
+        "source": "Council Dwellings page (RD1/dual frontage gate, first-party); impact-assessable fallback + 800 m2 from landintel.com.au (third party) (clause: Table of assessment / Dual occupancy code - number unknown)",
+        "url": "https://www.goldcoast.qld.gov.au/Planning-building/Building-applications/Domestic-building-works/Dwellings",
+        "verify": true
+       },
+       {
+        "label": "Level of assessment otherwise (third-party source)",
+        "value": "Impact assessment (third party claim only)",
+        "source": "landintel.com.au (clause: unknown)",
+        "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning",
+        "verify": true
+       },
+       {
+        "label": "Residential density overlay: RD1",
+        "value": "1 dwelling per 400 m² (25 dwellings/ha), from the layer legend",
+        "source": "Gold Coast City Plan Version 13 Open Data, Residential density layer renderer, layer 115",
+        "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/115",
+        "verify": true
+       }
+      ]
+     },
+     {
+      "zone": [
+       "medium density residential",
+       "high density residential"
+      ],
+      "level": "Accepted subject to requirements without the frontage/RDO gate (third party).",
+      "items": [
+       {
+        "label": "Level of assessment (third-party source)",
+        "value": "Accepted development subject to requirements, without the frontage or density gate",
+        "source": "landintel.com.au (clause: unknown)",
+        "url": "https://landintel.com.au/pages/gold-coast-property-due-diligence-gccc-zoning",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "md": {
+    "zones": [
+     "neighbourhood centre"
+    ],
+    "checks": [
+     "Density must not exceed the Residential density overlay map (PO4, Table 6.2.5-2, no acceptable outcome)."
+    ],
+    "sources": [
+     {
+      "name": "ITP26009 Town Planning Report (PD Online)",
+      "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [
+       "neighbourhood centre"
+      ],
+      "level": "Code assessment: Per a consultant town planning report quoting v13 ('Office and Multiple Dwelling are code assessable'); density must not exceed Residential density overlay map (PO4, Table 6.2.5-2, no AO).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Code assessment",
+        "source": "ITP26009 Town Planning Report, 2389-2391 Gold Coast Hwy Mermaid Beach, v2, 6 Jul 2026 (PD Online), Neighbourhood Centre Zone Code s6.2.5; Table 6.2.5-2 PO4",
+        "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+        "verify": true
+       },
+       {
+        "label": "Front setback",
+        "value": "0 m (max 2 m) for buildings up to 9.5 m and not more than 2 storeys; 2 m above that",
+        "source": "ITP26009 consultant report quoting City Plan v13, AO1, Table 6.2.5-2",
+        "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+        "verify": true
+       },
+       {
+        "label": "Side setback",
+        "value": "0 m where site abuts Centre/Neighbourhood centre/Mixed use zone, else 2 m; above 9.5 m add 0.5 m per 3 m of height",
+        "source": "ITP26009, AO1, Table 6.2.5-2",
+        "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+        "verify": true
+       },
+       {
+        "label": "Rear setback",
+        "value": "2 m up to 9.5 m; 6 m above 9.5 m",
+        "source": "ITP26009, AO1, Table 6.2.5-2",
+        "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+        "verify": true
+       },
+       {
+        "label": "Height",
+        "value": "2 storeys, max 14 m, or as shown on Building height overlay map",
+        "source": "ITP26009, AO3, Table 6.2.5-2",
+        "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+        "verify": true
+       },
+       {
+        "label": "Site cover",
+        "value": "80%",
+        "source": "ITP26009, AO2, Table 6.2.5-2",
+        "url": "https://integrations.goldcoast.qld.gov.au/pdonline/default.aspx?oid=A122363645",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "rol": {
+    "zones": [],
+    "checks": [
+     "Minimum lot sizes come from the Minimum lot size map or the zone code."
+    ],
+    "sources": [
+     {
+      "name": "Gold Coast City Plan Version 13 Open Data (Minimum lot size)",
+      "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/101"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Reconfiguring a lot: level of assessment not loaded. Minimum lot size comes from the Minimum lot size map (layer shown with this lot) or, where the lot has no polygon, from the zone code.",
+      "items": [
+       {
+        "label": "Minimum lot size map",
+        "value": "Read the MLS value on the Minimum lot size layer for the lot (values seen in the data: 400, 2000, 2500, 3500 and 4000 m²)",
+        "source": "City Plan v13 Open Data layer 101 (MLS field, values seen 400/2000/2500/3500/4000 m2), Minimum lot size map (Part 2/Part 6 overlay) - read MLS per lot via spatial query",
+        "url": "https://services-ap1.arcgis.com/lnVW0dLI3fvST2hd/ArcGIS/rest/services/City_Plan_Version_13_Open_Data/FeatureServer/101",
+        "verify": true
+       },
+       {
+        "label": "Low density residential zone code",
+        "value": "Minimum lot size not read (zone code 6.2.1 could not be fetched)",
+        "source": "NOT FOUND - Low density residential zone code (Part 6.2.1) not readable (council /files and ePlan blocked by robots.txt for fetcher). Draft Our City Our Plan copy exists at goldcoast.qld.gov.au/files/sharedassets/public/v/1/pdfs/city-plan/our-city-our-plan-amendments/part-6/round-1/ocop-amendments-part-6.2.1_low_density_residential_zone_code.pdf (draft, 2019-20, not current), 6.2.1",
+        "url": "https://cityplan.goldcoast.qld.gov.au/eplan/",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "mackay": {
+  "zones": [],
+  "rules": [
+   {
+    "id": "ma-water",
+    "authority": "other",
+    "keywords": [],
+    "title": "Water and sewer (Mackay Regional Council (water and waste))",
+    "code": "Mackay Regional Council (water and waste) connections",
+    "note": "New or intensified development needs water and sewer connection approval from Mackay Regional Council (water and waste) and may attract infrastructure charges.",
+    "checklist": [
+     "Ask Mackay Regional Council (water and waste) about connections and services",
+     "Check for water or sewer mains through the lot before siting buildings"
+    ],
+    "url": "https://www.mackay.qld.gov.au/",
+    "always": true
+   },
+   {
+    "id": "mk-overlays",
+    "authority": "council",
+    "keywords": [],
+    "always": true,
+    "title": "Mackay Region Planning Scheme 2017 overlays (not mapped in the app)",
+    "code": "Mackay Region Planning Scheme 2017 overlay maps (Schedule 2, SC25)",
+    "note": "Council publishes no zone or overlay data as open data, so the app cannot say which overlays affect this lot. Look the lot up on MiMAPS and check the overlay maps in the checklist. Overlays can make a dwelling house code assessable.",
+    "checklist": [
+     "Check the Acid sulfate soils overlay map",
+     "Check the Agricultural land class A and B overlay map",
+     "Check the Locally important agricultural areas overlay map",
+     "Check the Airport environs - aviation facilities overlay map",
+     "Check the Airport environs - OLS, safety, runway overlay map",
+     "Check the Airport environs - wildlife, ANEF, lighting overlay map",
+     "Check the Biodiversity - ESV and wildlife habitat overlay map",
+     "Check the Biodiversity - waterways and wetlands overlay map",
+     "Check the Bushfire hazard (1) overlay map",
+     "Check the Bushfire hazard (2) overlay map",
+     "Check the Extractive resources and high impact activities overlay map",
+     "Check the Flood hazard (1) overlay map",
+     "Check the Flood hazard (2) overlay map",
+     "Check the Coastal hazard overlay map",
+     "Check the Flood risk (Finch Hatton) overlay map",
+     "Check the Heritage and neighbourhood character overlay map",
+     "Check the Landscape character and image corridor overlay map",
+     "Check the Landslide hazard (1) overlay map",
+     "Check the Landslide hazard (2) overlay map",
+     "Check the Regional infrastructure overlay map",
+     "Check the Road hierarchy overlay map",
+     "Check the Transport noise corridors (1) overlay map",
+     "Check the Transport noise corridors (2) overlay map",
+     "Check the Mackay city centre and Marian central local plan maps if the lot is in those areas"
+    ],
+    "url": "https://www.mackay.qld.gov.au/Business/Building-Planning-and-Development/Planning-Schemes/Mackay-Region-Planning-Scheme-2017-Version-50/Mackay-Region-Planning-Scheme-2017-Version-50-Maps"
+   }
+  ],
+  "provisions": [],
+  "uses": {
+   "house": {
+    "zones": [],
+    "checks": [
+     "Overlays (airport environs, extractive resources, flood and coastal hazard, heritage and neighbourhood character, landslide, regional infrastructure) can make a dwelling house code assessable.",
+     "Secondary dwellings are part of the 'dwelling house' use (SC1.1); in Rural and Rural residential zones at most one, max 60 m², within 20 m of the primary dwelling."
+    ],
+    "sources": [
+     {
+      "name": "Mackay Council User Guide #9 Houses",
+      "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Zone not loaded for this council yet, so the level depends on the lot's zone (look it up on MiMAPS). Researched levels by zone:",
+      "items": [
+       {
+        "label": "Dwelling house: Low density residential, Medium density residential, High density residential, Emerging community, Township",
+        "value": "Accepted if no relevant overlay applies; code assessable (Dwelling house code) if an acceptable outcome is not met or an overlay (airport environs, extractive resources/HIA, flood and coastal hazard, heritage/neighbourhood character, landslide, regional infrastructure) triggers",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), SC1.1/SC1.2; Part 5 zone tables (Table 5.5.9 Low density, 5.5.12 Medium density per TOC); Dwelling house code 9.3.5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Dwelling house: Mixed use (MX2 Fringe commercial, not fronting Juliet St), Neighbourhood centre, Rural, Rural residential, Specialised centre (SC2 Tavern precinct)",
+        "value": "Accepted development subject to requirements: Dwelling house code requirements must be met and no relevant overlay; otherwise code assessable",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Part 5 zone table; Dwelling house code 9.3.5 (Table 9.3.5.3.A)",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Dwelling house: Any other zone (e.g. Principal centre)",
+        "value": "Impact assessment: Dwelling house not listed in the zone table so impact assessable",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024) and Mackay Council User Guide #3 Do I need to lodge a DA, Part 5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Secondary dwelling: Zones where dwelling house is accepted/accepted subject to requirements",
+        "value": "Accepted development: Treated as part of 'dwelling house' definition (SC1.1 option b). Defined SC1.2 as attached/detached dwelling subordinate to a dwelling house on same lot. Rural and rural residential: max 1 secondary dwelling, max 60m2, within 20m of primary dwelling",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), SC1.1, SC1.2; Dwelling house code 9.3.5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback (dwelling house, urban), Low density residential",
+        "value": "Arterial/sub-arterial 10m; collector and access street 4.5m house / 6m garage; corner lot secondary frontage 3m house / 6m garage",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code 9.3.5, Table 9.3.5.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback (dwelling house, urban), Medium density residential",
+        "value": "Arterial/sub-arterial 10m; collector and access street 4.5m house / 6m garage; corner lot secondary frontage 3m house / 6m garage",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code 9.3.5, Table 9.3.5.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback (dwelling house, urban), High density residential",
+        "value": "Arterial/sub-arterial 10m; collector and access street 4.5m house / 6m garage; corner lot secondary frontage 3m house / 6m garage",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code 9.3.5, Table 9.3.5.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback (dwelling house, urban), Township (dwelling house)",
+        "value": "Arterial/sub-arterial 10m; collector and access street 4.5m house / 6m garage; corner lot secondary frontage 3m house / 6m garage",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code 9.3.5, Table 9.3.5.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback (dwelling house), Rural / Rural residential",
+        "value": "Arterial 20m; sub-arterial 10m; collector 10m; access street 10m",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Table 9.3.5.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Side and rear, Rural (>=1ha)",
+        "value": "10m",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Side and rear, Rural residential (>=5000m2)",
+        "value": "10m from adjoining Rural zone; 5m from adjoining Rural residential or other zones",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Side and rear, Residential zones (dwelling house)",
+        "value": "Not set by planning scheme for dwelling house; regulated under building legislation (QDC MP1.2)",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), QDC MP1.2",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height, Dwelling house (general)",
+        "value": "2 storeys (8.5m) roof apex to natural ground; flood hazard area 8.5m plus defined flood level; parts of Mackay Harbour and Sarina Beach 3 storeys (11m); landslide hazard overlay 10m",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code 9.3.5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Site cover, Dwelling house (general)",
+        "value": "Site >= 400m2: 50%; 250-400m2: 60% (band boundaries unclear in guide); <= 250m2: 75%",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code 9.3.5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Parking and garage, Dwelling house (general)",
+        "value": "Min 2 spaces; enclosed garage/carport width lesser of 7m or 50% of frontage",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Dwelling house code 9.3.5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       },
+       {
+        "label": "Habitable floor level, Dwelling house (flood hazard)",
+        "value": "Highest of: 300mm above 1% AEP flood or storm tide; RL 5.4m AHD in Mackay; 225mm above natural ground; 300mm above kerb/road crown",
+        "source": "Mackay Council User Guide #9 Houses (secondary summary, (c)2017, v2 Oct 2024), Flood and coastal hazard overlay code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_9_-_houses_v2_-_oct_2024.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "dual": {
+    "zones": [],
+    "checks": [
+     "The Part 5 tables could not be read, so the level of assessment for dual occupancy is not stated in any source read."
+    ],
+    "sources": [
+     {
+      "name": "Mackay Know Your Land Use zone cards",
+      "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/know-your-land-use-zones/low_density_residential_zone_card.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Zone not loaded for this council yet. Level of assessment not stated in any source read for dual occupancy.",
+      "items": [
+       {
+        "label": "Dual occupancy: Low density residential",
+        "value": "Level of assessment not stated in any source read: Listed as expected use on zone card but assessment level not stated in any source read; Part 5 table not readable (PDF truncated)",
+        "source": "Know Your Land Use zone card Low density residential (clause: Table 5.5.9 (to read))",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/know-your-land-use-zones/low_density_residential_zone_card.pdf",
+        "verify": true
+       },
+       {
+        "label": "Dual occupancy: Medium density residential",
+        "value": "Level of assessment not stated in any source read: Expected use per zone card; level not stated; RAL guide shows min lot 600m2 (MD1) / 400m2 (MD2) for dual occupancy",
+        "source": "Know Your Land Use zone card Medium density residential (clause: Table 5.5.12 (to read))",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/know-your-land-use-zones/medium_density_residential_zone_card.pdf",
+        "verify": true
+       },
+       {
+        "label": "Dual occupancy: Township",
+        "value": "Level of assessment not stated in any source read: Expected use per zone card; level not stated",
+        "source": "Know Your Land Use zone card Township (clause: Part 5 Township table (to read))",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/know-your-land-use-zones/township_zone_card.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "md": {
+    "zones": [],
+    "checks": [
+     "Taller or denser than the zone code limits: expect impact assessment (for example 4 storeys in Low density residential)."
+    ],
+    "sources": [
+     {
+      "name": "Mackay Council User Guide #12 Multiple dwellings",
+      "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Zone not loaded for this council yet, so the level depends on the lot's zone (look it up on MiMAPS). Researched levels by zone:",
+      "items": [
+       {
+        "label": "Multiple dwelling: Medium density residential, High density residential, Emerging community, Neighbourhood centre, Specialised centre (SC2 Tavern precinct)",
+        "value": "Code assessment: No public notification",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), SC1.1 (3+ dwellings); Multiple dwelling activities code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Multiple dwelling: Low density residential; Township",
+        "value": "Code assessment: Only if height (2 storeys/8.5m) and plot ratio provisions of the zone code are met, else impact (e.g. 4 storeys in LDR = impact, Table 6.2.9.3.A AO5.1)",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017); Mackay Council User Guide #3 Do I need to lodge a DA, Table 6.2.9.3.A AO5.1",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Multiple dwelling: Principal centre (City core / City mixed use precincts only)",
+        "value": "Code assessment: Per Mackay city centre local plan",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Mackay city centre local plan",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Multiple dwelling: Major / District / Local centre",
+        "value": "Code assessment: Only if site also contains an existing or proposed commercial or community use",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Part 5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Multiple dwelling: Mixed use",
+        "value": "Code assessment: Only if site does not front Sydney St or Juliet St",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Part 5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Multiple dwelling: Any other zone",
+        "value": "Impact assessment: Public notification",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Part 5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height / plot ratio / density, High density residential",
+        "value": "32m (10 storeys); plot ratio 2.5:1; 1 dwelling per 75m2; min site 1,500m2, frontage 25m (multiple dwelling)",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), High density residential zone code 6.2.5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height / plot ratio / density, Medium density MD1",
+        "value": "8.5m (2 storeys); plot ratio 0.6:1 or 0.5:1; 1 dwelling per 500m2; min site 900m2, frontage 15m (multiple dwelling)",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Medium density zone code 6.2.12",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height / plot ratio / density, Medium density MD2",
+        "value": "8.5m (2 storeys); plot ratio 0.8:1; 1 dwelling per 300m2; min site 600m2, frontage 15m",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Medium density zone code 6.2.12",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height / plot ratio / density, Medium density MD3",
+        "value": "17m (5 storeys) in certain areas, 11m (3 storeys) elsewhere; plot ratio 1.5:1 / 1.2:1; 1 dwelling per 200m2; min site 1,000m2, frontage 20m",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Medium density zone code 6.2.12",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height / plot ratio, Low density residential (multiple dwelling)",
+        "value": "8.5m (2 storeys); plot ratio 0.5:1; min site 1,200m2, frontage 20m",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Low density zone code 6.2.9, Table 6.2.9.3.A",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height / plot ratio, Township (multiple dwelling)",
+        "value": "8.5m (2 storeys); plot ratio 0.3:1; min site 1,000m2 or 4,000m2, frontage 40m",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Township zone code 6.2.23",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback, Multiple dwelling zones (HDR, MD3)",
+        "value": "Arterial/sub-arterial 10m; collector/access 6m; laneway 0m to walls <=3.5m, 6m (HDR) or 2m (MD3) above",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Multiple dwelling activities code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Front setback, MD1, MD2, Low density (multiple dwelling)",
+        "value": "Arterial/sub-arterial 10m; collector/access 4.5m dwelling / 6m garage; laneway 0m to walls <=3.5m, 2m above",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Multiple dwelling activities code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       },
+       {
+        "label": "Side and rear, Multiple dwelling (all)",
+        "value": "Wall <=4.5m: 1.5m; <=7.5m: 2m; <=11m: 6m if adjoining LDR else 2.5m; <=14m: 15m / 2.5m; <=17m: 15m / 3.5m; >17m: performance / 6m",
+        "source": "Mackay Council User Guide #12 Multiple dwellings (secondary summary, (c)2017), Multiple dwelling activities code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_12_-_multiple_dwellings.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "rol": {
+    "zones": [],
+    "checks": [
+     "Reconfiguring a lot code 9.4.3 (Tables 9.4.3.3.A/B/C) sets the minimum lot sizes; the scheme PDF could not be read in full."
+    ],
+    "sources": [
+     {
+      "name": "Mackay Council User Guide #16 Residential subdivision in urban areas",
+      "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf"
+     },
+     {
+      "name": "Mackay Council User Guide #17 Residential subdivision non-urban",
+      "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_17_-_residential_subdivision_non-urban.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Zone not loaded for this council yet, so the level depends on the lot's zone (look it up on MiMAPS). Researched levels by zone:",
+      "items": [
+       {
+        "label": "Reconfiguring a lot: Most zones (urban and non-urban)",
+        "value": "Code assessment: Most residential subdivision is code assessable (no notification); boundary realignment and access easement need an application; amalgamation, community title/body corporate RAL and council infrastructure acquisitions are accepted",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017); Mackay Council User Guide #17 Residential subdivision non-urban (secondary summary), Part 5.6; Reconfiguring a lot code 9.4.3; Planning Regulation 2017 Sch 6 Pt 4 item 21",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Reconfiguring a lot: Rural",
+        "value": "Impact assessment: Subdivision 'not supported' unless every lot >= 100 ha",
+        "source": "Mackay Council User Guide #17 Residential subdivision non-urban (secondary summary), Table 9.4.3.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_17_-_residential_subdivision_non-urban.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Low density residential",
+        "value": "400 m², frontage 10 m",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Medium density residential – MD1 dwelling house / per dwelling for multiple",
+        "value": "300 m², frontage 10 m",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Medium density residential – MD1 dual occupancy or multiple dwelling (frontage)",
+        "value": "600 m², frontage 15 m",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B (600m2 is dual occupancy)",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Medium density residential – MD2 dwelling house / per dwelling for multiple",
+        "value": "200 m², frontage 5 m",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Medium density residential – MD2 dual occupancy or multiple dwelling (frontage)",
+        "value": "400 m², frontage 15 m",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B (400m2 is dual occupancy)",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Medium density residential – MD3",
+        "value": "1,000 m², frontage 20 m",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, High density residential",
+        "value": "1,500 m², frontage 25 m",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Emerging community – per approved Development Framework Plan",
+        "value": "no fixed value",
+        "source": "Mackay Council User Guide #16 Residential subdivision in urban areas (secondary summary, (c)2017), Table 9.4.3.3.B (no fixed value)",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_16_-_residential_subdivision_in_urban_areas.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Rural",
+        "value": "1,000,000 m²",
+        "source": "Mackay Council User Guide #17 Residential subdivision non-urban (secondary summary), Table 9.4.3.3.B (100 ha)",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_17_-_residential_subdivision_non-urban.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Rural residential",
+        "value": "10,000 m², frontage 60 m",
+        "source": "Mackay Council User Guide #17 Residential subdivision non-urban (secondary summary), Table 9.4.3.3.B (1 ha)",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_17_-_residential_subdivision_non-urban.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Township",
+        "value": "1,000 m², frontage 20 m",
+        "source": "Mackay Council User Guide #17 Residential subdivision non-urban (secondary summary), Table 9.4.3.3.B",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_17_-_residential_subdivision_non-urban.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "commercial": {
+    "zones": [],
+    "checks": [],
+    "sources": [
+     {
+      "name": "Mackay Council User Guide #14 Centres and commercial development",
+      "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_14_-_centres_and_commercial_development.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Zone not loaded for this council yet, so the level depends on the lot's zone (look it up on MiMAPS). Researched levels by zone:",
+      "items": [
+       {
+        "label": "Shop: Principal / Major / District / Local centre",
+        "value": "Level of assessment not stated in any source read: Guide says centre activities supported; level not stated",
+        "source": "Mackay Council User Guide #14 (clause: Part 5 (to read))",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_14_-_centres_and_commercial_development.pdf",
+        "verify": true
+       },
+       {
+        "label": "Height, Centre zones",
+        "value": "Principal up to 49m AHD; Major 7 storeys Mount Pleasant, 5 Rural View, 4 Sarina; District 5 storeys North Mackay/Fourways, 3 Andergrove/Walkerston, 2 Marian/Parkside; Local 3 Marina else 2; Neighbourhood 2; Specialised 11m non-residential",
+        "source": "Mackay Council User Guide #14, Centre zone codes",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_14_-_centres_and_commercial_development.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   },
+   "industry": {
+    "zones": [],
+    "checks": [],
+    "sources": [
+     {
+      "name": "Mackay Council User Guide #18 Industrial development",
+      "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_18_-_industrial_development.pdf"
+     }
+    ],
+    "rules": [
+     {
+      "zone": [],
+      "level": "Zone not loaded for this council yet, so the level depends on the lot's zone (look it up on MiMAPS). Researched levels by zone:",
+      "items": [
+       {
+        "label": "Low impact industry: Low impact industry zone",
+        "value": "Code assessment: Per guide key 'P' = code or accepted subject to requirements; table columns could not be mapped reliably to zones; unticked uses impact. Industry thresholds in SC1.1.2",
+        "source": "Mackay Council User Guide #18 Industrial development, SC1.1.2 Industry thresholds; Industry activities code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_18_-_industrial_development.pdf",
+        "verify": true
+       },
+       {
+        "label": "Food and drink outlet: Low impact industry zone",
+        "value": "Code if GFA <= 150m2, impact above 150m2",
+        "source": "Mackay Council User Guide #3 Do I need to lodge a DA, Part 5",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_3_-_do_i_need_to_lodge_a_development_application.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, Industry zones (non-high impact) site area",
+        "value": "2,500 m², frontage 30 m",
+        "source": "Mackay Council User Guide #18 (clause: Industry activities code (not numbered in guide))",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_18_-_industrial_development.pdf",
+        "verify": true
+       },
+       {
+        "label": "Minimum lot size and frontage, High impact industry",
+        "value": "3,500 m², frontage 35 m",
+        "source": "Mackay Council User Guide #18 (clause: Industry activities code (not numbered in guide))",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_18_-_industrial_development.pdf",
+        "verify": true
+       },
+       {
+        "label": "Site cover and front setback, Industry zones",
+        "value": "Site cover <= 60%; front 10m to arterial/sub-arterial, 6m other roads; landscaping 10% (arterial) or 7.5%",
+        "source": "Mackay Council User Guide #18, Industry activities code",
+        "url": "https://www.mackay.qld.gov.au/files/assets/public/v/1/3-business/documents/forms-and-fact-sheet/user_guide_18_-_industrial_development.pdf",
+        "verify": true
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "brisbane": {
+  "zones": [],
+  "rules": [],
+  "provisions": [],
+  "uses": {
+   "house": {
+    "zones": [
+     "medium density residential"
+    ],
+    "checks": [],
+    "sources": [],
+    "rules": [
+     {
+      "zone": [
+       "medium density residential"
+      ],
+      "level": "Accepted development if identified in schedule 6, part 2 of the Planning Regulation; accepted subject to requirements if all acceptable outcomes of the Dwelling house code (or the Dwelling house (small lot) code on a small lot) are met; otherwise code assessment. Where an overlay applies a dwelling house may become assessable (s5.10).",
+      "items": [
+       {
+        "label": "Accepted development",
+        "value": "If identified in schedule 6, part 2 of the Planning Regulation (no requirements). Note: where an overlay applies a dwelling house may become assessable (s5.10).",
+        "source": "Brisbane City Plan 2014 - Minor and administrative amendment package W, Schedule of Amendments (v37.00/2026), Table 5.5.3 (Dwelling house)",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-minor-and-administrative-package-w-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Accepted development subject to requirements",
+        "value": "Accepted subject to requirements: not on a small lot and complying with ALL acceptable outcomes of the Dwelling house code; OR on a small lot and complying with ALL acceptable outcomes of the Dwelling house (small lot) code (and not identified in sch 6 pt 2). Note: where an overlay applies a dwelling house may become assessable (s5.10).",
+        "source": "Brisbane City Plan 2014 - Minor and administrative amendment package W, Schedule of Amendments (v37.00/2026), Table 5.5.3 (Dwelling house)",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-minor-and-administrative-package-w-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Code assessment",
+        "value": "Not complying with all acceptable outcomes: assess against Dwelling house code (not small lot) or Dwelling house (small lot) code (small lot) plus the applicable zone code. Note: where an overlay applies a dwelling house may become assessable (s5.10).",
+        "source": "Brisbane City Plan 2014 - Minor and administrative amendment package W, Schedule of Amendments (v37.00/2026), Table 5.5.3 (Dwelling house)",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-minor-and-administrative-package-w-v37-2026.pdf",
+        "verify": false
+       }
+      ]
+     }
+    ]
+   },
+   "md": {
+    "zones": [],
+    "checks": [],
+    "sources": [],
+    "rules": [
+     {
+      "zone": [
+       "low medium density residential"
+      ],
+      "level": "Code assessment within the height caps for the precinct; impact assessment is expected above them (row not in the schedule; verify).",
+      "items": [
+       {
+        "label": "Level of assessment",
+        "value": "Code assessment (caps by precinct)",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Table 5.5.2 (Multiple dwelling)",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Height",
+        "value": "2 storey mix: 2 storeys/9.5m; 3 or 4 storey mix: 4 storeys/14m (800m2, key location) else 3 storeys/11.5m. Building transition to adjoining dwelling house: 9.5m/2 storeys (2 storey mix) or 11.5m/3 storeys (3 or 4 storey mix).",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Multiple dwelling code Table 9.3.14.3.B, Table 9.3.14.3.I",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Minimum site – 2 storey mix (max 2 storeys/9.5m)",
+        "value": "600 m², frontage 15 m",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Multiple dwelling code Table 9.3.14.3.B",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Minimum site – 3 or 4 storey mix, 4 storeys/14m (key location, road reserve 15.5m+)",
+        "value": "800 m², frontage 20 m. Condition text mixes deleted/inserted wording; TOA Table 5.5.2 (Multiple dwelling) states 800m2 and part of frontage in a key location. Verify the road-reserve (15.5m) condition survives in 9.3.14.3.B.",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Multiple dwelling code Table 9.3.14.3.B",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Minimum site – 3 or 4 storey mix, all other (max 3 storeys/11.5m)",
+        "value": "600 m², frontage 15 m",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Multiple dwelling code Table 9.3.14.3.B",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       }
+      ]
+     }
+    ]
+   },
+   "rol": {
+    "zones": [],
+    "checks": [],
+    "sources": [],
+    "rules": [
+     {
+      "zone": [
+       "low medium density residential"
+      ],
+      "level": "Impact assessment below the lot-size thresholds in the items; complying lots are expected to be code assessable (not shown in the schedule; verify).",
+      "items": [
+       {
+        "label": "Impact assessment thresholds",
+        "value": "Impact assessment where a reconfigured lot (with no associated assessable MCU) is: 2 storey mix precinct - under 260m2 (rear lot under 350m2); 3 or 4 storey mix precinct with part of frontage in a key location - under 600m2; 3 or 4 storey mix precinct with ALL frontages outside a key location - under 120m2, or 120-180m2 if accessed from a major road or frontage under 6m, or under 350m2 for a rear lot. Thresholds apply whether or not lodged with an associated MCU. Volumetric subdivision not tied to a building also impact. Complying lots expected to be code assessable - verify.",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Table 5.6.1 (Low-medium density residential zone)",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Lot size and frontage – 3 or 4 storey mix, part of frontage within a key location",
+        "value": "600 m², frontage 15 m, rectangle 18 x 20 m, rear lot 600 m²",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Table 9.4.10.3.B Part 1; Table 5.6.1",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Lot size and frontage – 3 or 4 storey mix, all frontages outside key location (not narrow street)",
+        "value": "120 m², frontage 6.5 m, rectangle 6 x 10 or 8 x 7 m. Frontage 6.5m (6.0m if vehicle access via shared driveway/crossover) with average frontage width of all lots 7.5m or greater. Impact threshold: under 120m2, or 120-180m2 if major-road access or frontage under 6m.",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Table 9.4.10.3.B Part 2",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Lot size and frontage – 3 or 4 storey mix, all frontages outside key location, on a narrow street (<6m road width)",
+        "value": "120 m², frontage 8 m, rectangle 6 x 10 or 8 x 7 m. Frontage 8m (7.5m with shared driveway/crossover).",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Table 9.4.10.3.B Part 2",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       },
+       {
+        "label": "Lot size and frontage – 3 or 4 storey mix, rear lot outside key location",
+        "value": "350 m²",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Table 5.6.1",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       }
+      ]
+     },
+     {
+      "zone": [
+       "low density residential"
+      ],
+      "level": "Impact assessment below the lot-size thresholds in the items; complying lots are expected to be code assessable (not shown in the schedule; verify).",
+      "items": [
+       {
+        "label": "Impact assessment thresholds",
+        "value": "Impact assessment where a reconfigured lot is: (A) if the entirety of all frontages is within 300m walking distance (was 200m before v37) of the nearest point of a Centre-zone-category site(s) with combined area >2,000m2 - less than 300m2; (B) otherwise - less than 400m2, or less than 600m2 for a rear lot. Also volumetric subdivision not tied to a building. Benchmarks: Subdivision code, LDR zone code, prescribed secondary code. Compliant (larger) lots are expected to be code assessable - not shown in the schedule, verify.",
+        "source": "Brisbane City Plan 2014 - More Homes, Sooner (LMR design) Schedule of Amendments, adopted 18 Aug 2026, effective 18 Sep 2026 (v37.00/2026), Table 5.6.1 (Low density residential zone)",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-citywide-amendment-more-homes-sooner-lm-density-residential-design-v37-2026.pdf",
+        "verify": false
+       }
+      ]
+     },
+     {
+      "zone": [
+       "rural residential"
+      ],
+      "level": "Impact assessment for a lot under 1 ha (100 ha minimum in the SEQ Regional Landscape and Rural Production Area).",
+      "items": [
+       {
+        "label": "Impact assessment threshold",
+        "value": "ROL (other than rearrangement of boundaries) resulting in a lot less than 1ha: impact assessment; note 100ha minimum applies in the SEQ Regional Landscape and Rural Production Area.",
+        "source": "Brisbane City Plan 2014 - Minor and administrative amendment package W, Schedule of Amendments (v37.00/2026), Table 5.6.1 (Rural residential zone)",
+        "url": "https://www.brisbane.qld.gov.au/content/dam/brisbanecitycouncil/corpwebsite/building-and-planning/documents/schedule-of-amendments-minor-and-administrative-package-w-v37-2026.pdf",
+        "verify": false
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "setbacks": {
+   "Low-medium density residential zone": {
+    "title": "Queensland Housing Code, Chapter 2 (lots 450 m² and over)",
+    "min_area_m2": 450,
+    "note": "These are the Queensland Housing Code defaults (from 1 September 2026). Brisbane's City Plan (v37, 2026) still refers to the older QDC MP 1.1 and MP 1.2 rules for these lots, so the distances that apply here may be different. Do not rely on these numbers until council confirms them.",
+    "source": "https://www.housing.qld.gov.au/__data/assets/pdf_file/0021/92712/queensland-housing-code-01092026.pdf",
+    "rows": [
+     {
+      "label": "Front, primary frontage (building wall)",
+      "value": "5 m",
+      "ref": "Table 1, A2.1"
+     },
+     {
+      "label": "Front, garage or carport",
+      "value": "5.6 m",
+      "ref": "Table 1, A2.1"
+     },
+     {
+      "label": "Front, garage door, detached laundry or shed",
+      "value": "6 m",
+      "ref": "Table 1, A2.1"
+     },
+     {
+      "label": "Side, ground floor or wall up to 4.5 m",
+      "value": "1.5 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Side, wall over 4.5 m up to 8.5 m",
+      "value": "1.5 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Side, wall over 8.5 m",
+      "value": "2.5 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Rear, ground floor or wall up to 4.5 m",
+      "value": "4 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Rear, wall over 4.5 m up to 8.5 m",
+      "value": "3 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Rear, wall over 8.5 m",
+      "value": "3 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Detached single-storey secondary dwelling (up to 4.5 m): side / rear",
+      "value": "1.5 m / 2 m",
+      "ref": "Table 3, A3.1"
+     }
+    ],
+    "check": "Corner lots (secondary road frontage), laneway lots, lots under 450 m² and special-area lots: check with council."
+   },
+   "Medium density residential zone": {
+    "title": "Queensland Housing Code, Chapter 2 (lots 450 m² and over)",
+    "min_area_m2": 450,
+    "note": "These are the Queensland Housing Code defaults (from 1 September 2026). Brisbane's City Plan (v37, 2026) still refers to the older QDC MP 1.1 and MP 1.2 rules for these lots, so the distances that apply here may be different. Do not rely on these numbers until council confirms them.",
+    "source": "https://www.housing.qld.gov.au/__data/assets/pdf_file/0021/92712/queensland-housing-code-01092026.pdf",
+    "rows": [
+     {
+      "label": "Front, primary frontage (building wall)",
+      "value": "5 m",
+      "ref": "Table 1, A2.1"
+     },
+     {
+      "label": "Front, garage or carport",
+      "value": "5.6 m",
+      "ref": "Table 1, A2.1"
+     },
+     {
+      "label": "Front, garage door, detached laundry or shed",
+      "value": "6 m",
+      "ref": "Table 1, A2.1"
+     },
+     {
+      "label": "Side, ground floor or wall up to 4.5 m",
+      "value": "1.5 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Side, wall over 4.5 m up to 8.5 m",
+      "value": "1.5 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Side, wall over 8.5 m",
+      "value": "2.5 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Rear, ground floor or wall up to 4.5 m",
+      "value": "4 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Rear, wall over 4.5 m up to 8.5 m",
+      "value": "3 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Rear, wall over 8.5 m",
+      "value": "3 m",
+      "ref": "Table 3, A3.1"
+     },
+     {
+      "label": "Detached single-storey secondary dwelling (up to 4.5 m): side / rear",
+      "value": "1.5 m / 2 m",
+      "ref": "Table 3, A3.1"
+     }
+    ],
+    "check": "Corner lots (secondary road frontage), laneway lots, lots under 450 m² and special-area lots: check with council."
+   }
+  }
  }
 }
