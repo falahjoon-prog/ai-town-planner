@@ -59,7 +59,7 @@
     "da_name": "Logan PD Online",
     "lodge_url": "https://www.logan.qld.gov.au/planning-and-development/pd-online",
     "contact": "Logan City Council (07) 3412 3412",
-    "licence": "CC BY 3.0 AU (council mapping service); Queensland cadastre and addresses CC BY 4.0",
+    "licence": "CC BY 3.0 AU (Logan Planning Scheme map service, ArcGIS item 12cfd36ecb7540e093c22a64090a11b6); Queensland cadastre and addresses CC BY 4.0",
     "attribution": "(c) Logan City Council",
     "rules": "logan",
     "title_prefix": "Logan — ",
@@ -91,14 +91,17 @@
             "Local Plans"
           ],
           "zoning": [
-            "^Zones?$",
-            "^Zoning$",
-            "^Zones \\(",
-            "Zone$"
+            "^ZM-01"
           ],
           "skip": [
             "(?i)label",
-            "(?i)annotation"
+            "(?i)annotation",
+            "(?i)figure (lineage|locations)$",
+            "(?i)streetscape",
+            "(?i)place making"
+          ],
+          "precincts": [
+            "^ZM-02"
           ]
         }
       ],
@@ -138,7 +141,7 @@
     "da_name": "City of Moreton Bay building and development",
     "lodge_url": "https://www.moretonbay.qld.gov.au/Services/Building-Development",
     "contact": "City of Moreton Bay (07) 3205 0555",
-    "licence": "City of Moreton Bay Data Hub (see handoffs/councils.md); Queensland cadastre and addresses CC BY 4.0",
+    "licence": "CC BY 4.0 (City of Moreton Bay Data Hub, e.g. ArcGIS item 9e142c14e15a43cfac2cc5bae953ea62 'MBRC Planning Scheme - Zones'); Queensland cadastre and addresses CC BY 4.0",
     "attribution": "(c) City of Moreton Bay",
     "rules": "moreton_bay",
     "title_prefix": "Moreton Bay — ",
@@ -162,7 +165,7 @@
           "kind": "arcgis",
           "root": "https://services-ap1.arcgis.com/152ojN3Ts9H3cdtl/arcgis/rest/services",
           "services": [
-            "ZM_Zones_Precincts_WebMercator_OpenData",
+            "ZM_Zones_Dissolved_WebMercator_OpenData",
             "MBRC_PlanningScheme_ZM_LocalPlanBoundary",
             "MBRC_PlanningScheme_ZM_LocalPlanPrecincts",
             "OM_.*_WebMercator_OpenData",
@@ -172,12 +175,15 @@
           "service_type": "FeatureServer",
           "pick": "all",
           "zoning": [
-            "^ZM_Zones_Precincts"
+            "^ZM_Zones_Dissolved"
           ],
           "skip": [
             "(?i)label",
             "(?i)annotation"
-          ]
+          ],
+          "zone_field": "LVL1_ZONE",
+          "precinct_field": "ZONE_PREC",
+          "title_strip": "^(MBRC_PlanningScheme_(OM_)?)"
         }
       ],
       "test": {

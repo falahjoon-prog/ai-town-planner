@@ -8,17 +8,37 @@ import FORMS from "../src-tauri/knowledge/forms.json";
 import SETBACKS_DATA from "../src-tauri/knowledge/setbacks.json";
 import TIMEFRAMES_DATA from "../src-tauri/knowledge/timeframes.json";
 import REFERRALS_DATA from "../src-tauri/knowledge/referrals.json";
+import COUNCILS_DATA from "../src-tauri/knowledge/councils.json";
+import COUNCIL_RULES from "../src-tauri/knowledge/council_rules.json";
 import "./style.css";
 
-type Hit = { pid: number; address: string; lotplan: string; suburb: string };
-type Overlay = { authority: string; distance_m: number | null; dataset_id: string; title: string; props: Record<string, unknown>; coverage_pct: number | null; geom: any };
+type Hit = { pid: number; address: string; lotplan: string; suburb: string; council?: string };
+// Council registry entry (src-tauri/knowledge/councils.json, shared with the data pack pipeline)
+type Council = { id: string; name: string; short: string; scheme: string; scheme_url: string; maps_url?: string; maps_name?: string; website?: string; da_url?: string; da_name?: string; water?: { name: string; url: string }; title_prefix?: string };
+const COUNCILS = COUNCILS_DATA as unknown as Council[];
+const councilOf = (id?: string): Council => COUNCILS.find((c) => c.id === (id || "brisbane")) ?? COUNCILS[0];
+type Overlay = { authority: string; council?: string | null; distance_m: number | null; dataset_id: string; title: string; props: Record<string, unknown>; coverage_pct: number | null; geom: any };
 type Assessment = {
-  parcel: { pid: number; lotplan: string; address: string; suburb: string; area_m2: number | null; geom: any };
-  zones: { authority: string; zone: { name: string; purpose: string; typical: string }; coverage_pct: number | null }[];
-  flags: { rule: { id: string; authority: string; title: string; code: string; note: string; checklist: string[] }; layers: string[] }[];
+  parcel: { pid: number; lotplan: string; address: string; suburb: string; council?: string; area_m2: number | null; geom: any };
+  zones: { authority: string; zone: { name: string; purpose: string; typical: string; source?: string; url?: string; verify?: boolean }; precinct?: string | null; coverage_pct: number | null }[];
+  flags: { rule: { id: string; authority: string; title: string; code: string; note: string; checklist: string[]; council?: string; url?: string }; layers: string[] }[];
   overlays: Overlay[];
   manifest: Record<string, string>;
+  council?: Council;
 };
+/** The council of the loaded site (Brisbane for older data packs). */
+const siteCouncil = (a: Assessment | null = current): Council => (a?.council as Council | undefined) ?? councilOf(a?.parcel.council);
+/** Source badge: council findings name the council, others use the authority label. */
+const authLabel = (authority: string, a: Assessment | null = current) => (authority === "council" ? `${siteCouncil(a).short} council` : AUTH[authority] ?? authority);
+const zoneTitle = (z: Assessment["zones"][number]) => (z.precinct ? `${z.zone.name} – ${z.precinct}` : z.zone.name);
+/** Councils covered by the installed data pack (from its manifest), else the registry. */
+function packCouncils(): string[] {
+  try {
+    const list = JSON.parse(status?.datapack?.councils ?? "[]") as { name: string }[];
+    if (list.length) return list.map((c) => c.name);
+  } catch { /* older pack without a council list */ }
+  return status?.datapack ? [status.datapack.region] : COUNCILS.map((c) => c.name);
+}
 type ModelStatus = { id: string; name: string; file: string; size_gb: number; min_ram_gb: number; note: string; installed: boolean; active: boolean };
 type AiSettings = { provider: string; model: string | null; ollama_url: string; ollama_model: string; anthropic_model: string; openai_base: string; openai_model: string };
 type Status = {
@@ -44,7 +64,7 @@ async function refreshStatus(): Promise<Status> {
   const p = s.datapack;
   $("packInfo").textContent = p ? `Data: ${p.region} · ${p.built_at}` : "No data pack: open Settings";
   $("packDetail").textContent = p
-    ? `${p.region} · built ${p.built_at} · ${Number(p.parcels).toLocaleString()} lots · ${p.layers} City Plan layers. ${p.attribution}`
+    ? `${p.region} · built ${p.built_at} · ${Number(p.parcels).toLocaleString()} lots · ${p.layers} planning scheme and state layers. ${p.attribution}`
     : "No data pack installed yet. Download the latest datapack .sqlite.gz from the GitHub Releases page, then import it here.";
   $("disclaimer").textContent = s.disclaimer;
   status = s;
@@ -328,7 +348,7 @@ $("results").addEventListener("click", (ev) => {
 });
 
 // Shared address search (main box and Compare dialog): Google suggestions when a key is set, else the offline typo-tolerant search.
-const NOT_FOUND = "Not found in the Brisbane City Council data pack (Brisbane council area only). It may be in another council area.";
+const notFound = () => `Not found in the data pack. It covers ${packCouncils().join(", ")}. The address may be in another council area.`;
 async function findAddresses(q: string): Promise<{ google?: { place_id: string; text: string }[]; hits?: Hit[]; note?: string }> {
   let note: string | undefined;
   if (hasGoogle) {
@@ -360,9 +380,9 @@ async function runSearch() {
     }
     const hits = r.hits ?? [];
     list.innerHTML = hits
-      .map((h) => `<li data-pid="${h.pid}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></li>`)
+      .map((h) => `<li data-pid="${h.pid}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)} · ${esc(councilOf(h.council).short)}</span></li>`)
       .join("");
-    $("hint").textContent = hits.length ? `${hits.length} result${hits.length > 1 ? "s" : ""}` : NOT_FOUND;
+    $("hint").textContent = hits.length ? `${hits.length} result${hits.length > 1 ? "s" : ""}` : notFound();
   } catch (e) {
     alertMsg(e);
   }
@@ -395,7 +415,7 @@ const PALETTE = ["#c2410c", "#0e7490", "#7c3aed", "#b91c1c", "#15803d", "#a16207
 // Compact finding card: source badge, title, short description; long text collapses behind a whole-card toggle ("Show more").
 function fcard(kind: string, authority: string, title: string, sub: string, text: string) {
   const long = text.length > 150;
-  return `<div class="fcard ${kind}${long ? " fold" : ""}"${long ? ` role="button" tabindex="0" aria-expanded="false" title="Show or hide the full description"` : ""}><div class="fc-top"><span class="auth">${esc(AUTH[authority] ?? authority)}</span><b>${esc(title)}</b></div>${sub ? `<div class="meta fc-sub">${esc(sub)}</div>` : ""}<p class="fc-text">${esc(text)}</p>${long ? `<span class="fc-more" aria-hidden="true"></span>` : ""}</div>`;
+  return `<div class="fcard ${kind}${long ? " fold" : ""}"${long ? ` role="button" tabindex="0" aria-expanded="false" title="Show or hide the full description"` : ""}><div class="fc-top"><span class="auth">${esc(authLabel(authority))}</span><b>${esc(title)}</b></div>${sub ? `<div class="meta fc-sub">${esc(sub)}</div>` : ""}<p class="fc-text">${esc(text)}</p>${long ? `<span class="fc-more" aria-hidden="true"></span>` : ""}</div>`;
 }
 function foldCard(c: HTMLElement) {
   c.setAttribute("aria-expanded", String(c.classList.toggle("open")));
@@ -423,20 +443,26 @@ async function loadSite(pid: number, silent = false) {
   $("site").hidden = false;
   ($("q") as HTMLInputElement).value = a.parcel.address || a.parcel.lotplan;
   $("results").innerHTML = "";
-  $("siteMeta").textContent = [a.parcel.lotplan, a.parcel.suburb].filter(Boolean).join(" · ");
+  const cn = siteCouncil(a);
+  $("siteMeta").textContent = [a.parcel.lotplan, a.parcel.suburb, cn.name].filter(Boolean).join(" · ");
+  $("siteMeta").title = `${cn.name} · ${cn.scheme}`;
+  $("tZoneLbl").textContent = `Zone · ${cn.short}`;
+  const daName = cn.da_name ?? "DA register";
+  $("daRegBtn").textContent = `Open ${cn.short} DA register (${daName})`;
+  $("daRegNote").textContent = `The address is copied. Paste it into the search on ${daName} to see applications and decisions on this lot and next door.`;
   $("tLot").textContent = a.parcel.area_m2 ? `${Math.round(a.parcel.area_m2).toLocaleString()} m²` : "–";
-  $("tZone").textContent = a.zones[0]?.zone.name ?? "–";
-  $("tZone").title = a.zones.map((z) => z.zone.name).join(", ");
+  $("tZone").textContent = a.zones[0] ? zoneTitle(a.zones[0]) : "–";
+  $("tZone").title = `${a.zones.map(zoneTitle).join(", ")} (${cn.scheme})`;
   $("tFlags").textContent = String(a.flags.length + a.overlays.length);
   $("tFlags").title = `${a.flags.length} constraints, ${a.overlays.length} mapped layers`;
   $("zones").innerHTML = a.zones.length
     ? a.zones
-        .map((z) => fcard("zone", z.authority, z.zone.name, z.coverage_pct != null && z.coverage_pct < 99 ? `${z.coverage_pct}% of lot` : "", z.zone.purpose))
+        .map((z) => fcard("zone", z.authority, zoneTitle(z), [z.authority === "council" ? cn.scheme : "", z.coverage_pct != null && z.coverage_pct < 99 ? `${z.coverage_pct}% of lot` : ""].filter(Boolean).join(" · "), z.zone.purpose + (z.zone.source ? ` (Source: ${z.zone.source}${z.zone.verify ? "; verify" : ""})` : "")))
         .join("")
-    : `<p class="meta">Zone not identified from the data pack. Check the zoning layer attributes below.</p>`;
+    : `<p class="meta">Zone not identified from the data pack. Check the zoning layer attributes below, or ${link(cn.scheme_url, cn.scheme)}.</p>`;
   $("flags").innerHTML = a.flags.length
     ? a.flags
-        .map((f) => fcard("flag", f.rule.authority, f.rule.title, f.rule.code, f.rule.note))
+        .map((f) => fcard("flag", f.rule.authority, f.rule.title, f.rule.authority === "council" ? `${cn.scheme}: ${f.rule.code}` : f.rule.code, f.rule.note))
         .join("")
     : `<p class="meta">No overlay constraints mapped on this lot.</p>`;
   renderSetbacks(a);
@@ -445,7 +471,7 @@ async function loadSite(pid: number, silent = false) {
   $("ovSummary").textContent = `All mapped layers (${a.overlays.length})`;
   $("overlays").innerHTML = a.overlays
     .map(
-      (o) => `<li><span class="auth">${esc(AUTH[o.authority] ?? o.authority)}</span> <b>${esc(o.title)}</b>${o.coverage_pct != null ? ` · ${o.coverage_pct}% of lot` : ""}${o.distance_m != null ? ` · ${o.distance_m} m away` : ""}
+      (o) => `<li><span class="auth">${esc(authLabel(o.authority, a))}</span> <b>${esc(o.title)}</b>${o.coverage_pct != null ? ` · ${o.coverage_pct}% of lot` : ""}${o.distance_m != null ? ` · ${o.distance_m} m away` : ""}
       <div class="meta">${Object.entries(o.props).slice(0, 6).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join(" · ")}</div></li>`
     )
     .join("");
@@ -531,9 +557,9 @@ function renderPotential() {
   ].filter(Boolean).join(" · ");
   const prov = p.provisions
     ? `<table class="ptable"><tr><th colspan="2">${esc(p.provisions.title)}</th><th>Source</th></tr>${p.provisions.items
-        .map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ` <span class="pill warn" title="Not yet confirmed for Brisbane: check with Brisbane City Council or a registered planner">verify</span>` : ""}</td><td class="meta">${link(i.url, i.source)}</td></tr>`)
+        .map((i) => `<tr><td>${esc(i.label)}</td><td><b>${esc(i.value)}</b>${i.verify ? ` <span class="pill warn" title="Not yet confirmed: check with ${esc(siteCouncil().name)} or a registered planner">verify</span>` : ""}</td><td class="meta">${link(i.url, i.source)}</td></tr>`)
         .join("")}</table>`
-    : `<p class="meta">${p.pda ? "PDA site: limits come from the PDA development scheme (EDQ)." : "No sourced numeric provisions for this zone in the app yet. The AI report names the City Plan codes that set them."}</p>`;
+    : `<p class="meta">${p.pda ? "PDA site: limits come from the PDA development scheme (EDQ)." : siteCouncil().id === "brisbane" ? "No sourced numeric provisions for this zone in the app yet. The AI report names the City Plan codes that set them." : `Zone provisions: not loaded yet – see ${link(siteCouncil().scheme_url, siteCouncil().scheme)}.`}</p>`;
   const fit = p.use_fit
     ? `<div id="useFit" class="fcard usefit ${p.use_fit.zone_ok === false ? "flag" : "zone"}"><span class="auth">Proposal</span> <b>${esc(p.use_fit.use_def.name)}</b>
        <div class="meta">Planning use term: ${esc(p.use_fit.use_def.term)}</div><p>${esc(p.use_fit.note)}</p>
@@ -776,7 +802,7 @@ $("floodBtn").addEventListener("click", async () => {
     return alertMsg(e);
   }
   if (!feats.length) {
-    setFloodUi(true, `<b>No mapped flooding within 400 m</b><div class="meta">Check Council's FloodWise Property Report to confirm.</div>`);
+    setFloodUi(true, `<b>No mapped flooding within 400 m</b><div class="meta">${floodCheck()}</div>`);
     return;
   }
   const titles = [...new Set(feats.map((f) => f.title))];
@@ -787,14 +813,21 @@ $("floodBtn").addEventListener("click", async () => {
   });
   m.addLayer({ id: "flood", type: "fill", source: "flood", paint: { "fill-color": ["get", "c"], "fill-opacity": 0.25 } }, "lot");
   m.addLayer({ id: "flood-line", type: "line", source: "flood", paint: { "line-color": ["get", "c"], "line-width": 1 } }, "lot");
-  const short = (t: string) => t.replace(/^City Plan 2014 — /, "").replace(/^Queensland — /, "State: ");
+  const pre = siteCouncil().title_prefix ?? "";
+  const short = (t: string) => (pre && t.startsWith(pre) ? t.slice(pre.length) : t).replace(/^Queensland — /, "State: ");
   setFloodUi(
     true,
     titles.map((t) => `<div><i style="background:${color(t)}"></i>${esc(short(t))}</div>`).join("") +
-      `<div class="meta">Mapped flood planning areas. Levels: FloodWise Property Report.</div>`
+      `<div class="meta">Mapped flood areas. ${siteCouncil().id === "brisbane" ? "Levels: FloodWise Property Report." : `Levels: ask ${esc(siteCouncil().name)} for flood information for this property.`}</div>`
   );
   fitTo([current.parcel.geom, ...feats.map((f) => f.geom)]);
 });
+
+/** What to check to confirm flooding, by council. */
+function floodCheck(): string {
+  const c = siteCouncil();
+  return c.id === "brisbane" ? "Check Council's FloodWise Property Report to confirm." : `Ask ${esc(c.name)} for flood information for this property to confirm.`;
+}
 
 function drawMap(a: Assessment) {
   map?.remove();
@@ -1198,6 +1231,13 @@ $("myMapBtn").addEventListener("click", () => openExternal(mapUrlFor(chosenMap()
 function renderMaps() {
   const f = val("mapsFilter").toLowerCase();
   const ok = (n: string) => !f || n.toLowerCase().includes(f);
+  const c = current ? siteCouncil() : null;
+  $("siteCouncilMaps").innerHTML = c
+    ? `<div class="mapitem"><div><b>${esc(c.name)}</b><div class="meta">This site's council · ${esc(c.scheme)}</div></div><div class="model-act">
+        ${c.maps_url ? `<button type="button" data-url="${esc(c.maps_url)}" data-title="${esc(c.maps_name ?? c.name)}">${esc(c.maps_name ?? "Interactive map")}</button>` : ""}
+        <button type="button" class="ghost" data-url="${esc(c.scheme_url)}" data-title="${esc(c.scheme)}">Planning scheme</button>
+        ${c.website ? `<button type="button" class="ghost" data-url="${esc(c.website)}" data-title="${esc(c.name)}">Website</button>` : ""}</div></div>`
+    : "";
   $("stateMaps").innerHTML = MAPS.state
     .filter((m) => ok(m.name))
     .map((m) => `<div class="mapitem"><div><b>${esc(m.name)}</b><div class="meta">${esc(m.desc)}</div></div><button type="button" data-url="${esc(m.url)}" data-title="${esc(m.name)}">Open</button></div>`)
@@ -1365,14 +1405,15 @@ function chargeEstimate(p: any): string {
   const n = p.lots_by_area;
   if (!rate || !n || n < 2) return "";
   const money = (x: number) => `$${Math.round(x).toLocaleString()}`;
-  return `<p class="meta"><b>Estimate:</b> ${n} lots = ${n - 1} additional × ${money(rate)} = <b>${money((n - 1) * rate)}</b> Council charge, plus Urban Utilities water and sewer. Before indexation and any credits.</p>`;
+  return `<p class="meta"><b>Estimate:</b> ${n} lots = ${n - 1} additional × ${money(rate)} = <b>${money((n - 1) * rate)}</b> Council charge, plus ${esc(siteCouncil().water?.name ?? "water and sewer")} water and sewer. Before indexation and any credits.</p>`;
 }
 
-// ---- Nearby approvals: Brisbane's DA register (Development.i), address copied for pasting ----
+// ---- Nearby approvals: the site council's DA register (Brisbane: Development.i), address copied for pasting ----
 $("daRegBtn").addEventListener("click", () => {
   if (!current) return;
   navigator.clipboard.writeText(current.parcel.address || current.parcel.lotplan).catch(() => {});
-  openExternal("https://developmenti.brisbane.qld.gov.au/");
+  const c = siteCouncil();
+  openExternal(c.da_url || c.website || c.scheme_url);
 });
 
 // ---- Statutory clock: rules from knowledge/timeframes.json (each with source); lodgement date and path saved per lot ----
@@ -1513,7 +1554,7 @@ $("suburbBtn").addEventListener("click", async () => {
   ($("suburbBtn") as HTMLButtonElement).disabled = true;
   try {
     const r = await invoke<any>("suburb_stats", { suburb: sub });
-    if (!r || !r.lots) { out.innerHTML = `<p class="err" role="alert">No lots found in the data pack for "${esc(sub)}". Check the suburb name; the pack covers the Brisbane City Council area only.</p>`; return; }
+    if (!r || !r.lots) { out.innerHTML = `<p class="err" role="alert">No lots found in the data pack for "${esc(sub)}". Check the suburb name; the pack covers ${esc(packCouncils().join(", "))}.</p>`; return; }
     const lot = current.parcel.area_m2 ?? 0;
     out.innerHTML = `<table class="ptable"><tbody>
       <tr><td>Lots in ${esc(r.suburb)}</td><td><b>${r.lots.toLocaleString()}</b></td></tr>
@@ -1523,7 +1564,7 @@ $("suburbBtn").addEventListener("click", async () => {
       <tr><td>Lots 800 m² or more</td><td>${r.pct_800}%</td></tr>
       <tr><td>Lots 900 m² or more (2 × 450 m² by area)</td><td>${r.pct_900}% (${r.count_900.toLocaleString()} lots)</td></tr>
       <tr><td>Lots 1,000 m² or more</td><td>${r.pct_1000}%</td></tr></tbody></table>
-      <p class="meta">From the Brisbane cadastre in the data pack. Population, income and housing: ${link("https://www.abs.gov.au/census/find-census-data/quickstats", "ABS Census QuickStats")} (search "${esc(sub)}").</p>`;
+      <p class="meta">${siteCouncil().id === "brisbane" ? "From the Brisbane cadastre in the data pack." : "From the Queensland cadastre in the data pack (lots in this suburb name, all councils)."} Population, income and housing: ${link("https://www.abs.gov.au/census/find-census-data/quickstats", "ABS Census QuickStats")} (search "${esc(sub)}").</p>`;
   } catch (e) {
     out.innerHTML = `<p class="err" role="alert">Suburb report failed: ${esc(String(e))}</p>`;
   } finally {
@@ -1574,8 +1615,8 @@ async function cmpFind() {
   try {
     const r = await findAddresses(q);
     const items = r.google ? r.google.map((x) => `<li><button type="button" class="ghost" data-place="${esc(x.place_id)}"><b>${esc(x.text)}</b><span>Google</span></button></li>`)
-      : (r.hits ?? []).map((h) => `<li><button type="button" class="ghost" data-pid="${h.pid}" data-addr="${esc(h.address)}" data-lp="${esc(h.lotplan)}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></button></li>`);
-    out.innerHTML = items.length ? items.join("") : `<li class="meta">${NOT_FOUND}</li>`;
+      : (r.hits ?? []).map((h) => `<li><button type="button" class="ghost" data-pid="${h.pid}" data-addr="${esc(h.address)}" data-lp="${esc(h.lotplan)}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)} · ${esc(councilOf(h.council).short)}</span></button></li>`);
+    out.innerHTML = items.length ? items.join("") : `<li class="meta">${notFound()}</li>`;
   } catch (e) {
     out.innerHTML = `<li class="err">${esc(e)}</li>`;
   }
@@ -1688,22 +1729,34 @@ $("batchSave").addEventListener("click", async () => {
 });
 
 // ---- Setbacks: rows come from knowledge/setbacks.json, only for zones and lot sizes it covers ----
-type SetbackSet = { title: string; min_area_m2: number; note: string; source: string; rows: { label: string; value: string; ref: string }[]; check: string };
+// Brisbane: knowledge/setbacks.json. Other councils: "setbacks" in knowledge/council_rules.json (keyed by zone, optional precincts).
+type SetbackSet = { title: string; min_area_m2: number; note: string; source: string; rows: { label: string; value: string; ref: string }[]; check: string; precinct?: string[] };
 const SETBACKS = SETBACKS_DATA as Record<string, SetbackSet>;
-/** The setback set for this lot, only when its zone is covered and the lot is at least the set's minimum area. */
+const COUNCIL_KB = COUNCIL_RULES as unknown as Record<string, { setbacks?: Record<string, SetbackSet | SetbackSet[]> }>;
+/** The setback set for this lot, only when its zone (and precinct, if the set names one) is covered and the lot is at least the set's minimum area. */
 function setbackSet(a: Assessment): SetbackSet | undefined {
-  const set = a.zones.map((z) => SETBACKS[z.zone.name]).find(Boolean);
+  const cid = siteCouncil(a).id;
+  const low = (x: string) => x.toLowerCase();
+  const pick = (z: Assessment["zones"][number]): SetbackSet | undefined => {
+    if (cid === "brisbane") return SETBACKS[z.zone.name];
+    const v = COUNCIL_KB[cid]?.setbacks?.[z.zone.name];
+    return (Array.isArray(v) ? v : v ? [v] : []).find((s) => !s.precinct?.length || s.precinct.some((p) => low(z.precinct ?? "").includes(low(p))));
+  };
+  const set = a.zones.map(pick).find(Boolean);
   const area = a.parcel.area_m2;
   return set && area != null && area >= set.min_area_m2 ? set : undefined;
 }
 function renderSetbacks(a: Assessment) {
-  const zones = a.zones.map((z) => z.zone.name);
+  const zones = a.zones.map(zoneTitle);
   const set = setbackSet(a);
   const area = a.parcel.area_m2;
-  const fact = `<button type="button" class="ghost" data-url="https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones">Open the City Plan fact sheet</button>`;
+  const cn = siteCouncil(a);
+  const fact = cn.id === "brisbane"
+    ? `<button type="button" class="ghost" data-url="https://www.brisbane.qld.gov.au/planning-building/planning-guidelines-tools/brisbane-city-plan-2014/fact-sheets/residential-development-suburban-zones">Open the City Plan fact sheet</button>`
+    : `<button type="button" class="ghost" data-url="${esc(cn.scheme_url)}">Open the ${esc(cn.scheme)}</button>`;
   if (!set) {
     $("setbacks").innerHTML = `<div class="card"><div class="meta">Zone: ${esc(zones.join(", ") || "not identified")}${area != null ? ` · ${Math.round(area)} m²` : ""}</div>
-      <p>Setback distances for this zone and lot size aren't in the app yet, so none are shown. Check with council.</p>${fact}</div>`;
+      <p>Setback distances for this zone and lot size aren't in the app yet, so none are shown. Check with ${esc(cn.name)}.</p>${fact}</div>`;
     return;
   }
   $("setbacks").innerHTML = `<div class="card"><div class="meta">${esc(set.title)} · <span class="pill warn">verify</span></div>
@@ -2192,8 +2245,8 @@ function prefill(): Record<string, string> {
     addl: "Not required",
     ease: "No",
     staged: "No",
-    assessor: "Brisbane City Council",
-    loc_lga: "Brisbane City Council",
+    assessor: siteCouncil().name,
+    loc_lga: siteCouncil().name,
     superseded: "No",
     ref_resp: "No",
     assoc: "No",
@@ -2289,7 +2342,7 @@ function formContext(): string {
     .filter((it) => it.t !== "note" && formVals[it.id])
     .map((it) => `${it.n} ${it.q}: ${it.t === "check" ? "ticked" : formVals[it.id]}`);
   return [
-    "TASK: Help the applicant complete the Queensland DA Form 1 (version 1.3). Explain questions in plain words, say what to check with council or City Plan, and suggest wording when asked. Do not tick declarations, do not fill in Part 9, and do not say an answer is correct.",
+    "TASK: Help the applicant complete the Queensland DA Form 1 (version 1.3). Explain questions in plain words, say what to check with council or its planning scheme, and suggest wording when asked. Do not tick declarations, do not fill in Part 9, and do not say an answer is correct.",
     `SITE: ${current?.parcel.address ?? ""} · ${current?.parcel.lotplan ?? ""}${current?.parcel.area_m2 ? ` · ${Math.round(current.parcel.area_m2)} m²` : ""}`,
     `ZONES: ${current?.zones.map((z) => z.zone.name).join(", ") || "not identified"}`,
     `CURRENT QUESTION: ${fvCtx.n} ${fvCtx.q} (${fvCtx.part})`,
@@ -2459,7 +2512,7 @@ $("recentBtn").addEventListener("click", () => { if ($("results").innerHTML) $("
 new MutationObserver(() => {
   const open = !!$("results").firstElementChild;
   $("recentBtn").setAttribute("aria-expanded", String(open));
-  if (!open && !$("hint").classList.contains("err") && $("hint").textContent !== NOT_FOUND) $("hint").textContent = "";
+  if (!open && !$("hint").classList.contains("err") && $("hint").textContent !== notFound()) $("hint").textContent = "";
 }).observe($("results"), { childList: true });
 document.addEventListener("mousedown", (ev) => {
   if (!$("results").firstElementChild) return;

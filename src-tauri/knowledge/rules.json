@@ -375,7 +375,8 @@
     "authority": "other",
     "always": true,
     "keywords": [],
-    "title": "Water and sewer (Urban Utilities)",
+    "council": "brisbane",
+  "title": "Water and sewer (Urban Utilities)",
     "code": "South East Queensland Water (Distribution and Retail Restructuring) Act 2009 — Urban Utilities connections",
     "note": "New or intensified development needs water and sewer connection approval from Urban Utilities and may attract infrastructure charges.",
     "checklist": [
@@ -406,7 +407,7 @@
     "note": "An easement is mapped over part of the lot. Easements (for example drainage, sewer, access or power) can restrict building, fencing, landscaping and subdivision layout. The map shows where; the title search shows the purpose and who benefits.",
     "checklist": [
       "Order a title search and read each easement's purpose and beneficiary",
-      "Check whether the easement is Urban Utilities, Energex, Council or a neighbour",
+      "Check whether the easement is held by the water and sewer provider, Energex, Council or a neighbour",
       "Keep buildings and deep structures clear of the easement unless the holder consents",
       "Show the easement on all plans lodged with the application"
     ],

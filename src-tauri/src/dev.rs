@@ -1,5 +1,6 @@
 //! Development potential: lot dimensions, frontage, zone provisions (sourced), subdivision yield and sketch,
 //! proposed-use fit, required forms, and contours (online, cached).
+use crate::council;
 use crate::data::{distance_m, e, geo_json, polys, to_geo, Parcel, Proj};
 use crate::rules::Assessment;
 use geo::{Area, BooleanOps, Coord, LineString, MultiPolygon, Polygon};
@@ -140,17 +141,17 @@ fn zone_text(a: &Assessment) -> String {
         .zones
         .iter()
         .filter(|z| z.authority == "council")
-        .map(|z| format!("{} {}", z.zone.name, z.raw))
+        .map(|z| format!("{} {} {}", z.zone.name, z.precinct.as_deref().unwrap_or(""), z.raw))
         .collect();
     norm(&parts.join(" "))
 }
 
-fn match_provisions(text: &str) -> Option<ProvSet> {
+fn match_provisions(text: &str, cid: &str) -> Option<ProvSet> {
     let zone_hit = |p: &ProvSet| p.zone.iter().any(|z| text.contains(&norm(z)));
-    provisions_kb()
-        .iter()
+    let kb: &[ProvSet] = if cid == council::DEFAULT { provisions_kb() } else { council::kb(cid).map(|k| k.provisions.as_slice()).unwrap_or(&[]) };
+    kb.iter()
         .find(|p| zone_hit(p) && !p.precinct.is_empty() && p.precinct.iter().any(|x| text.contains(&norm(x))))
-        .or_else(|| provisions_kb().iter().find(|p| zone_hit(p) && p.precinct.is_empty()))
+        .or_else(|| kb.iter().find(|p| zone_hit(p) && p.precinct.is_empty()))
         .cloned()
 }
 
@@ -290,8 +291,34 @@ fn strips(lot_m: &MultiPolygon<f64>, u: (f64, f64), n: usize, pr: &Proj) -> Vec<
         .collect()
 }
 
+/// A form with the council's own lodgement and water authority details (forms.json holds Brisbane's).
+fn council_form(mut f: FormDef, cid: &str) -> FormDef {
+    if cid == council::DEFAULT {
+        return f;
+    }
+    let c = council::info(cid);
+    let s = |k: &str| c[k].as_str().unwrap_or("").to_string();
+    match f.id.as_str() {
+        "daform1" | "daform2" => {
+            f.lodge = s("lodge_name");
+            f.lodge_url = s("lodge_url");
+        }
+        "water" => {
+            let w = &c["water"];
+            let (name, url) = (w["name"].as_str().unwrap_or("the water and sewer provider"), w["url"].as_str().unwrap_or(""));
+            f.to = name.into();
+            f.url = url.into();
+            f.lodge = name.into();
+            f.lodge_url = url.into();
+        }
+        _ => {}
+    }
+    f
+}
+
 fn forms_for(a: &Assessment, use_id: &str, pda: bool) -> Vec<FormNeed> {
-    let has = |id: &str| forms_kb().iter().find(|f| f.id == id).cloned();
+    let cid = a.parcel.council.as_str();
+    let has = |id: &str| forms_kb().iter().find(|f| f.id == id).cloned().map(|f| council_form(f, cid));
     let mut out = Vec::new();
     let mut add = |id: &str, reason: &str| {
         if let Some(form) = has(id) {
@@ -367,12 +394,18 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
 
     // Provisions and subdivision
     let pda = a.zones.iter().any(|z| z.authority == "pda");
+    let cid = a.parcel.council.as_str();
+    let brisbane = cid == council::DEFAULT;
     let text = zone_text(a);
-    let provisions = match_provisions(&text);
+    let provisions = match_provisions(&text, cid);
     let mut subdivision = Vec::new();
     let mut lots_by_area = None;
     if pda {
-        subdivision.push("The site is in a Priority Development Area: lot sizes and density come from the PDA development scheme, not City Plan.".into());
+        subdivision.push(if brisbane {
+            "The site is in a Priority Development Area: lot sizes and density come from the PDA development scheme, not City Plan.".into()
+        } else {
+            "The site is in a Priority Development Area: lot sizes and density come from the PDA development scheme, not the council planning scheme.".into()
+        });
     }
     match num(&provisions, "min_front") {
         Some(min) => {
@@ -392,7 +425,8 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
                 }
             }
         }
-        None if !pda => subdivision.push("No minimum lot size recorded for this zone in the app yet. Refer to the Subdivision code (Table of minimum lot sizes) in City Plan.".into()),
+        None if !pda && brisbane => subdivision.push("No minimum lot size recorded for this zone in the app yet. Refer to the Subdivision code (Table of minimum lot sizes) in City Plan.".into()),
+        None if !pda => subdivision.push(format!("Minimum lot size for this zone: {}.", council::not_loaded(cid))),
         None => {}
     }
     if let Some(d) = num(&provisions, "min_dual_occ") {
@@ -411,11 +445,25 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
 
     // Proposed use
     let use_fit = uses_kb().iter().find(|u| u.id == use_id && u.id != "general").map(|u| {
+        // Other councils: zones, checks, sources and level-of-assessment rows come from council_rules.json only.
+        let u = if brisbane {
+            u.clone()
+        } else {
+            let cu = council::kb(cid).and_then(|k| k.uses.get(use_id));
+            UseDef {
+                zones: cu.map(|c| c.zones.clone()).unwrap_or_default(),
+                checks: cu.map(|c| c.checks.clone()).unwrap_or_default(),
+                sources: cu.map(|c| c.sources.clone()).unwrap_or_default(),
+                rules: cu.map(|c| c.rules.clone()).unwrap_or_default(),
+                ..u.clone()
+            }
+        };
         let zone_ok = (!u.zones.is_empty()).then(|| u.zones.iter().any(|z| text.contains(&norm(z))));
         let note = match (pda, zone_ok) {
             (true, _) => "PDA site: check the PDA development scheme's land-use plan for this use.".to_string(),
             (_, Some(true)) => "The zone generally contemplates this use. The level of assessment depends on the precinct, scale and overlays.".to_string(),
             (_, Some(false)) => "This use is not typical in this zone. Expect impact assessment (public notification), and approval is less likely.".to_string(),
+            _ if !brisbane && u.rules.is_empty() => format!("Level of assessment for this use: {}.", council::not_loaded(cid)),
             _ => String::new(),
         };
         let rule = if pda { None } else { u.rules.iter().find(|r| r.zone.is_empty() || r.zone.iter().any(|z| text.contains(&norm(z)))).cloned() };

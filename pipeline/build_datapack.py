@@ -525,10 +525,10 @@ def leaf_layers(meta, groups=None):
     layers = meta.get("layers", [])
     by_id = {l["id"]: l for l in layers}
 
-    def leaves(l, parent):
+    def leaves(l, parent):  # parent = the nearest group (it names the overlay), without "(Part 8)"-style suffixes
         subs = l.get("subLayerIds") or []
         if subs:
-            return [x for s in subs if s in by_id for x in leaves(by_id[s], l["name"])]
+            return [x for s in subs if s in by_id for x in leaves(by_id[s], re.sub(r"\s*\(Part \d+\)$", "", l["name"]))]
         return [(l, parent)]
 
     tops = [l for l in layers if l.get("parentLayerId", -1) in (-1, None)]
@@ -552,11 +552,11 @@ def pick_field(fields, patterns):
     return None
 
 
-def zone_transform(src, info):
-    """Adds normalised "zone" / "precinct" props to zoning features (field names from the registry or guessed)."""
+def zone_transform(src, info, role="zoning"):
+    """Adds normalised "zone" / "precinct" props to zoning and precinct features (field names from the registry or guessed)."""
     names = [f["name"] for f in info.get("fields") or [] if f.get("type") == "esriFieldTypeString"]
-    zf = src.get("zone_field") or pick_field(names, [r"^zone_?name$", r"^zone_?desc", r"zone.*(name|desc)", r"^zone$", r"^lps_?zone", r"zone(?!.*code)", r"zone"])
-    pf = src.get("precinct_field") or pick_field(names, [r"^precinct_?name$", r"precinct.*(name|desc)", r"^precinct$", r"precinct(?!.*code)"])
+    zf = None if role == "precinct" else src.get("zone_field") or pick_field(names, [r"^zone_?name$", r"^zone_?desc", r"zone.*(name|desc)", r"^zone$", r"^lvl1_zone$", r"^lps_?zone", r"zone(?!.*(code|prec))", r"zone"])
+    pf = src.get("precinct_field") or pick_field(names, [r"^precinct_?name$", r"precinct.*(name|desc)", r"^precinct$", r"^zone_prec$", r"precinct(?!.*code)"])
 
     def t(props):
         low = {k.lower(): v for k, v in props.items()}
@@ -566,6 +566,21 @@ def zone_transform(src, info):
             props["precinct"] = str(low[pf.lower()])
         return props
     return t, zf, pf
+
+
+def pretty(s, strip=None):
+    """Readable layer name: registry prefix removed, underscores and CamelCase split."""
+    if strip:
+        s = re.sub(strip, "", s)
+    s = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", s.replace("_", " "))
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def layer_label(name, parent, strip=None):
+    name, parent = pretty(name, strip), pretty(parent, strip) if parent else None
+    if not parent or parent.lower() in name.lower():
+        return name
+    return parent if name.lower() in parent.lower() and len(name) * 2 > len(parent) else f"{parent} — {name}"
 
 
 def load_arcgis_council(db, c, src, bbox):
@@ -580,7 +595,7 @@ def load_arcgis_council(db, c, src, bbox):
         print(f"  service {sname}", flush=True)
         for layer, parent in leaf_layers(meta, src.get("groups")):
             name = layer.get("name", str(layer["id"]))
-            if any(re.search(p, name) for p in src.get("skip", [])):
+            if any(re.search(p, x) for p in src.get("skip", []) for x in (name, parent or "")):
                 continue
             total += 1
             url = f"{svc}/{layer['id']}"
@@ -589,17 +604,17 @@ def load_arcgis_council(db, c, src, bbox):
                 if info.get("type") not in (None, "Feature Layer"):
                     total -= 1
                     continue
-                zoning = any(re.search(p, x) for p in src.get("zoning", []) for x in (name, parent or "", sname))
-                tf, zf, pf = zone_transform(src, info) if zoning else (None, None, None)
+                hit = lambda key: any(re.search(p, x) for p in src.get(key, []) for x in (name, parent or "", sname))  # noqa: E731
+                role = "zoning" if hit("zoning") else "precinct" if hit("precincts") else "overlay"
+                tf, zf, pf = zone_transform(src, info, role) if role != "overlay" else (None, None, None)
                 lid = next_lid(db)
                 n = insert_features(db, lid, arcgis_features(url, oid, bbox_str(bbox) if bbox else None, "1=1", page, gj), tf)
-                label = f"{parent} — {name}" if parent and not name.lower().startswith(parent.lower()[:12]) else name
-                role = "zoning" if zoning else "overlay"
+                label = layer_label(name, parent, src.get("title_strip"))
                 did = f"{cid}:{role}:{slug(sname, 40)}:{layer['id']}:" + slug(label).replace("zoning", "zones")
                 db.execute("INSERT INTO layers VALUES(?,?,?,?,?,?)", (lid, did, f"{prefix}{label}", n, "council", cid))
                 db.commit()
                 ok += 1
-                print(f"   [{role}] {label}: {n}" + (f" (zone field {zf}, precinct field {pf})" if zoning else ""), flush=True)
+                print(f"   [{role}] {label}: {n}" + (f" (zone field {zf}, precinct field {pf})" if tf else ""), flush=True)
             except Exception as e:  # noqa: BLE001
                 failed.append(f"{sname}/{name}")
                 print(f"::warning title=Council layer failed::{sname}/{name}: {e}", flush=True)
