@@ -251,6 +251,20 @@ function showRecents() {
   $("hint").textContent = r.length ? "Saved and recent addresses" : "";
 }
 
+// Shared address search (main box and Compare dialog): Google suggestions when a key is set, else the offline typo-tolerant search.
+async function findAddresses(q: string): Promise<{ google?: { place_id: string; text: string }[]; hits?: Hit[]; note?: string }> {
+  let note: string | undefined;
+  if (hasGoogle) {
+    try {
+      const sg = await invoke<{ place_id: string; text: string }[]>("google_suggest", { q });
+      if (sg.length) return { google: sg };
+    } catch (e) {
+      note = String(e); // fall back to the offline search below
+    }
+  }
+  return { hits: await invoke<Hit[]>("search", { q }), note };
+}
+
 async function runSearch() {
   const q = ($("q") as HTMLInputElement).value.trim();
   const list = $("results");
@@ -259,20 +273,15 @@ async function runSearch() {
     showRecents();
     return;
   }
-  if (hasGoogle) {
-    try {
-      const sg = await invoke<{ place_id: string; text: string }[]>("google_suggest", { q });
-      if (sg.length) {
-        list.innerHTML = sg.map((x) => `<li data-place="${esc(x.place_id)}"><b>${esc(x.text)}</b><span>Google</span></li>`).join("");
-        $("hint").textContent = `${sg.length} suggestion${sg.length > 1 ? "s" : ""}`;
-        return;
-      }
-    } catch (e) {
-      $("hint").textContent = String(e); // fall back to the offline search below
-    }
-  }
   try {
-    const hits = await invoke<Hit[]>("search", { q });
+    const r = await findAddresses(q);
+    if (r.note) $("hint").textContent = r.note;
+    if (r.google) {
+      list.innerHTML = r.google.map((x) => `<li data-place="${esc(x.place_id)}"><b>${esc(x.text)}</b><span>Google</span></li>`).join("");
+      $("hint").textContent = `${r.google.length} suggestion${r.google.length > 1 ? "s" : ""}`;
+      return;
+    }
+    const hits = r.hits ?? [];
     list.innerHTML = hits
       .map((h) => `<li data-pid="${h.pid}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></li>`)
       .join("");
@@ -1205,17 +1214,72 @@ $("suburbBtn").addEventListener("click", async () => {
 });
 
 // ---- Compare 2–3 sites ----
+let cmpAdded: Site[] = [];
+function cmpRender() {
+  const checked = new Set([...document.querySelectorAll<HTMLInputElement>("#cmpPick input:checked")].map((i) => i.value));
+  const list = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts).filter((h) => !cmpAdded.some((c) => c.lotplan === h.lotplan));
+  const row = (h: Site, added: boolean) => `<div class="mapitem cmprow"><label><input type="checkbox" value="${esc(h.lotplan)}" data-pid="${h.pid}"${checked.has(h.lotplan) ? " checked" : ""}> ${h.star ? "★ " : ""}<b>${esc(h.address || h.lotplan)}</b> <span class="meta">${esc(h.lotplan)}</span></label>${added ? `<button type="button" class="ghost cmp-rm" data-lp="${esc(h.lotplan)}" aria-label="Remove ${esc(h.address || h.lotplan)}">Remove</button>` : ""}</div>`;
+  $("cmpPick").innerHTML = cmpAdded.map((h) => row(h, true)).join("") + list.map((h) => row(h, false)).join("") || `<p class="meta">No saved addresses yet. Search above to add one.</p>`;
+  cmpSync();
+}
+function cmpSync() {
+  const boxes = [...document.querySelectorAll<HTMLInputElement>("#cmpPick input")];
+  const n = boxes.filter((i) => i.checked).length;
+  boxes.forEach((i) => { i.disabled = n >= 3 && !i.checked; });
+  ($("cmpGo") as HTMLButtonElement).disabled = n < 2;
+  $("cmpMsg").textContent = n >= 3 ? "Limit of 3 addresses reached. Untick or remove one to change the selection." : `${n} of 3 selected (pick at least 2).`;
+}
+$("cmpPick").addEventListener("change", cmpSync);
+$("cmpPick").addEventListener("click", (ev) => {
+  const b = (ev.target as HTMLElement).closest<HTMLElement>(".cmp-rm");
+  if (!b) return;
+  cmpAdded = cmpAdded.filter((c) => c.lotplan !== b.dataset.lp);
+  cmpRender();
+});
+async function cmpFind() {
+  const q = ($("cmpQ") as HTMLInputElement).value.trim();
+  const out = $("cmpRes");
+  if (q.length < 3) { out.innerHTML = ""; return; }
+  try {
+    const r = await findAddresses(q);
+    const items = r.google ? r.google.map((x) => `<li><button type="button" class="ghost" data-place="${esc(x.place_id)}"><b>${esc(x.text)}</b><span>Google</span></button></li>`)
+      : (r.hits ?? []).map((h) => `<li><button type="button" class="ghost" data-pid="${h.pid}" data-addr="${esc(h.address)}" data-lp="${esc(h.lotplan)}"><b>${esc(h.address || h.lotplan)}</b><span>${esc(h.lotplan)}</span></button></li>`);
+    out.innerHTML = items.length ? items.join("") : `<li class="meta">No matches.</li>`;
+  } catch (e) {
+    out.innerHTML = `<li class="err">${esc(e)}</li>`;
+  }
+}
+let cmpTimer = 0;
+$("cmpQ").addEventListener("input", () => { clearTimeout(cmpTimer); cmpTimer = window.setTimeout(cmpFind, 250); });
+$("cmpQ").addEventListener("keydown", (ev) => { if ((ev as KeyboardEvent).key === "Enter") { ev.preventDefault(); clearTimeout(cmpTimer); cmpFind(); } });
+$("cmpRes").addEventListener("click", async (ev) => {
+  const b = (ev.target as HTMLElement).closest<HTMLElement>("button");
+  if (!b) return;
+  if (document.querySelectorAll("#cmpPick input:checked").length >= 3) { cmpSync(); return; }
+  let h: Hit | undefined;
+  try {
+    h = b.dataset.place ? await invoke<Hit>("google_pick", { placeId: b.dataset.place }) : { pid: Number(b.dataset.pid), address: b.dataset.addr ?? "", lotplan: b.dataset.lp ?? "", suburb: "" };
+  } catch (e) { return alertMsg(e); }
+  if (!h) return;
+  const lp = h.lotplan;
+  if (!cmpAdded.some((c) => c.lotplan === lp)) cmpAdded.unshift({ pid: h.pid, address: h.address, lotplan: lp, ts: Date.now() });
+  ($("cmpQ") as HTMLInputElement).value = "";
+  $("cmpRes").innerHTML = "";
+  cmpRender();
+  const box = [...document.querySelectorAll<HTMLInputElement>("#cmpPick input")].find((i) => i.value === lp);
+  if (box) { box.checked = true; cmpSync(); }
+});
 $("cmpBtn").addEventListener("click", () => {
-  const list = Object.values(sites()).sort((x, y) => Number(!!y.star) - Number(!!x.star) || y.ts - x.ts);
-  $("cmpPick").innerHTML = list.length
-    ? list.map((h) => `<label class="mapitem"><span><input type="checkbox" value="${esc(h.lotplan)}" data-pid="${h.pid}"> ${h.star ? "★ " : ""}<b>${esc(h.address || h.lotplan)}</b></span><span class="meta">${esc(h.lotplan)}</span></label>`).join("")
-    : `<p class="meta">Open a few addresses first – they appear here.</p>`;
+  cmpAdded = [];
+  ($("cmpQ") as HTMLInputElement).value = "";
+  $("cmpRes").innerHTML = "";
   $("cmpOut").innerHTML = "";
+  cmpRender();
   ($("cmpDlg") as HTMLDialogElement).showModal();
 });
 $("cmpGo").addEventListener("click", async () => {
   const picked = [...document.querySelectorAll<HTMLInputElement>("#cmpPick input:checked")].slice(0, 3);
-  if (picked.length < 2) return alertMsg("Pick 2 or 3 addresses.");
+  if (picked.length < 2) return;
   $("cmpOut").innerHTML = `<p class="meta">Comparing…</p>`;
   const rows: { a: Assessment; p: any }[] = [];
   for (const el of picked) {
