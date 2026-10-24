@@ -397,15 +397,16 @@ def load_parcels_cadastre(db, cid, cidx, src, bbox, limit=None):
             used.add(lp)
         addr = al[0][1] if al else ""
         suburb = (a.get("locality") or (al[0][2] if al else "") or "").upper()
-        if not addr:
-            addr = f"{lp}, {suburb} QLD" if suburb else lp
+        if not addr:  # no address point: lot/plan, or the road or feature name for unlotted parcels
+            first = lp or (f"{a['feat_name']} ({a.get('parcel_typ') or 'parcel'})" if a.get("feat_name") else "")
+            addr = ", ".join(x for x in [first, f"{suburb} QLD" if suburb else ""] if x)
         others = [x[1] for x in al[1:]]
         props = clean_props({"LOT": a.get("lot"), "PLAN_": a.get("plan"), "LOTPLAN": lp, "LOT_AREA": a.get("lot_area"),
                              "SUBURB": suburb, "TENURE_DESC": a.get("tenure"), "PARCEL_TYP_DESC": a.get("parcel_typ"),
                              "COVER_TYP": a.get("cover_typ"), "PROPERTY_NAME_1": a.get("feat_name"),
                              "LGA": a.get("shire_name"), "OTHER_ADDRESSES": "; ".join(others[:8]) + (" …" if len(others) > 8 else "")})
         pid = cidx * PID_STRIDE + int(a["objectid"])
-        search = " ".join([addr] + others[:40] + [lp]).upper()
+        search = " ".join([addr] + others[:40] + [lp]).upper() if lp else ""  # roads and unlotted land are not search results
         rows.append((pid, lp, addr, suburb, search, a.get("lot_area"), json.dumps(props), g, cid))
         idx.append((pid, *b))
         n += 1
