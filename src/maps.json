@@ -2,18 +2,24 @@
  "state": [
   {
    "name": "Queensland Globe",
-   "url": "https://qldglobe.information.qld.gov.au/",
-   "desc": "Property, cadastre, aerial imagery, planning and environment layers"
+   "url": "https://qldglobe.information.qld.gov.au/?topic=property",
+   "desc": "Property, cadastre, aerial imagery, planning and environment layers",
+   "copy": "lotplan",
+   "field": "the Globe search box (Property topic)"
   },
   {
    "name": "State planning mapping (SARA DA mapping & SPP IMS)",
    "url": "https://planning.qld.gov.au/planning-framework/mapping",
-   "desc": "State referral triggers and State Planning Policy mapping"
+   "desc": "State referral triggers and State Planning Policy mapping: pick DAMS or SPP IMS, then search the lot/plan",
+   "copy": "lotplan",
+   "field": "the mapping tool's search box"
   },
   {
    "name": "FloodCheck Queensland",
    "url": "https://floodcheck.information.qld.gov.au/",
-   "desc": "Flood extents and studies"
+   "desc": "Flood extents and studies",
+   "copy": "address",
+   "field": "the FloodCheck search box"
   },
   {
    "name": "Queensland Heritage Register",
@@ -42,17 +48,17 @@
   },
   {
    "name": "Before You Dig Australia (BYDA)",
-   "url": "https://www.byda.com.au/",
+   "url": "https://www.byda.com.au/before-you-dig/guide-to-free-plans/",
    "desc": "Free plans of underground services: water, sewer, recycled water, power, gas, fibre/telecoms"
   },
   {
    "name": "Urban Utilities",
-   "url": "https://urbanutilities.com.au/",
+   "url": "https://www.urbanutilities.com.au/development/our-services/how-to-connect-water-and-sewerage/standard-connections",
    "desc": "Water, sewer and recycled water connections (Brisbane, Ipswich, Lockyer, Scenic Rim, Somerset)"
   },
   {
    "name": "Powerlink",
-   "url": "https://www.powerlink.com.au/",
+   "url": "https://www.powerlink.com.au/network-connections",
    "desc": "Queensland high-voltage transmission network operator"
   }
  ],
