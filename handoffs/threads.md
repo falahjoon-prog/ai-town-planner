@@ -97,3 +97,9 @@ Common rules for every thread
 2) Done: slim tiles strip (cols .8/1.6/.8fr, 43 px high, 10/13 px text); Proposal type row sticky in .pbody with opaque panel bg and border; saved/recent and search results as floating popover (Escape, outside click, pick closes; aria-haspopup/expanded; old inline margin/hint rules removed); grip is full-height 12 px hit zone with hover/drag accent line, pointer capture, double-click expand/restore (150 ms transition, reduced-motion aware, persists colRight).
 3) Tests: tsc and vite build pass; headless Chromium 1280/1920 light/dark, default and 340 px: tiles 43 px, zone not clipped at default (clipped with ellipsis at 340), no horizontal scroll, popover moves nothing and closes on Esc/outside, sticky row gap 0 while scrolled, drag from top/mid/bottom works, dbl-click expands (930 / 1442 px) and restores. Shots: /tmp/claude-0/shots/t12-*.
 4) Remaining: zone name still ellipsised at 340 px (title tooltip kept); typed-search results also use the popover.
+
+### T13 report (map legend compact, PR against t12-tiles-sticky)
+1) Files: src/style.css (.legend rules; removed old .legend + short-window override), handoffs/threads.md.
+2) Done: legend now 11.5px labels, 10.5px note (wraps, max-width 260px), 10px swatches, 6/8px padding, 3px line gap, 8px radius, 86% panel surface, bottom-left at 8px/64px (just above the style bar). Same #legend container serves flood and power legends, so both get it; content unchanged.
+3) Tests: tsc and vite build pass; headless Chromium at 768/1280/1920, light+dark, injected power legend: no overlap with style bar or attribution (at 768 the pre-existing attribution/bar overlap is unchanged), no clipping, no page errors. Shots: /tmp/claude-0/shots/t13-{before,after}-*.png.
+4) Remaining: map pane is narrow (about 300 px at 768), so the legend cannot sit lower than the style bar's top without overlapping it; it is kept above the bar.
