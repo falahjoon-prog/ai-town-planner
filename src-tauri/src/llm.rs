@@ -49,6 +49,57 @@ pub const CATALOG: &[ModelSpec] = &[
 const N_CTX: u32 = 8192;
 const CHUNK: usize = 512;
 
+/// Drops `<think>...</think>` blocks from streamed text (Qwen3 reasoning), holding back
+/// only a possible partial tag so normal text streams immediately.
+struct ThinkFilter {
+    buf: String,
+    in_think: bool,
+}
+
+fn partial_len(buf: &str, tag: &str) -> usize {
+    (1..tag.len()).rev().find(|k| buf.ends_with(&tag[..*k])).unwrap_or(0)
+}
+
+impl ThinkFilter {
+    fn push(&mut self, s: &str, out: &mut impl FnMut(&str)) {
+        self.buf.push_str(s);
+        loop {
+            if self.in_think {
+                if let Some(i) = self.buf.find("</think>") {
+                    self.buf.drain(..i + 8);
+                    self.in_think = false;
+                    let n = self.buf.len() - self.buf.trim_start().len();
+                    self.buf.drain(..n);
+                } else {
+                    let cut = self.buf.len() - partial_len(&self.buf, "</think>");
+                    self.buf.drain(..cut);
+                    break;
+                }
+            } else if let Some(i) = self.buf.find("<think>") {
+                if i > 0 {
+                    out(&self.buf[..i]);
+                }
+                self.buf.drain(..i + 7);
+                self.in_think = true;
+            } else {
+                let cut = self.buf.len() - partial_len(&self.buf, "<think>");
+                if cut > 0 {
+                    out(&self.buf[..cut]);
+                }
+                self.buf.drain(..cut);
+                break;
+            }
+        }
+    }
+
+    fn flush(&mut self, out: &mut impl FnMut(&str)) {
+        if !self.in_think && !self.buf.is_empty() {
+            out(&self.buf);
+        }
+        self.buf.clear();
+    }
+}
+
 pub struct Engine {
     backend: Mutex<Option<LlamaBackend>>,
     model: Mutex<Option<(PathBuf, LlamaModel)>>,
@@ -67,6 +118,11 @@ impl Engine {
         max_new: usize,
         mut on_text: impl FnMut(&str),
     ) -> Result<(), String> {
+        // Qwen3 hybrid models reason in <think> blocks; skip that for fast answers.
+        // (Qwen3-2507 Instruct has no thinking mode, so it needs no prefill.)
+        let fname = model_path.file_name().and_then(|n| n.to_str()).unwrap_or("").to_lowercase();
+        let qwen3 = fname.contains("qwen3");
+        let think_prefill = qwen3 && !fname.contains("2507");
         self.cancel.store(false, Ordering::SeqCst);
         let mut bguard = self.backend.lock().map_err(e)?;
         if bguard.is_none() {
@@ -88,7 +144,15 @@ impl Engine {
             .map(|(role, content)| format!("<|im_start|>{role}\n{content}<|im_end|>\n"))
             .collect();
         prompt.push_str("<|im_start|>assistant\n");
-        let ctx_params = LlamaContextParams::default().with_n_ctx(NonZeroU32::new(N_CTX));
+        if think_prefill {
+            prompt.push_str("<think>\n\n</think>\n\n");
+        }
+        let threads = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4);
+        let threads = ((threads / 2).max(4)).min(threads) as i32; // ~physical cores
+        let ctx_params = LlamaContextParams::default()
+            .with_n_ctx(NonZeroU32::new(N_CTX))
+            .with_n_threads(threads)
+            .with_n_threads_batch(threads);
         let mut ctx = model.new_context(backend, ctx_params).map_err(e)?;
         let vocab = model.vocab();
         let tokens = vocab.tokenize(prompt.as_bytes(), false, true);
@@ -115,6 +179,14 @@ impl Engine {
             LlamaSampler::dist(42),
         ]);
         let mut pending: Vec<u8> = Vec::new();
+        let mut filter = ThinkFilter { buf: String::new(), in_think: false };
+        let mut emit = |t: &str| {
+            if qwen3 {
+                filter.push(t, &mut on_text);
+            } else {
+                on_text(t);
+            }
+        };
         for _ in 0..max_new {
             if self.cancel.load(Ordering::SeqCst) || pos as u32 >= N_CTX - 1 {
                 break;
@@ -129,20 +201,23 @@ impl Engine {
                 Ok(_) => pending.len(),
                 Err(err) if err.error_len().is_some() => {
                     // Genuinely invalid bytes: flush lossily rather than stall.
-                    on_text(&String::from_utf8_lossy(&pending));
+                    emit(&String::from_utf8_lossy(&pending));
                     pending.clear();
                     0
                 }
                 Err(err) => err.valid_up_to(),
             };
             if valid > 0 {
-                on_text(std::str::from_utf8(&pending[..valid]).unwrap_or_default());
+                emit(std::str::from_utf8(&pending[..valid]).unwrap_or_default());
                 pending.drain(..valid);
             }
             batch.clear();
             batch.add(token, pos, &[0], true).map_err(e)?;
             pos += 1;
             ctx.decode(&mut batch).map_err(e)?;
+        }
+        if qwen3 {
+            filter.flush(&mut on_text);
         }
         Ok(())
     }

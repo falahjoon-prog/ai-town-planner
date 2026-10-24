@@ -85,3 +85,9 @@ Common rules for every thread
 2) Done: rail 76->48px icon-only (40px targets, labels and unused label CSS removed); address row buttons 32px square, input takes remaining width; Generate AI report and Client PDF always in one row.
 3) Tests: tsc and vite build clean; headless Chromium 768/1280/1920 light+dark, default and 340px min: rail 48px, 0 buttons without name/tooltip, address input 152-332px, buttons one row, no clipping, no horizontal scroll; chat view opens. Shots: /tmp/claude-0/shots/t10-*.
 4) Remaining: at 340px the address input is about 152px (long addresses still truncate); rail tooltips are native title only.
+
+### T11 report (branch t11-fast-chat, PR into t10-slim-chrome)
+1) Files: src-tauri/src/llm.rs, src-tauri/src/lib.rs (chat/assistant max_new 900 -> 512), handoffs/threads.md.
+2) Done: Qwen3 non-2507 GGUFs get an empty think block prefilled; ThinkFilter strips any `<think>` text from streamed output (Qwen3 only, no buffering except a partial tag); n_threads/n_threads_batch set to ~half of logical CPUs (min 4) instead of the crate default. Model is already cached across messages. Note: the catalog Qwen3-4B-Instruct-2507 has no thinking mode, so the minute was mostly CPU prefill of the long system prompt (app guide + site facts) in a fresh context per message plus default threads.
+3) Tests: Rust NOT compiled locally (no cargo registry); diff re-read for types/borrows. CI Build app is the gate. tsc/vite unaffected (no TS change).
+4) Remaining: context/KV-cache reuse across messages (prefix reuse) not done (risky refactor, biggest remaining win); shorter system prompt for the assistant; physical-core count is estimated (no num_cpus crate); 512 limit also applies to Ollama/API for chat+assistant.
