@@ -36,7 +36,9 @@
 - Ipswich, Redland, Gold Coast and Mackay rule rows are all verify=true (council summaries, checklists, consultant reports and third-party pages; the scheme PDFs could not be read). Logan/Moreton Bay rule rows are verify=true (read through a summarising fetch or council info sheets); MBRC scheme PDFs could not be opened from the workspace.
 
 ## Next steps
-1. User testing of v0.4.0 on Windows (report, chat, PDF, aerial, 3D, compare).
-2. City Plan code text library (quote acceptable outcomes), more uses and zones in the level-of-assessment tables, site cover.
-3. Full data pack rebuild with the easement layer (test pack first).
-4. Android and iOS builds; Windows GPU (Vulkan).
+1. User testing of v0.6.0 on Windows (T3–T24 merged to main 2026-11-04: PlanLens layout, DA Form 1, setbacks, batch check, checklist, charges, project folders, map markup, statutory clock, Logan/Moreton Bay/Ipswich/Redland/Gold Coast/Mackay, deep links, hang fix).
+2. Phone version: Tauri 2 Android + iOS (iOS needs a Mac runner and Apple developer account).
+3. Design check: import DesignAI model / IFC / plan, check rules per site, red marks on the drawing.
+4. City Plan code text library and full DA planning report (code-by-code table, Word/PDF).
+5. More uses and zones in the level-of-assessment tables; verified setbacks per zone.
+6. Full data pack rebuild with the easement layer (test pack first); Windows GPU (Vulkan).
