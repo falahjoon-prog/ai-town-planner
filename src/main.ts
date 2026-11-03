@@ -774,6 +774,8 @@ $("docPdf").addEventListener("click", () => {
 });
 const FLOOD_COLORS = ["#1d4ed8", "#0891b2", "#7c3aed", "#0369a1", "#4f46e5", "#0e7490", "#2563eb", "#6d28d9"];
 
+/** Map padding that keeps the lot clear of the top tool bar and the bottom map buttons. */
+const LOT_PAD = { top: 90, bottom: 80, left: 40, right: 40 };
 function fitTo(geoms: any[]) {
   let [x0, y0, x1, y1] = [180, 90, -180, -90];
   for (const g of geoms) {
@@ -781,7 +783,7 @@ function fitTo(geoms: any[]) {
     const b = bounds(g);
     x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]);
   }
-  map?.fitBounds([[x0, y0], [x1, y1]], { padding: 30, duration: 300 });
+  map?.fitBounds([[x0, y0], [x1, y1]], { padding: LOT_PAD, duration: 300 });
 }
 
 function setFloodUi(on: boolean, legend = "") {
@@ -867,7 +869,7 @@ function drawMap(a: Assessment) {
     m.addLayer({ id: "lot-hl", type: "fill", source: "lot", paint: { "fill-color": "#fde68a", "fill-opacity": 0.12 } });
     m.addLayer({ id: "lot", type: "line", source: "lot", paint: { "line-color": "#111827", "line-width": 2.5 } });
     const b = bounds(a.parcel.geom);
-    m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: 40, duration: 0 });
+    m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: LOT_PAD, duration: 0 });
     m.on("click", (e) => measClick([e.lngLat.lng, e.lngLat.lat]));
     m.on("contextmenu", (e) => { e.preventDefault(); measUndo(); });
   });
@@ -2568,6 +2570,10 @@ const SEC_GROUPS: Record<string, [string, string[]]> = {
   report: ["AI planner report", ["s-report"]],
 };
 let curSec = "zoning";
+$("siteHead").addEventListener("click", (ev) => {
+  const t = (ev.target as HTMLElement).closest<HTMLElement>(".tile[data-go]");
+  if (t && current) showSec(t.dataset.go!);
+});
 function showSec(k: string) {
   const g = SEC_GROUPS[k];
   if (!g) return;

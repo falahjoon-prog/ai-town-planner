@@ -22,6 +22,7 @@
 
 - v0.5 (T19): Logan City Council and City of Moreton Bay: search across councils, council name and scheme on header, cards, reports, forms and links; Logan/MB zones, precincts, overlays, local plans; sourced Logan (LPS 2015 v9.2) and MB (council info sheets, v7) rule rows, all flagged verify; discover/test modes in the data pack workflow.
 - v0.6 (T20): Ipswich, Redland, Gold Coast and Mackay added to the registry; Redland and Gold Coast zones/overlays from their open data; Ipswich and Mackay show "Zone not loaded for this council yet" with a link to the council map; sourced rule rows (all verify) and labelled third-party rows; Brisbane v37 additions in council_rules.json ("brisbane"); Maps dialog and no-match message list all 7 councils.
+- v0.6.1: navy colour scheme and new icon (site + building + pin), Windows installer artwork (src-tauri/installer), text labels on the left tools and right section rail, clickable Lot/Zone/Flags tiles, map fit keeps the lot clear of the toolbars.
 
 ## Current issues
 - No package registry access in the cloud workspace: compile and test happen only in GitHub Actions; the app is not run by the developer – the user tests on Windows.
