@@ -1979,8 +1979,8 @@ function drawSetbacks() {
   if (typeof res === "string") { ed.hidden = true; return setFloodUi(floodOn, `<b>Can't draw setbacks for this lot</b><div class="meta">${esc(res)}</div>`); }
   const geom = { type: "Polygon", coordinates: [res.ring] };
   map.addSource("setb", { type: "geojson", data: { type: "Feature", properties: {}, geometry: geom as any } });
-  map.addLayer({ id: "setbf", type: "fill", source: "setb", paint: { "fill-color": "#0f5e4b", "fill-opacity": 0.15 } });
-  map.addLayer({ id: "setb", type: "line", source: "setb", paint: { "line-color": "#0f5e4b", "line-width": 2, "line-dasharray": [3, 2] } });
+  map.addLayer({ id: "setbf", type: "fill", source: "setb", paint: { "fill-color": "#1f4e8c", "fill-opacity": 0.15 } });
+  map.addLayer({ id: "setb", type: "line", source: "setb", paint: { "line-color": "#1f4e8c", "line-width": 2, "line-dasharray": [3, 2] } });
   for (const l of res.labels) {
     const el = document.createElement("div");
     el.className = "dim front";
