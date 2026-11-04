@@ -1,0 +1,11 @@
+#cloud-config
+# AI Town Planner web app on an Oracle Cloud "Always Free" Ubuntu VM (Ampere A1).
+# Paste this whole file into: Create instance -> Show advanced options -> Management ->
+# "Paste cloud-init script". The server then installs Docker, builds the app from GitHub,
+# serves it over HTTPS and checks GitHub every 15 minutes for updates.
+package_update: true
+packages: [git, curl, ca-certificates, netfilter-persistent, iptables-persistent]
+runcmd:
+  - curl -fsSL https://get.docker.com | sh
+  - git clone --depth 1 https://github.com/falahjoon-prog/ai-town-planner /opt/atp
+  - bash /opt/atp/deploy/oracle/setup.sh

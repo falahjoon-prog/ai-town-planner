@@ -97,7 +97,7 @@ async fn call(t: &T, req: Request<Body>) -> (StatusCode, Vec<u8>, axum::http::He
 }
 
 fn post(cmd: &str, body: Value) -> Request<Body> {
-    Request::post(format!("/api/{cmd}")).header("host", "town-planner.hf.space").header("content-type", "application/json").body(Body::from(body.to_string())).unwrap()
+    Request::post(format!("/api/{cmd}")).header("host", "152-67-1-2.sslip.io").header("content-type", "application/json").body(Body::from(body.to_string())).unwrap()
 }
 
 async fn json_call(t: &T, cmd: &str, body: Value) -> (StatusCode, Value) {
@@ -225,8 +225,8 @@ async fn ai_streams_with_user_key_and_never_logs_it() {
     let t = setup("ai", true, &base, 1000);
 
     let req = Request::post("/api/assistant")
-        .header("host", "town-planner.hf.space")
-        .header("origin", "https://town-planner.hf.space")
+        .header("host", "152-67-1-2.sslip.io")
+        .header("origin", "https://152-67-1-2.sslip.io")
         .header("x-ai-provider", "anthropic")
         .header("x-ai-key", KEY)
         .body(Body::from(json!({"pid": 1, "history": [{"role": "user", "content": "Can I build a duplex?"}]}).to_string()))
@@ -275,7 +275,7 @@ async fn ai_streams_with_user_key_and_never_logs_it() {
 #[tokio::test]
 async fn security_limits_and_static() {
     let t = setup("sec", true, "http://127.0.0.1:9", 5);
-    let req = Request::post("/api/search").header("host", "town-planner.hf.space").header("origin", "https://evil.example").body(Body::from("{\"q\":\"x\"}")).unwrap();
+    let req = Request::post("/api/search").header("host", "152-67-1-2.sslip.io").header("origin", "https://evil.example").body(Body::from("{\"q\":\"x\"}")).unwrap();
     assert_eq!(call(&t, req).await.0, StatusCode::FORBIDDEN);
 
     // admin refresh needs the token

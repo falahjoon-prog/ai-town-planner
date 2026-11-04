@@ -15,7 +15,7 @@ on:
       - "src-tauri/knowledge/**"
       - "Dockerfile"
       - ".dockerignore"
-      - ".github/scripts/hf_deploy.py"
+      - "deploy/**"
       - ".github/workflows/web.yml"
   workflow_dispatch:
 
@@ -54,22 +54,3 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  deploy:
-    name: Deploy to Hugging Face Spaces
-    needs: [server, image]
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    env:
-      HF_TOKEN: ${{ secrets.HF_TOKEN }}
-    steps:
-      - name: No Hugging Face token yet
-        if: env.HF_TOKEN == ''
-        run: echo "::notice title=Deploy skipped::Add the HF_TOKEN repository secret (see server/README.md), then re-run this workflow."
-      - uses: actions/checkout@v4
-        if: env.HF_TOKEN != ''
-      - name: Push the app to the Space (Hugging Face builds the Docker image)
-        if: env.HF_TOKEN != ''
-        run: |
-          pip install --quiet huggingface_hub
-          python3 .github/scripts/hf_deploy.py

@@ -1,0 +1,22 @@
+# AI Town Planner web app + Caddy (automatic HTTPS). SITE comes from .env (written by setup.sh).
+services:
+  app:
+    build: ../..
+    restart: unless-stopped
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - pack:/data
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      SITE: ${SITE}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy:/data
+    depends_on: [app]
+volumes:
+  pack:
+  caddy:
