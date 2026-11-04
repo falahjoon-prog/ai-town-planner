@@ -785,6 +785,8 @@ const FLOOD_COLORS = ["#1d4ed8", "#0891b2", "#7c3aed", "#0369a1", "#4f46e5", "#0
 
 /** Map padding that keeps the lot clear of the top tool bar and the bottom map buttons. */
 const LOT_PAD = { top: 90, bottom: 80, left: 40, right: 40 };
+/** Fit padding that clears the map toolbars; the short map on a phone gets a tighter fit. */
+const lotPad = (m = map) => (m?.resize().getContainer().clientHeight ?? 999) < 360 ? { top: 70, bottom: 64, left: 24, right: 90 } : LOT_PAD; // resize first: the map may have just changed size
 function fitTo(geoms: any[]) {
   let [x0, y0, x1, y1] = [180, 90, -180, -90];
   for (const g of geoms) {
@@ -792,7 +794,7 @@ function fitTo(geoms: any[]) {
     const b = bounds(g);
     x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]);
   }
-  map?.fitBounds([[x0, y0], [x1, y1]], { padding: LOT_PAD, duration: 300 });
+  map?.fitBounds([[x0, y0], [x1, y1]], { padding: lotPad(), duration: 300 });
 }
 
 function setFloodUi(on: boolean, legend = "") {
@@ -878,7 +880,7 @@ function drawMap(a: Assessment) {
     m.addLayer({ id: "lot-hl", type: "fill", source: "lot", paint: { "fill-color": "#fde68a", "fill-opacity": 0.12 } });
     m.addLayer({ id: "lot", type: "line", source: "lot", paint: { "line-color": "#111827", "line-width": 2.5 } });
     const b = bounds(a.parcel.geom);
-    m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: LOT_PAD, duration: 0 });
+    m.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: lotPad(m), duration: 0 });
     m.on("click", (e) => measClick([e.lngLat.lng, e.lngLat.lat]));
     m.on("contextmenu", (e) => { e.preventDefault(); measUndo(); });
   });
@@ -2190,7 +2192,7 @@ async function importIfc(file: File) {
     design = { ...d, place: f ? defaultPlace(f) : { x: 0, y: 0, rot: 0 } };
     saveDesign();
     updateDesign();
-    if (map) { const b = bounds(current.parcel.geom); map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: LOT_PAD, duration: 300 }); }
+    if (map) { const b = bounds(current.parcel.geom); map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: lotPad(), duration: 300 }); }
   } catch (e) {
     renderDesign(`This IFC file could not be read: ${e instanceof Error ? e.message : String(e)}`);
   }
@@ -2816,6 +2818,7 @@ function setSheet(on: boolean) {
   $("moreBtn").setAttribute("aria-expanded", String(on));
 }
 $("moreBtn").addEventListener("click", () => setSheet(!app.classList.contains("moresheet")));
+$("pdfMore").addEventListener("click", () => $("pdfBtn").click());
 app.addEventListener("click", (ev) => { if (ev.target === app) setSheet(false); }); // the dimmed backdrop
 document.querySelector(".leftcol")!.addEventListener("click", (ev) => { if ((ev.target as HTMLElement).closest("button")) setSheet(false); });
 function syncMapSz() {

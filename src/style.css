@@ -442,7 +442,7 @@ button.ibtn:disabled { opacity: .35; }
 .tile[data-go]:hover { border-color: var(--accent); }
 
 /* ---- Desktop app vs phone web app ---- */
-.webonly, .phonebar, .mapsz { display: none; }
+.webonly, .phonebar, .mapsz, .toolstack > .phoneonly { display: none; }
 .dgroup { display: contents; }
 .web .deskonly { display: none !important; }
 .web .webonly { display: revert; }
@@ -473,7 +473,7 @@ button.ibtn:disabled { opacity: .35; }
   .tile { padding: 6px 8px; flex-direction: column; gap: 0; }
   .tile:nth-child(2) { grid-column: auto; order: 0; }
   .tile b { white-space: nowrap; }
-  .mapstage { order: 3; position: relative; inset: auto; flex: 0 0 38%; min-height: 0; }
+  .mapstage { order: 3; position: relative; inset: auto; flex: 0 0 36%; min-height: 0; }
   .map, .empty { border-radius: 0; border-width: 1px 0; }
   #site, #botWin { order: 4; flex: 1; min-height: 0; background: var(--panel); }
   .sechead { padding: 10px 12px 2px; }
@@ -481,9 +481,15 @@ button.ibtn:disabled { opacity: .35; }
   .pbody { padding: 4px 12px 16px; -webkit-overflow-scrolling: touch; }
   .pbody button, .panelfoot button, .dlg button, .fv-col button, .report-bar button, .mapitem button { min-height: 44px; }
   .pbody select, .clockform select { min-height: 44px; }
-  .panelfoot { padding: 8px 12px; }
+  .panelfoot { display: none; } /* Client PDF moves to the More sheet */
+  .toolstack > .phoneonly { display: flex; }
+  #checklist input[type=checkbox] { width: 22px; height: 22px; margin: 0 10px 0 0; vertical-align: middle; }
+  #checklist .mapitem { min-height: 48px; }
   .ptable { font-size: 13px; }
-  .dsgt td:first-child { width: auto; }
+  .ptable td, .dsgt td { overflow-wrap: break-word; }
+  .dsgt td:first-child { width: 34%; }
+  .dsgt td:last-child { white-space: normal; }
+  .dsgt .pill { display: inline-block; white-space: normal; text-align: center; }
 
   /* Bottom tab bar (the section rail) */
   .rail { order: 5; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; width: auto; height: calc(var(--tab) + var(--sab)); padding: 0 4px var(--sab); flex-direction: row; gap: 0; overflow-x: auto; overflow-y: hidden; border: 0; border-top: 1px solid var(--line); background: var(--panel); scrollbar-width: none; overscroll-behavior-x: contain; }
@@ -519,7 +525,9 @@ button.ibtn:disabled { opacity: .35; }
   .legend { bottom: 60px; max-width: 60%; }
   .setbacked { left: 8px; bottom: 60px; max-width: calc(100% - 16px); }
   .app:has(#site[hidden]) .mapstage { flex: 1; }
-  .app:has(#site[hidden]) .mapsz { display: none; }
+  @media (max-height: 720px) { .sitehead .meta { display: none; } .maptools button { width: 38px; height: 38px; } .mapsz { top: 54px; gap: 4px; } .mapsz button { min-height: 30px; padding: 4px 8px; } .bottombar .seg button { padding: 6px 10px; } }
+  .app:has(#site[hidden]) :is(.mapsz, .maptools, .bottombar) { display: none; }
+  .app.fullmap .mapstage, .app.formsmode .mapstage, .app.rcol .mapstage { right: auto; }
 
   /* Bigger map / hidden map / full map */
   .app.fullmap .rightcol { display: contents; }

@@ -61,6 +61,7 @@ jobs:
           npx tauri build > tauri.log 2>&1 || { tail -70 tauri.log | awk '{printf "%s%%0A", $0}' | sed 's/^/::error title=Bundle::/'; echo; exit 1; }
           tail -15 tauri.log
       - name: Publish to release
+        if: github.ref == 'refs/heads/main' # test builds from other branches don't replace the release installers
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
