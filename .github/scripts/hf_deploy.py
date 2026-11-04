@@ -31,7 +31,10 @@ AI Town Planner web app (phone PWA). Source: https://github.com/falahjoon-prog/a
 api = HfApi(token=os.environ["HF_TOKEN"])
 user = api.whoami()["name"]
 repo = f"{user}/{SPACE}"
-api.create_repo(repo, repo_type="space", space_sdk="docker", exist_ok=True)
+if not api.repo_exists(repo, repo_type="space"):
+    # New accounts may be refused here (HTTP 402); then create the Space once on the website:
+    # https://huggingface.co/new-space -> name "town-planner", SDK Docker, Blank, CPU basic (free).
+    api.create_repo(repo, repo_type="space", space_sdk="docker")
 
 stage = tempfile.mkdtemp()
 files = subprocess.run(["git", "ls-files", "--", *PATHS], capture_output=True, text=True, check=True).stdout.split()
