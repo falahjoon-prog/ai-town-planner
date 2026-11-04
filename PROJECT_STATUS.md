@@ -40,7 +40,7 @@
 
 ## Next steps
 1. User testing of v0.7.0 on Windows (T3–T24 merged to main 2026-11-04: PlanLens layout, DA Form 1, setbacks, batch check, checklist, charges, project folders, map markup, statutory clock, Logan/Moreton Bay/Ipswich/Redland/Gold Coast/Mackay, deep links, hang fix).
-2. Phone web app (iPhone + Android PWA on Fly.io, users bring their own AI key): frontend and server done on branch web-server; merge to main, then go live needs the owner's FLY_API_TOKEN secret (server/README.md). Test on a real iPhone and Android phone after deploy (install, search, design check IFC import, assistant with own key).
+2. Phone web app (iPhone + Android PWA, free Hugging Face Docker Space, users bring their own AI key): done and merged; goes live when the owner adds the HF_TOKEN secret (server/README.md).
 3. Design check: test v0.7.0 with real DesignAI / Revit IFC exports on Windows; add DXF plans; encode site cover, GFA/plot ratio, parking and private open space numbers per zone so fewer rows say "Cannot check".
 4. City Plan code text library and full DA planning report (code-by-code table, Word/PDF).
 5. More uses and zones in the level-of-assessment tables; verified setbacks per zone.

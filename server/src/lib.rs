@@ -127,12 +127,9 @@ pub(crate) fn err(code: StatusCode, msg: impl Into<String>) -> Response {
     (code, Json(json!({ "error": msg.into() }))).into_response()
 }
 
-/// Client IP: Fly's proxy header first, then the socket peer.
+/// Client IP: the hosting proxy's X-Forwarded-For first, then the socket peer.
 fn client_ip(req: &Request) -> String {
     let h = req.headers();
-    if let Some(ip) = h.get("fly-client-ip").and_then(|v| v.to_str().ok()) {
-        return ip.trim().to_string();
-    }
     if let Some(ip) = h.get("x-forwarded-for").and_then(|v| v.to_str().ok()).and_then(|v| v.split(',').next()) {
         return ip.trim().to_string();
     }

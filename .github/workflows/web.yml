@@ -15,7 +15,7 @@ on:
       - "src-tauri/knowledge/**"
       - "Dockerfile"
       - ".dockerignore"
-      - "fly.toml"
+      - ".github/scripts/hf_deploy.py"
       - ".github/workflows/web.yml"
   workflow_dispatch:
 
@@ -56,23 +56,20 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy:
-    name: Deploy to Fly.io
+    name: Deploy to Hugging Face Spaces
     needs: [server, image]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     env:
-      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
     steps:
-      - name: No Fly token yet
-        if: env.FLY_API_TOKEN == ''
-        run: echo "::notice title=Deploy skipped::Add the FLY_API_TOKEN repository secret (see server/README.md), then re-run this workflow."
+      - name: No Hugging Face token yet
+        if: env.HF_TOKEN == ''
+        run: echo "::notice title=Deploy skipped::Add the HF_TOKEN repository secret (see server/README.md), then re-run this workflow."
       - uses: actions/checkout@v4
-        if: env.FLY_API_TOKEN != ''
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-        if: env.FLY_API_TOKEN != ''
-      - name: Deploy
-        if: env.FLY_API_TOKEN != ''
-        run: flyctl deploy --remote-only
-      - name: Site
-        if: env.FLY_API_TOKEN != ''
-        run: echo "::notice title=Live::https://ai-town-planner.fly.dev"
+        if: env.HF_TOKEN != ''
+      - name: Push the app to the Space (Hugging Face builds the Docker image)
+        if: env.HF_TOKEN != ''
+        run: |
+          pip install --quiet huggingface_hub
+          python3 .github/scripts/hf_deploy.py
