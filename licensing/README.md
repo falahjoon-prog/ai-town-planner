@@ -15,7 +15,7 @@ company's with shared seats). An ElectricalAI licence does **not** open the Town
    - `TRADEAI_SUPABASE_URL` = Project URL (Supabase → Project Settings → API), e.g. `https://abcd.supabase.co`
    - `TRADEAI_SUPABASE_ANON_KEY` = the **anon / publishable** key (never the service_role / secret key)
 
-   Then Actions → "Build app" → Run workflow, and "Web server" → Run workflow. Both builds write these two
+   Then Actions → "Build app" → Run workflow, and "Web app" → Run workflow. Both builds write these two
    values into the program; until they are set, the desktop app and the phone web app show
    "Sign-in is not set up in this copy yet" and stay locked.
 3. **Optional, web server only:** `SUPABASE_JWT_SECRET` (Project Settings → API → JWT secret, legacy HS256)
