@@ -3,6 +3,13 @@
 set -euo pipefail
 cd /opt/atp/deploy/oracle
 
+# Packages. First boot: unattended-upgrades often holds the dpkg lock, so wait for it instead of failing.
+export DEBIAN_FRONTEND=noninteractive
+echo "iptables-persistent iptables-persistent/autosave_v4 boolean true" | debconf-set-selections
+echo "iptables-persistent iptables-persistent/autosave_v6 boolean true" | debconf-set-selections
+apt-get -o DPkg::Lock::Timeout=900 update
+apt-get -o DPkg::Lock::Timeout=900 install -y caddy netfilter-persistent iptables-persistent
+
 # 1 GB machines: add swap so unpacking the data pack never runs out of memory.
 if ! swapon --show | grep -q /swapfile; then
   fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile >/dev/null && swapon /swapfile
@@ -12,7 +19,7 @@ fi
 # Oracle's Ubuntu images block everything except SSH in iptables: open HTTP/HTTPS.
 for port in 80 443; do
   iptables -C INPUT -p tcp --dport "$port" -m state --state NEW -j ACCEPT 2>/dev/null ||
-    iptables -I INPUT 6 -p tcp --dport "$port" -m state --state NEW -j ACCEPT
+    iptables -I INPUT 1 -p tcp --dport "$port" -m state --state NEW -j ACCEPT
 done
 netfilter-persistent save
 
@@ -21,7 +28,6 @@ netfilter-persistent save
 if [ -s /opt/atp-site ]; then SITE=$(tr -d '[:space:]' < /opt/atp-site)
 else SITE="$(curl -fsS https://api.ipify.org | tr . -).sslip.io"; fi
 
-DEBIAN_FRONTEND=noninteractive apt-get install -y caddy
 cat > /etc/caddy/Caddyfile <<CADDY
 $SITE {
 	encode zstd gzip

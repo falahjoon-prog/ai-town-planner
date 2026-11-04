@@ -4,7 +4,8 @@
 # The server downloads the pre-built app from GitHub, serves it over HTTPS (Caddy) and
 # checks for a newer build every 15 minutes.
 package_update: true
-packages: [git, curl, ca-certificates, netfilter-persistent, iptables-persistent]
+packages: [git, curl, ca-certificates]
 runcmd:
   - git clone --depth 1 https://github.com/falahjoon-prog/ai-town-planner /opt/atp
-  - bash /opt/atp/deploy/oracle/setup.sh
+  # Retry until setup succeeds (pulling the newest setup scripts each time); log in /var/log/atp-setup.log.
+  - until bash /opt/atp/deploy/oracle/setup.sh >> /var/log/atp-setup.log 2>&1; do sleep 60; git -C /opt/atp pull -q; done
