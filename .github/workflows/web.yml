@@ -1,0 +1,78 @@
+name: Web app
+
+on:
+  push:
+    branches: [main, web-server]
+    paths:
+      - "server/**"
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "package.json"
+      - "package-lock.json"
+      - "vite.config.ts"
+      - "src-tauri/src/**"
+      - "src-tauri/knowledge/**"
+      - "Dockerfile"
+      - ".dockerignore"
+      - "fly.toml"
+      - ".github/workflows/web.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    name: Build and test server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+      - name: Build
+        run: cd server && cargo build --release --locked
+      - name: Test
+        run: cd server && cargo test --release --locked
+
+  image:
+    name: Docker image builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Fly.io
+    needs: [server, image]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    steps:
+      - name: No Fly token yet
+        if: env.FLY_API_TOKEN == ''
+        run: echo "::notice title=Deploy skipped::Add the FLY_API_TOKEN repository secret (see server/README.md), then re-run this workflow."
+      - uses: actions/checkout@v4
+        if: env.FLY_API_TOKEN != ''
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+        if: env.FLY_API_TOKEN != ''
+      - name: Deploy
+        if: env.FLY_API_TOKEN != ''
+        run: flyctl deploy --remote-only
+      - name: Site
+        if: env.FLY_API_TOKEN != ''
+        run: echo "::notice title=Live::https://ai-town-planner.fly.dev"

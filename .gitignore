@@ -6,3 +6,4 @@ src-tauri/icons/
 *.sqlite
 *.sqlite.gz
 *.gguf
+server/target/

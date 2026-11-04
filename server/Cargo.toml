@@ -1,0 +1,37 @@
+[package]
+name = "atp-server"
+version = "0.1.0"
+description = "AI Town Planner web server (phone PWA): the desktop core behind an HTTP API"
+edition = "2021"
+publish = false
+
+[lib]
+name = "atp_server"
+path = "src/lib.rs"
+
+[[bin]]
+name = "atp-server"
+path = "src/main.rs"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "fs", "io-util", "time", "sync", "signal"] }
+tower-http = { version = "0.6", features = ["fs", "compression-gzip", "compression-br"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Same versions as src-tauri: the core modules (data/rules/council/dev) are compiled in from there.
+rusqlite = { version = "0.32", features = ["bundled", "hooks"] }
+geo = "0.29"
+geojson = "0.24"
+flate2 = "1"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
+futures-util = "0.3"
+bytes = "1"
+
+[dev-dependencies]
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
