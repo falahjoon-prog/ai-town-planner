@@ -31,7 +31,8 @@ CADDY
 
 install -m 644 atp.service atp-update.service atp-update.timer /etc/systemd/system/
 systemctl daemon-reload
-bash update.sh
 systemctl enable --now atp-update.timer
 systemctl restart caddy
+# First install now; if the GitHub build isn't published yet, the timer retries every 15 minutes.
+bash update.sh || echo "App download not available yet; atp-update.timer will retry."
 echo "AI Town Planner: https://$SITE" | tee /opt/atp-url.txt
