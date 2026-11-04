@@ -26,6 +26,21 @@ Site: **https://ai-town-planner.fly.dev**
    releases (~420 MB, 1–3 minutes); keep the page open until search works. On the phone: Share → Add to
    Home Screen (iPhone) or menu → Install app (Android).
 
+## Install on a phone
+
+The site is an installable web app (PWA): it opens full screen with its own icon, like a normal app.
+
+- **iPhone / iPad (Safari):** open https://ai-town-planner.fly.dev in **Safari**, tap **Share** (square with arrow),
+  then **Add to Home Screen** → **Add**. Open it from the new "Town Planner" icon. (Other iPhone browsers
+  can also add it from their Share menu on iOS 16.4 and later.)
+- **Android (Chrome):** open the site, tap the **⋮** menu → **Install app** (or **Add to Home screen**) → **Install**.
+  Chrome may also show an "Install" banner at the bottom.
+- **AI:** in the app open **More → Settings → AI engine**, choose Claude or OpenAI and paste your own API key.
+  The key stays on that phone (browser storage only) and is sent with each AI request; the server never stores it.
+- Saved addresses, notes, checklist ticks, forms and design-check placements are kept on the phone.
+  Use **Settings → Backup** to save them to a file. Clearing the browser's website data removes them.
+- Updates: the app checks for a new version each time it opens online; just close and reopen it.
+
 Optional: `fly secrets set ADMIN_TOKEN=<long random text> -a ai-town-planner` enables
 `POST /admin/refresh` to load a newer data pack without a redeploy:
 `curl -X POST -H "Authorization: Bearer <token>" https://ai-town-planner.fly.dev/admin/refresh`

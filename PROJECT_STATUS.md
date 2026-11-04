@@ -24,6 +24,7 @@
 - v0.6 (T20): Ipswich, Redland, Gold Coast and Mackay added to the registry; Redland and Gold Coast zones/overlays from their open data; Ipswich and Mackay show "Zone not loaded for this council yet" with a link to the council map; sourced rule rows (all verify) and labelled third-party rows; Brisbane v37 additions in council_rules.json ("brisbane"); Maps dialog and no-match message list all 7 councils.
 - v0.6.1: navy colour scheme and new icon (site + building + pin), Windows installer artwork (src-tauri/installer), text labels on the left tools and right section rail, clickable Lot/Zone/Flags tiles, map fit keeps the lot clear of the toolbars.
 - v0.7.0 design check: import an IFC (web-ifc, offline wasm), storeys/height/footprint/GFA/car spaces from the model, placed on the lot (centred, front to the street; drag and rotate), checked per rule against the knowledge rows (setbacks by wall height, height, storeys, site cover, plot ratio, parking, private open space, overlays) with Pass/Fail/Cannot check/Verify and sources; red dimension lines for failing setbacks; saved per site; in the client PDF and the AI report prompt (src/design.ts, src/ifc.ts, tests/design.test.ts, tests/fixtures/design_house.ifc).
+- Phone web app (branch web-server): `src/backend.ts` runs the same UI on the Tauri core or the web server (`POST /api/<cmd>`, SSE streams for chat/assistant, browser download/file picker); desktop-only features hidden on the web (`.deskonly`: AI report, AI drafts, title summary, batch check, data pack/model management); AI provider and key kept only in the phone's browser (X-AI-* headers); phone layout at ≤700 px (header + More sheet, search, collapsible map, section panel, bottom tab bar, safe areas, 44 px targets); PWA manifest, icons and app-shell service worker. Desktop screenshots at 1440×900 pixel-identical before/after.
 
 ## Current issues
 - No package registry access in the cloud workspace: compile and test happen only in GitHub Actions; the app is not run by the developer – the user tests on Windows.
@@ -39,7 +40,7 @@
 
 ## Next steps
 1. User testing of v0.7.0 on Windows (T3–T24 merged to main 2026-11-04: PlanLens layout, DA Form 1, setbacks, batch check, checklist, charges, project folders, map markup, statutory clock, Logan/Moreton Bay/Ipswich/Redland/Gold Coast/Mackay, deep links, hang fix).
-2. Phone web app (iPhone + Android PWA on Fly.io, users bring their own AI key): server on branch web-server; go live needs the owner's FLY_API_TOKEN secret.
+2. Phone web app (iPhone + Android PWA on Fly.io, users bring their own AI key): frontend and server done on branch web-server; merge to main, then go live needs the owner's FLY_API_TOKEN secret (server/README.md). Test on a real iPhone and Android phone after deploy (install, search, design check IFC import, assistant with own key).
 3. Design check: test v0.7.0 with real DesignAI / Revit IFC exports on Windows; add DXF plans; encode site cover, GFA/plot ratio, parking and private open space numbers per zone so fewer rows say "Cannot check".
 4. City Plan code text library and full DA planning report (code-by-code table, Word/PDF).
 5. More uses and zones in the level-of-assessment tables; verified setbacks per zone.
