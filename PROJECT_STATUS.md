@@ -40,7 +40,7 @@
 - Ipswich, Redland, Gold Coast and Mackay rule rows are all verify=true (council summaries, checklists, consultant reports and third-party pages; the scheme PDFs could not be read). Logan/Moreton Bay rule rows are verify=true (read through a summarising fetch or council info sheets); MBRC scheme PDFs could not be opened from the workspace.
 
 ## Next steps
-0. Owner: run licensing/SUPABASE_SETUP.sql in the Trade AI Supabase project and set the TRADEAI_SUPABASE_URL / TRADEAI_SUPABASE_ANON_KEY repository variables (licensing/README.md). Next features: Town Planner ↔ DesignAI two-way link, then quick sketch.
+0. Trade AI Supabase project `trade-ai` (iqtilarntgenosjrevoz, Sydney) set up 2026-11-04: accounts schema + licensing/SUPABASE_SETUP.sql run, built into v0.8.1 via workflow defaults. Owner gives paid licences in Table Editor → product_licences (licensing/README.md). Next features: Town Planner ↔ DesignAI two-way link, then quick sketch.
 1. User testing of v0.7.0 on Windows (T3–T24 merged to main 2026-11-04: PlanLens layout, DA Form 1, setbacks, batch check, checklist, charges, project folders, map markup, statutory clock, Logan/Moreton Bay/Ipswich/Redland/Gold Coast/Mackay, deep links, hang fix).
 2. Phone web app (iPhone + Android PWA, users bring their own AI key): done; hosting on an Oracle Cloud Always Free VM (E2.1.Micro) via deploy/oracle: cloud-init, Caddy HTTPS on sslip.io, pre-built app from the web-latest release, self-updating every 15 min (server/README.md).
 3. Design check: test v0.7.0 with real DesignAI / Revit IFC exports on Windows; add DXF plans; encode site cover, GFA/plot ratio, parking and private open space numbers per zone so fewer rows say "Cannot check".

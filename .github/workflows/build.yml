@@ -25,8 +25,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       # Trade AI sign-in (licensing/README.md): public project URL and anon key, written into the app at build time
-      TRADEAI_SUPABASE_URL: ${{ vars.TRADEAI_SUPABASE_URL }}
-      TRADEAI_SUPABASE_ANON_KEY: ${{ vars.TRADEAI_SUPABASE_ANON_KEY }}
+      TRADEAI_SUPABASE_URL: ${{ vars.TRADEAI_SUPABASE_URL || 'https://iqtilarntgenosjrevoz.supabase.co' }}
+      TRADEAI_SUPABASE_ANON_KEY: ${{ vars.TRADEAI_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxdGlsYXJudGdlbm9zanJldm96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3Nzg5MTIsImV4cCI6MjEwOTM1NDkxMn0.dGVLYsoCD0xXdpNEFLFJ70UO8kVE5xytOGxtcyRQlzM' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

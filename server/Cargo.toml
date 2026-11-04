@@ -1,6 +1,6 @@
 [package]
 name = "atp-server"
-version = "0.8.0"
+version = "0.8.1"
 description = "AI Town Planner web server (phone PWA): the desktop core behind an HTTP API"
 edition = "2021"
 publish = false

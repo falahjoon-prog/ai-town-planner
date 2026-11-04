@@ -16,8 +16,10 @@ company's with shared seats). An ElectricalAI licence does **not** open the Town
    - `TRADEAI_SUPABASE_ANON_KEY` = the **anon / publishable** key (never the service_role / secret key)
 
    Then Actions → "Build app" → Run workflow, and "Web app" → Run workflow. Both builds write these two
-   values into the program; until they are set, the desktop app and the phone web app show
-   "Sign-in is not set up in this copy yet" and stay locked.
+   values into the program. **Done 2026-11-04:** the Trade AI project is `trade-ai`
+   (`https://iqtilarntgenosjrevoz.supabase.co`, Sydney, owner account tradeai.apps@gmail.com); both SQL files
+   have been run, Site URL = https://planner.trade-ai.com.au, and the workflows fall back to this URL and
+   its public anon key when the variables are not set. Set the variables only to point at a different project.
 3. **Optional, web server only:** `SUPABASE_JWT_SECRET` (Project Settings → API → JWT secret, legacy HS256)
    in `/etc/atp/atp.env` on the server lets it reject forged tokens without asking Supabase. Never put the
    JWT secret or service_role key in GitHub variables or the desktop app.
