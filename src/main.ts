@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { invoke, Channel } from "@tauri-apps/api/core";
 import { open, save } from "@tauri-apps/plugin-dialog";
 import maplibregl from "maplibre-gl";
@@ -10,6 +11,8 @@ import TIMEFRAMES_DATA from "../src-tauri/knowledge/timeframes.json";
 import REFERRALS_DATA from "../src-tauri/knowledge/referrals.json";
 import COUNCILS_DATA from "../src-tauri/knowledge/councils.json";
 import COUNCIL_RULES from "../src-tauri/knowledge/council_rules.json";
+import wasmUrl from "web-ifc/web-ifc.wasm?url";
+import { checkDesign, placeFn, placePolys, frontRotation, ringCentroid, ringArea, unionArea, type DesignModel, type Place, type CheckOut, type Poly } from "./design";
 import { siteLink, destLabel, resolveLotUrl, resolverFor, type Dest, type SiteRef } from "./sitelink";
 import "./style.css";
 
@@ -253,7 +256,7 @@ $("q").addEventListener("input", () => {
 let hasGoogle = false;
 const OPEN_LAST_KEY = "openLast"; // "0" = do not reopen the last address on start
 
-type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string; project?: string; marks?: Mark[]; lodged?: string; path?: string };
+type Site = { pid: number; address: string; lotplan: string; ts: number; star?: boolean; note?: string; title?: string; project?: string; marks?: Mark[]; lodged?: string; path?: string; design?: SavedDesign };
 function sites(): Record<string, Site> {
   try { return JSON.parse(localStorage.getItem("sites") ?? "{}"); } catch { return {}; }
 }
@@ -262,7 +265,7 @@ function saveSites(m: Record<string, Site>) {
   const all = Object.values(m).sort((x, y) => y.ts - x.ts);
   let n = 0;
   const keep: Record<string, Site> = {};
-  for (const x of all) if (x.star || x.note || x.title || x.project || x.marks?.length || x.lodged || n++ < 20) keep[x.lotplan] = x;
+  for (const x of all) if (x.star || x.note || x.title || x.project || x.marks?.length || x.lodged || x.design || n++ < 20) keep[x.lotplan] = x;
   try { localStorage.setItem("sites", JSON.stringify(keep)); } catch { /* storage unavailable */ }
 }
 function touchSite(p: { pid: number; address: string; lotplan: string }, patch: Partial<Site> = {}) {
@@ -497,6 +500,10 @@ async function loadSite(pid: number, silent = false) {
   resetSetbackTool();
   $("suburbOut").innerHTML = "";
   drawMap(a);
+  design = sites()[a.parcel.lotplan]?.design ?? null;
+  designOut = null;
+  designMarkers = []; // the map is rebuilt on a new site, which removes them
+  renderDesign();
   loadPotential();
 }
 
@@ -557,6 +564,7 @@ async function loadPotential(changed = false) {
   }
   drawDims();
   if (subOn) drawSketch();
+  if (design) updateDesign();
 }
 
 function renderPotential() {
@@ -1112,7 +1120,7 @@ $("genBtn").addEventListener("click", async () => {
     renderReport();
   };
   try {
-    await invoke("generate_report", { pid: current.parcel.pid, question: val("question"), useId: useId(), onEvent: ch });
+    await invoke("generate_report", { pid: current.parcel.pid, question: val("question") + designBrief(), useId: useId(), onEvent: ch });
     if (sections.length) activeTab = sections[0].key;
     renderReport();
     $("saveBtn").hidden = !sections.length;
@@ -1186,6 +1194,7 @@ ${mapImg}
 ${full ? `<h2>Zoning (${esc(cn.scheme)})</h2><ul>${a.zones.length || !zonesMissing(cn) ? "" : `<li>${NO_ZONE}: check ${esc(cn.maps_name ?? "the council online map")}.</li>`}${a.zones.map((z) => `<li><b>${esc(zoneTitle(z))}</b> (${esc(z.authority)})${z.coverage_pct != null ? ` – ${Math.round(z.coverage_pct)}% of lot` : ""}</li>`).join("")}</ul>
 <h2>Constraints by authority</h2>${auths.filter(([k]) => byAuth(k).length).map(([k, t]) => `<h3>${t}</h3><ul>${byAuth(k).map((f) => `<li><b>${esc(f.rule.title)}</b> – ${esc(f.rule.note)}</li>`).join("")}</ul>`).join("") || "<p>No mapped constraints.</p>"}
 <h2>Development potential</h2>${$("pot").innerHTML}
+${designReport()}
 ${site?.title ? `<h2>Title search summary</h2>${marked.parse(site.title)}` : ""}
 ${site?.note ? `<h2>Notes</h2><p>${esc(site.note).replace(/\n/g, "<br>")}</p>` : ""}` : ""}
 ${sections.map((x) => `<h2>${esc(x.title)}</h2>${marked.parse(x.text)}`).join("")}
@@ -1870,24 +1879,25 @@ function resetSetbackTool() {
   setbackMarkers = []; // the map is rebuilt on a new site, which removes the layer
 }
 
-/** Buildable polygon (lon/lat ring) and labels, or a reason it can't be drawn. */
-type SbInfo = { i: number; kind: string; len: number; std: number; off: number; mid: XY };
-function setbackEnvelope(a: Assessment, p: Pot, ov: Record<number, number> = {}): { ring: XY[]; labels: { ll: XY; text: string }[]; info: SbInfo[]; area: number; stdArea: number; lotArea: number } | string {
-  const set = setbackSet(a);
-  if (!set) return "Setback distances for this zone and lot size aren't in the app.";
-  const val = (label: string) => parseFloat(set.rows.find((r) => r.label === label)?.value ?? "");
-  const d = { front: val(SETBACK_ROWS.front), side: val(SETBACK_ROWS.side), rear: val(SETBACK_ROWS.rear) };
-  if (!isFinite(d.front) || !isFinite(d.side) || !isFinite(d.rear)) return "The setback rows needed aren't in the data.";
+const shoe = (r: XY[]) => r.reduce((t, c, i) => t + (r[(i + 1) % r.length][0] - c[0]) * (r[(i + 1) % r.length][1] + c[1]), 0) / 2;
+/** Local metres around the lot (east, north) and back to lon/lat; outer ring of the lot in lon/lat. */
+type LotMetric = { outer: XY[]; toM: (c: XY) => XY; toLL: (c: XY) => XY };
+function lotMetric(a: Assessment): LotMetric | string {
   const g = a.parcel.geom;
-  const polys: XY[][][] = g.type === "Polygon" ? [g.coordinates] : g.type === "MultiPolygon" ? g.coordinates : [];
-  const shoe = (r: XY[]) => r.reduce((t, c, i) => t + (r[(i + 1) % r.length][0] - c[0]) * (r[(i + 1) % r.length][1] + c[1]), 0) / 2;
+  const polys: XY[][][] = g?.type === "Polygon" ? [g.coordinates] : g?.type === "MultiPolygon" ? g.coordinates : [];
   const outer = polys.map((q) => q[0]).sort((x, y) => Math.abs(shoe(y)) - Math.abs(shoe(x)))[0];
   if (!outer || outer.length < 4) return "No lot outline.";
   const lat0 = (Math.min(...outer.map((c) => c[1])) + Math.max(...outer.map((c) => c[1]))) / 2;
   const lon0 = (Math.min(...outer.map((c) => c[0])) + Math.max(...outer.map((c) => c[0]))) / 2;
   const kx = Math.cos((lat0 * Math.PI) / 180) * 111320, ky = 111320;
-  const toM = (c: XY): XY => [(c[0] - lon0) * kx, (c[1] - lat0) * ky];
-  const toLL = (c: XY): XY => [lon0 + c[0] / kx, lat0 + c[1] / ky];
+  return { outer, toM: (c: XY): XY => [(c[0] - lon0) * kx, (c[1] - lat0) * ky], toLL: (c: XY): XY => [lon0 + c[0] / kx, lat0 + c[1] / ky] };
+}
+/** Lot sides in metres matched to pot.edges, with front / side / rear for each (shared by the setbacks tool and the design check). */
+type LotFrame = LotMetric & { sides: [XY, XY][]; fronts: number[]; ri: number; corner: boolean; kindOf: (i: number) => "front" | "side" | "rear"; dirOf: (i: number) => XY; normal: (i: number) => XY };
+function lotFrame(a: Assessment, p: Pot): LotFrame | string {
+  const lm = lotMetric(a);
+  if (typeof lm === "string") return lm;
+  const { outer, toM } = lm;
   // Merge near-collinear segments exactly as dev.rs sides() does, so the edges line up with pot.edges.
   const ring = outer.map(toM);
   const sides: [XY, XY][] = [];
@@ -1914,12 +1924,6 @@ function setbackEnvelope(a: Assessment, p: Pot, ov: Record<number, number> = {})
   const flen = (i: number) => p.edges[i].length_m;
   const fi = fronts.reduce((x, y) => (flen(y) < flen(x) ? y : x)); // corner lot: the shorter street edge is treated as the primary frontage
   const corner = fronts.length > 1;
-  const cross = (i: number) => {
-    const u = [sides[i][1][0] - sides[i][0][0], sides[i][1][1] - sides[i][0][1]], v = [sides[(i + 1) % n][1][0] - sides[(i + 1) % n][0][0], sides[(i + 1) % n][1][1] - sides[(i + 1) % n][0][1]];
-    return u[0] * v[1] - u[1] * v[0];
-  };
-  const cs = sides.map((_, i) => cross(i));
-  if (!(cs.every((c) => c >= -1e-6) || cs.every((c) => c <= 1e-6))) return "The lot isn't a simple convex shape.";
   const ccw = shoe(sides.map((sd) => sd[0])) < 0; // shoe() is the (x2-x1)(y2+y1) form: negative = counter-clockwise
   const dirOf = (i: number): XY => { const l = Math.hypot(sides[i][1][0] - sides[i][0][0], sides[i][1][1] - sides[i][0][1]); return [(sides[i][1][0] - sides[i][0][0]) / l, (sides[i][1][1] - sides[i][0][1]) / l]; };
   const normal = (i: number): XY => { const u = dirOf(i); return ccw ? [-u[1], u[0]] : [u[1], -u[0]]; }; // pointing into the lot
@@ -1931,6 +1935,27 @@ function setbackEnvelope(a: Assessment, p: Pot, ov: Record<number, number> = {})
   const fd = dirOf(fi), rd = dirOf(ri);
   if (Math.abs(fd[0] * rd[0] + fd[1] * rd[1]) < Math.cos((30 * Math.PI) / 180)) return "No clear rear edge opposite the front.";
   const kindOf = (i: number) => (fronts.includes(i) ? "front" : i === ri ? "rear" : "side");
+  return { ...lm, sides, fronts, ri, corner, kindOf, dirOf, normal };
+}
+
+/** Buildable polygon (lon/lat ring) and labels, or a reason it can't be drawn. */
+type SbInfo = { i: number; kind: string; len: number; std: number; off: number; mid: XY };
+function setbackEnvelope(a: Assessment, p: Pot, ov: Record<number, number> = {}): { ring: XY[]; labels: { ll: XY; text: string }[]; info: SbInfo[]; area: number; stdArea: number; lotArea: number } | string {
+  const set = setbackSet(a);
+  if (!set) return "Setback distances for this zone and lot size aren't in the app.";
+  const val = (label: string) => parseFloat(set.rows.find((r) => r.label === label)?.value ?? "");
+  const d = { front: val(SETBACK_ROWS.front), side: val(SETBACK_ROWS.side), rear: val(SETBACK_ROWS.rear) };
+  if (!isFinite(d.front) || !isFinite(d.side) || !isFinite(d.rear)) return "The setback rows needed aren't in the data.";
+  const fr = lotFrame(a, p);
+  if (typeof fr === "string") return fr;
+  const { sides, fronts, ri, corner, kindOf, dirOf, normal, toLL } = fr;
+  const n = sides.length;
+  const cross = (i: number) => {
+    const u = [sides[i][1][0] - sides[i][0][0], sides[i][1][1] - sides[i][0][1]], v = [sides[(i + 1) % n][1][0] - sides[(i + 1) % n][0][0], sides[(i + 1) % n][1][1] - sides[(i + 1) % n][0][1]];
+    return u[0] * v[1] - u[1] * v[0];
+  };
+  const cs = sides.map((_, i) => cross(i));
+  if (!(cs.every((c) => c >= -1e-6) || cs.every((c) => c <= 1e-6))) return "The lot isn't a simple convex shape.";
   const std = (i: number) => (fronts.includes(i) ? d.front : i === ri ? d.rear : d.side);
   // Clip the lot by every edge moved inward by its setback.
   const clip = (offOf: (i: number) => number) => {
@@ -2019,6 +2044,197 @@ document.querySelector(".panel")!.addEventListener("click", (ev) => {
 });
 $("setbackBtn").addEventListener("click", () => { setbackOn = !setbackOn; toolUi("setbackBtn", setbackOn); drawSetbacks(); });
 // ==== end Setbacks tool ====
+
+// ==== Design check: an imported IFC design placed on the lot and checked against this site's rules (setbacks.json / council_rules / provisions / uses) ====
+type SavedDesign = DesignModel & { unit?: string; place: Place };
+let design: SavedDesign | null = null;
+let designOut: CheckOut | null = null;
+let designMarkers: maplibregl.Marker[] = [];
+const DESIGN_NOTE = "Design check is an aid, not formal planning advice. Verify against the current planning scheme.";
+const openRing = (r: XY[]) => (r.length > 1 && r[0][0] === r[r.length - 1][0] && r[0][1] === r[r.length - 1][1] ? r.slice(0, -1) : r);
+function designFrame(): { lm: LotMetric; ring: XY[]; frame: LotFrame | null; why: string } | null {
+  if (!current) return null;
+  const lm = lotMetric(current);
+  if (typeof lm === "string") return null;
+  const fr = pot ? lotFrame(current, pot) : "Lot measurements aren't loaded yet.";
+  return { lm, ring: openRing(lm.outer.map(lm.toM)), frame: typeof fr === "string" ? null : fr, why: typeof fr === "string" ? fr : "" };
+}
+/** Centre of the lot, design front (plan bottom) to the longest street edge, else the longest lot edge. */
+function defaultPlace(f: NonNullable<ReturnType<typeof designFrame>>): Place {
+  const c = ringCentroid(f.ring);
+  const segs: [XY, XY][] = f.frame ? f.frame.fronts.map((i) => f.frame!.sides[i]) : f.ring.map((p, i) => [p, f.ring[(i + 1) % f.ring.length]]);
+  const len = (s: [XY, XY]) => Math.hypot(s[1][0] - s[0][0], s[1][1] - s[0][1]);
+  const e = segs.reduce((x, y) => (len(y) > len(x) ? y : x));
+  return { x: c[0], y: c[1], rot: Math.round(frontRotation(e[0], e[1], f.ring) * 10) / 10 };
+}
+function geomToM(g: any, toM: (c: XY) => XY): { polys: Poly[]; lines: XY[][] } {
+  const t = g?.type, c = g?.coordinates;
+  const ring = (r: XY[]) => openRing(r).map(toM);
+  if (t === "Polygon") return { polys: [c.map(ring)], lines: [] };
+  if (t === "MultiPolygon") return { polys: c.map((p: XY[][]) => p.map(ring)), lines: [] };
+  if (t === "LineString") return { polys: [], lines: [c.map(toM)] };
+  if (t === "MultiLineString") return { polys: [], lines: c.map((l: XY[]) => l.map(toM)) };
+  if (t === "Point") return { polys: [], lines: [[toM(c)]] };
+  return { polys: [], lines: [] };
+}
+/** Run the checks for the current placement; quick = skip overlays (while dragging). */
+function runDesignCheck(quick = false): CheckOut | null {
+  const f = designFrame();
+  if (!design || !f || !current) return null;
+  const tf = placeFn(design.centre, design.place);
+  const set = setbackSet(current);
+  return checkDesign({
+    storeys: design.storeys.map((s) => ({ ...s, polys: placePolys(s.polys, tf) })), carPolys: placePolys(design.carPolys, tf),
+    height: design.height, gfa: design.gfa, gfaFrom: design.gfaFrom, cars: design.cars, pos: design.pos,
+    lotRing: f.ring, lotArea: current.parcel.area_m2 ?? Math.abs(ringArea(f.ring)),
+    edges: f.frame ? f.frame.sides.map((sd, i) => ({ a: sd[0], b: sd[1], kind: f.frame!.kindOf(i) })) : null, edgesWhy: f.why,
+    depth: pot?.depth_m ?? null,
+    setbacks: set ? { title: set.title, source: set.source, rows: set.rows } : null, setbacksWhy: "Setback distances for this zone and lot size aren't in the app.",
+    items: [...(pot?.use_fit?.rule?.items ?? []), ...(pot?.provisions?.items ?? [])],
+    overlays: quick ? [] : current.overlays.filter((o) => o.geom).map((o) => ({ title: `${o.title} (${authLabel(o.authority)})`, ...geomToM(o.geom, f.lm.toM) })),
+  });
+}
+function whenMapReady(fn: () => void) {
+  const m = map;
+  if (!m) return;
+  if (m.getSource("lot")) fn(); else m.once("load", fn);
+}
+function drawDesign() {
+  whenMapReady(() => {
+    const m = map!;
+    designMarkers.forEach((k) => k.remove());
+    designMarkers = [];
+    const f = designFrame();
+    const feats: any[] = [], dims: any[] = [];
+    if (design && f && designOut) {
+      const tf = placeFn(design.centre, design.place);
+      design.storeys.forEach((s, li) => placePolys(s.polys, tf).forEach((p) => feats.push({ type: "Feature", properties: { lvl: li }, geometry: { type: "Polygon", coordinates: p.map((r) => [...r, r[0]].map((q) => f.lm.toLL(q as XY))) } })));
+      for (const mk of designOut.marks) {
+        const [a, b] = [f.lm.toLL(mk.a as XY), f.lm.toLL(mk.b as XY)];
+        dims.push({ type: "Feature", properties: { fail: mk.fail }, geometry: { type: "LineString", coordinates: [a, b] } });
+        const el = document.createElement("div");
+        el.className = `dim ${mk.fail ? "dfail" : "dpass"}`;
+        el.textContent = `${mk.d.toFixed(2)} m`;
+        designMarkers.push(new maplibregl.Marker({ element: el, anchor: "bottom", offset: [0, -3] }).setLngLat([(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]).addTo(m)); // label above the line so short lines stay visible
+      }
+    }
+    const color = designOut && (designOut.coverFail || designOut.heightFail) ? "#dc2626" : "#1f4e8c";
+    const fc = (features: any[]) => ({ type: "FeatureCollection", features }) as any;
+    if (!m.getSource("dsg")) {
+      m.addSource("dsg", { type: "geojson", data: fc(feats) });
+      m.addSource("dsgdim", { type: "geojson", data: fc(dims) });
+      m.addLayer({ id: "dsgf", type: "fill", source: "dsg", paint: { "fill-color": color, "fill-opacity": 0.14 } });
+      m.addLayer({ id: "dsg", type: "line", source: "dsg", paint: { "line-color": color, "line-width": 2.5 } });
+      m.addLayer({ id: "dsgdim", type: "line", source: "dsgdim", paint: { "line-color": ["case", ["get", "fail"], "#dc2626", "#9ca3af"], "line-width": ["case", ["get", "fail"], 2.5, 1.5] } });
+      m.on("mouseenter", "dsgf", () => { if (!measMode) m.getCanvas().style.cursor = "move"; });
+      m.on("mouseleave", "dsgf", () => { m.getCanvas().style.cursor = ""; });
+      m.on("mousedown", "dsgf", (e) => {
+        const fr = designFrame();
+        if (measMode || !design || !fr) return;
+        e.preventDefault(); // no map pan while moving the design
+        const start = fr.lm.toM([e.lngLat.lng, e.lngLat.lat]), p0 = { ...design.place };
+        const move = (ev: maplibregl.MapMouseEvent) => {
+          const q = fr.lm.toM([ev.lngLat.lng, ev.lngLat.lat]);
+          if (design) design.place = { ...p0, x: p0.x + q[0] - start[0], y: p0.y + q[1] - start[1] };
+          updateDesign(true);
+        };
+        m.on("mousemove", move);
+        m.once("mouseup", () => { m.off("mousemove", move); updateDesign(); saveDesign(); });
+      });
+    } else {
+      (m.getSource("dsg") as maplibregl.GeoJSONSource).setData(fc(feats));
+      (m.getSource("dsgdim") as maplibregl.GeoJSONSource).setData(fc(dims));
+      m.setPaintProperty("dsgf", "fill-color", color);
+      m.setPaintProperty("dsg", "line-color", color);
+    }
+  });
+}
+function updateDesign(quick = false) {
+  designOut = runDesignCheck(quick);
+  drawDesign();
+  if (!quick) renderDesign();
+}
+function saveDesign() {
+  if (current) touchSite(current.parcel, { design: design ?? undefined });
+}
+const RES_CLS: Record<string, string> = { Pass: "", Fail: "bad", "Cannot check": "na", Verify: "warn" };
+function designRows(out: CheckOut, links = true): string {
+  return out.rows.map((r) => `<tr class="${r.result === "Fail" ? "fail" : ""}"><td>${esc(r.rule)}${r.source ? `<div class="meta">${links && r.url ? link(r.url, r.source) : esc(r.source)}${r.verify ? ' <span class="pill warn">verify</span>' : ""}</div>` : ""}</td><td>${esc(r.design)}</td><td>${esc(r.limit)}</td><td><span class="pill ${RES_CLS[r.result]}">${r.result}</span></td></tr>`).join("");
+}
+function designSummary(d: SavedDesign): string {
+  const n = d.storeys.length;
+  return [`${n} storey${n === 1 ? "" : "s"}`, `${d.height.toFixed(1)} m high`, `footprint ${Math.round(unionArea(d.storeys[0]?.polys ?? []))} m²`, d.gfa != null ? `GFA ${Math.round(d.gfa)} m² (${d.gfaFrom})` : "", d.cars != null ? `${d.cars} car space${d.cars === 1 ? "" : "s"}` : ""].filter(Boolean).join(" · ");
+}
+function renderDesign(err = "") {
+  const el = $("design");
+  if (!current) { el.innerHTML = `<p class="meta">Load a site first, then import a design.</p>`; return; }
+  const e = err ? `<p class="err" role="alert">${esc(err)}</p>` : "";
+  if (!design) {
+    el.innerHTML = `<div class="card">${e}<p>Import a building design (IFC from DesignAI, Revit, ArchiCAD and others) to place it on this lot and check it against the site's planning rules.</p>
+      <button type="button" class="primary" data-dsg="import">Import IFC…</button><p class="meta">${DESIGN_NOTE}</p></div>`;
+    return;
+  }
+  const d = design, out = designOut;
+  const fails = out?.rows.filter((r) => r.result === "Fail").length ?? 0;
+  el.innerHTML = `<div class="card">${e}<div class="dsghead"><b>${esc(d.name)}</b>${d.unit ? ` <span class="meta">(${esc(d.unit)} units)</span>` : ""}</div>
+    <p class="meta">${esc(designSummary(d))}</p>
+    <div class="dsgctl"><span class="meta">Rotate</span>${[-15, -1, 1, 15].map((r) => `<button type="button" class="ghost" data-rot="${r}">${r > 0 ? "+" : "−"}${Math.abs(r)}°</button>`).join("")}<span class="meta">${(((d.place.rot % 360) + 360) % 360).toFixed(1)}°</span><button type="button" class="ghost" data-dsg="centre">Re-centre</button></div>
+    <p class="meta">Drag the footprint on the map to move it. The results update as it moves.</p>
+    ${out ? `<p><b>${fails ? `${fails} rule${fails === 1 ? "" : "s"} fail` : "No rule fails"}</b> <span class="meta">of the rules the app can check</span></p>
+    <table class="ptable dsgt"><thead><tr><th>Rule</th><th>Design</th><th>Limit</th><th>Result</th></tr></thead><tbody>${designRows(out)}</tbody></table>
+    <p class="meta">Checked against ${esc(siteCouncil().scheme)} rows in the app. Height is measured from the lowest floor level (natural ground isn't in the model); the footprint is walls, floor slabs and columns (eaves not included).</p>` : `<p class="meta">Checking…</p>`}
+    <p class="meta warnp">${DESIGN_NOTE}</p>
+    <button type="button" class="ghost" data-dsg="import">Replace IFC…</button> <button type="button" class="ghost" data-dsg="remove">Remove design</button></div>`;
+}
+async function importIfc(file: File) {
+  if (!current) return;
+  $("design").innerHTML = `<p class="meta">Reading ${esc(file.name)}…</p>`;
+  try {
+    const { ifcApi, parseIfc } = await import("./ifc");
+    const d = parseIfc(await ifcApi(wasmUrl), new Uint8Array(await file.arrayBuffer()), file.name);
+    const f = designFrame();
+    design = { ...d, place: f ? defaultPlace(f) : { x: 0, y: 0, rot: 0 } };
+    saveDesign();
+    updateDesign();
+    if (map) { const b = bounds(current.parcel.geom); map.fitBounds([[b[0], b[1]], [b[2], b[3]]], { padding: LOT_PAD, duration: 300 }); }
+  } catch (e) {
+    renderDesign(`This IFC file could not be read: ${e instanceof Error ? e.message : String(e)}`);
+  }
+}
+function openDesign(pick = false) {
+  if (!current) { $("hint").textContent = "Load a site first, then import a design."; $("q").focus(); return; }
+  showSec("design");
+  if (pick) $("ifcFile").click();
+}
+$("ifcFile").addEventListener("change", () => {
+  const inp = $("ifcFile") as HTMLInputElement;
+  const file = inp.files?.[0];
+  inp.value = "";
+  if (file) importIfc(file);
+});
+$("design").addEventListener("click", (ev) => {
+  const t = (ev.target as HTMLElement).closest<HTMLElement>("[data-dsg],[data-rot]");
+  if (!t) return;
+  if (t.dataset.rot && design) { design.place = { ...design.place, rot: Math.round((design.place.rot + Number(t.dataset.rot)) * 10) / 10 }; updateDesign(); saveDesign(); return; }
+  const act = t.dataset.dsg;
+  if (act === "import") $("ifcFile").click();
+  else if (act === "remove") { design = null; designOut = null; saveDesign(); drawDesign(); renderDesign(); }
+  else if (act === "centre" && design) { const f = designFrame(); if (f) { design.place = defaultPlace(f); updateDesign(); saveDesign(); } }
+});
+/** Design check table for the client PDF. */
+function designReport(): string {
+  if (!design || !designOut) return "";
+  return `<h2>Design check: ${esc(design.name)}</h2><p>${esc(designSummary(design))}</p>
+<table><tr><th>Rule</th><th>Design</th><th>Limit</th><th>Result</th></tr>${designRows(designOut, false)}</table>
+<p class="d">Checked against ${esc(siteCouncil().scheme)} rows in the app. ${DESIGN_NOTE}</p>`;
+}
+/** Short design summary for the AI report prompt. */
+function designBrief(): string {
+  if (!design || !designOut) return "";
+  const fails = designOut.rows.filter((r) => r.result === "Fail").map((r) => `${r.rule} ${r.design} (limit ${r.limit})`);
+  return `\nImported building design "${design.name}": ${designSummary(design)}; site cover ${designOut.cover.toFixed(1)}%. Design check: ${fails.length ? `fails ${fails.join("; ")}` : "no failing rule among those checked"}.`;
+}
+// ==== end Design check ====
 
 // ---- Layout: full map, map styles, side column resizing ----
 const app = $("app");
@@ -2562,6 +2778,7 @@ function setRcol(on: boolean) {
 const SEC_GROUPS: Record<string, [string, string[]]> = {
   zoning: ["Zoning", ["s-zoning", "s-suburb"]],
   setbacks: ["Setbacks", ["s-setbacks"]],
+  design: ["Design check", ["s-design"]],
   constraints: ["Constraints", ["s-constraints"]],
   potential: ["Development potential", ["s-potential"]],
   approvals: ["Approvals, clock & referrals", ["s-approvals"]],
@@ -2624,10 +2841,10 @@ const clickId = (id: string) => () => $(id).click();
 const setBaseTo = (k: string) => () => { ($("baseSel") as HTMLSelectElement).value = k; $("baseSel").dispatchEvent(new Event("change")); syncBase(); };
 type MI = [string, () => void] | "-";
 const MENUS: [string, MI[]][] = [
-  ["File", [["Back up my data…", () => openSettings("sset-backup")], ["Restore from backup…", () => openSettings("sset-backup")], "-", ["Batch check…", clickId("batchBtn")], ["Client PDF", clickId("footPdf")], "-", ["Report branding…", () => openSettings("sset-brand")], ["Data pack…", () => openSettings("sset-data")], ["Address search key…", () => openSettings("sset-search")]]],
+  ["File", [["Back up my data…", () => openSettings("sset-backup")], ["Restore from backup…", () => openSettings("sset-backup")], "-", ["Batch check…", clickId("batchBtn")], ["Import design (IFC)…", () => openDesign(true)], ["Client PDF", clickId("footPdf")], "-", ["Report branding…", () => openSettings("sset-brand")], ["Data pack…", () => openSettings("sset-data")], ["Address search key…", () => openSettings("sset-search")]]],
   ["AI", [["AI engine…", () => openSettings("sset-ai")], ["Built-in models…", () => openSettings("sset-models")], "-", ["Generate AI report", clickId("footReport")], ["Ask the assistant", () => setChat(true)]]],
   ["Forms", [["Open DA forms", clickId("formsBtn")], ["Approvals", clickId("apprBtn")]]],
-  ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], ["Annotate map", clickId("markBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
+  ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Design check", () => openDesign()], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], ["Annotate map", clickId("markBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
   ["Window", [["Full map on/off", () => setFull(!app.classList.contains("fullmap"))], "-", ["Plain map", setBaseTo("plain")], ["Street map", setBaseTo("street")], ["Aerial photo", setBaseTo("sat")], "-", ["Light / dark", clickId("themeBtn")], ["Reset panel widths", () => { document.documentElement.style.removeProperty("--right"); try { localStorage.removeItem("colRight"); } catch { /* storage unavailable */ } resizeMap(); }], "-", ["Settings…", () => openSettings()]]],
 ];
 const mbar = $("menubar");
