@@ -70,5 +70,5 @@ cd server && cargo test                  # API tests use a tiny pack built in th
 npx vite build                           # frontend -> dist/
 DATA_DIR=/path/with/datapack.sqlite DIST_DIR=../dist PORT=8080 cargo run --release
 ```
-The "Web app" workflow builds and tests on every push to `main` or `web-server`, checks the Docker
-image; the Oracle server pulls `main` itself (no deploy secrets).
+The "Web server" workflow builds and tests on every push to `main` or `web-server` and, on `main`, publishes
+the pre-built bundle to the `web-latest` release.
