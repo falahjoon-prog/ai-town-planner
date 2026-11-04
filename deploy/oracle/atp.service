@@ -1,0 +1,15 @@
+[Unit]
+Description=AI Town Planner web server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+DynamicUser=yes
+StateDirectory=atp
+Environment=DATA_DIR=/var/lib/atp DIST_DIR=/opt/atp-app/current/dist PORT=8080
+ExecStart=/opt/atp-app/current/atp-server
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

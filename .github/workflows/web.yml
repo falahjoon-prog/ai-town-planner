@@ -13,8 +13,7 @@ on:
       - "vite.config.ts"
       - "src-tauri/src/**"
       - "src-tauri/knowledge/**"
-      - "Dockerfile"
-      - ".dockerignore"
+      - "deploy/**"
       - "deploy/**"
       - ".github/workflows/web.yml"
   workflow_dispatch:
@@ -41,16 +40,31 @@ jobs:
       - name: Test
         run: cd server && cargo test --release --locked
 
-  image:
-    name: Docker image builds
-    runs-on: ubuntu-latest
+  bundle:
+    name: Web app bundle (linux-amd64)
+    if: github.ref == 'refs/heads/main'
+    needs: server
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Build image (no push)
-        uses: docker/build-push-action@v6
+      - uses: actions/setup-node@v4
         with:
-          context: .
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          node-version: 20
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: server
+      - run: npm ci --no-audit --no-fund
+      - run: npx vite build
+      - run: cd server && cargo build --release --locked
+      - name: Publish the pre-built web app (the Oracle server downloads it)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir pkg && cp server/target/release/atp-server pkg/ && cp -r dist pkg/dist
+          tar -czf town-planner-web-linux-amd64.tar.gz -C pkg .
+          gh release create web-latest --title "Web app (latest build)" --prerelease --latest=false \
+            --notes "Pre-built phone web app for the Oracle server; replaced on every push to main." 2>/dev/null || true
+          gh release upload web-latest town-planner-web-linux-amd64.tar.gz --clobber

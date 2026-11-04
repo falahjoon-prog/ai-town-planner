@@ -8,20 +8,20 @@ Site: **https://<server-ip-with-dashes>.sslip.io** (written to `/opt/atp-url.txt
 
 ## Go live (owner, once) – files in `deploy/oracle/`
 
-1. Sign up at https://signup.cloud.oracle.com (free; a card is asked only to verify identity). Home region:
-   **Australia East (Sydney)** (cannot be changed later).
-2. Networking → Virtual cloud networks → your VCN → Default Security List → Add Ingress Rules:
-   source `0.0.0.0/0`, TCP, destination ports `80,443`.
-3. Compute → Instances → Create instance: image **Canonical Ubuntu 24.04**, shape **VM.Standard.A1.Flex**
-   (Ampere) with **4 OCPU / 24 GB** (Always Free), public IPv4 on, add an SSH key (download it), and under
-   Advanced options → Management paste the whole of `deploy/oracle/cloud-init.yaml`.
-4. Wait ~20 min (Docker install + app build), then open `https://<public-ip-with-dashes>.sslip.io`
-   (e.g. 152.67.1.2 → `https://152-67-1-2.sslip.io`). The first start downloads the data pack (~1–2 min).
+1. Oracle Cloud account (Always Free), home region Australia East (Sydney).
+2. Network: "Create VCN with internet connectivity" wizard; in its Default Security List add an ingress rule
+   `0.0.0.0/0`, TCP, destination ports `80,443`.
+3. Compute → Create instance: **Ubuntu 24.04**, shape **VM.Standard.E2.1.Micro** (Always Free; A1.Flex also works
+   when Sydney has capacity), the VCN's public subnet with a public IPv4 address, and paste
+   `deploy/oracle/cloud-init.yaml` as the initialization script.
+4. After ~10 minutes open `https://<public-ip-with-dashes>.sslip.io`. The first start downloads the data pack
+   (a few minutes on the small server).
 
-Updates are automatic: the server checks GitHub `main` every 15 min and rebuilds when it changed
-(`atp-update.timer`). Own domain later: point an A record at the server IP, write the name into
-`/opt/atp-site` and run `sudo bash /opt/atp/deploy/oracle/setup.sh`. Optional `ADMIN_TOKEN` (add under
-`environment:` in docker-compose.yml) enables `POST /admin/refresh` for loading a newer data pack.
+The "Web server" workflow publishes a pre-built `town-planner-web-linux-amd64.tar.gz` to the `web-latest`
+release on every push to `main`; the server checks it every 15 minutes (`atp-update.timer`) and restarts the app
+when it changed. No Docker and no build on the server (it has 1 GB RAM; setup adds 2 GB swap). Caddy (apt)
+serves HTTPS. Own domain later: point an A record at the server IP, write the name into `/opt/atp-site` and run
+`sudo bash /opt/atp/deploy/oracle/setup.sh`.
 
 ## Install on a phone
 

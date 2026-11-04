@@ -40,7 +40,7 @@
 
 ## Next steps
 1. User testing of v0.7.0 on Windows (T3–T24 merged to main 2026-11-04: PlanLens layout, DA Form 1, setbacks, batch check, checklist, charges, project folders, map markup, statutory clock, Logan/Moreton Bay/Ipswich/Redland/Gold Coast/Mackay, deep links, hang fix).
-2. Phone web app (iPhone + Android PWA, users bring their own AI key): done; hosting on an Oracle Cloud Always Free VM via deploy/oracle (cloud-init, Caddy HTTPS on sslip.io, self-updating from main) – owner creates the VM (server/README.md).
+2. Phone web app (iPhone + Android PWA, users bring their own AI key): done; hosting on an Oracle Cloud Always Free VM (E2.1.Micro) via deploy/oracle: cloud-init, Caddy HTTPS on sslip.io, pre-built app from the web-latest release, self-updating every 15 min (server/README.md).
 3. Design check: test v0.7.0 with real DesignAI / Revit IFC exports on Windows; add DXF plans; encode site cover, GFA/plot ratio, parking and private open space numbers per zone so fewer rows say "Cannot check".
 4. City Plan code text library and full DA planning report (code-by-code table, Word/PDF).
 5. More uses and zones in the level-of-assessment tables; verified setbacks per zone.

@@ -1,6 +1,6 @@
 [Unit]
-Description=Update AI Town Planner from GitHub
-After=network-online.target docker.service
+Description=Update AI Town Planner from the latest GitHub build
+After=network-online.target
 
 [Service]
 Type=oneshot
