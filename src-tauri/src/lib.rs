@@ -2,6 +2,8 @@ mod ai;
 mod council;
 mod data;
 mod dev;
+mod licence;
+mod licwords;
 mod llm;
 mod rules;
 
@@ -281,11 +283,13 @@ async fn summarise_title(app: AppHandle, state: State<'_, AppState>, path: Strin
 
 #[tauri::command]
 async fn search(state: State<'_, AppState>, q: String) -> Result<Vec<data::ParcelHit>, String> {
+    licence::require()?;
     with_db(&state, |c| data::search(c, &q))
 }
 
 #[tauri::command]
 async fn assess(state: State<'_, AppState>, pid: i64) -> Result<rules::Assessment, String> {
+    licence::require()?;
     let db = state.db.clone();
     tauri::async_runtime::spawn_blocking(move || load_assessment(&db, pid)).await.map_err(e)?
 }
@@ -690,6 +694,33 @@ async fn devi_land_number(host: String, term: String) -> Option<String> {
     }
 }
 
+// ---- Trade AI account and the townplanner licence (licence.rs, licensing/README.md) ----
+#[tauri::command]
+async fn licence_state(app: AppHandle) -> Result<licence::LicenceState, String> {
+    Ok(licence::state(&dir(&app, "account")?).await)
+}
+
+#[tauri::command]
+async fn auth_sign_in(app: AppHandle, email: String, password: String) -> Result<licence::LicenceState, String> {
+    licence::sign_in(&dir(&app, "account")?, &email, &password).await
+}
+
+#[tauri::command]
+async fn auth_sign_up(app: AppHandle, email: String, password: String, full_name: String) -> Result<Option<licence::LicenceState>, String> {
+    licence::sign_up(&dir(&app, "account")?, &email, &password, &full_name).await
+}
+
+#[tauri::command]
+async fn auth_reset(email: String) -> Result<(), String> {
+    licence::reset(&email).await
+}
+
+#[tauri::command]
+async fn auth_sign_out(app: AppHandle) -> Result<(), String> {
+    licence::sign_out(&dir(&app, "account")?).await;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -731,7 +762,12 @@ pub fn run() {
             delete_model,
             save_text,
             read_backup,
-            read_text_file
+            read_text_file,
+            licence_state,
+            auth_sign_in,
+            auth_sign_up,
+            auth_reset,
+            auth_sign_out
         ])
         .run(tauri::generate_context!())
         .expect("error while running AI Town Planner");

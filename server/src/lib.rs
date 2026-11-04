@@ -14,6 +14,8 @@ mod dev;
 #[allow(dead_code)]
 #[path = "../../src-tauri/src/rules.rs"]
 mod rules;
+#[path = "../../src-tauri/src/licwords.rs"]
+mod licwords;
 
 mod ai;
 mod api;
