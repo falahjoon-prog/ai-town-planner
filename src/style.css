@@ -440,3 +440,115 @@ button.ibtn:disabled { opacity: .35; }
 .rail button svg, .toolstack > button svg { flex: none; }
 .tile[data-go] { cursor: pointer; }
 .tile[data-go]:hover { border-color: var(--accent); }
+
+/* ---- Desktop app vs phone web app ---- */
+.webonly, .phonebar, .mapsz { display: none; }
+.dgroup { display: contents; }
+.web .deskonly { display: none !important; }
+.web .webonly { display: revert; }
+.keynote { background: var(--chip); border-radius: 8px; padding: 8px 10px; }
+
+/* ---- Phone layout (<= 700 px): header, search, map on top, section below, tab bar at the bottom ---- */
+@media (max-width: 700px) {
+  :root { --top: 0px; --bot: 0px; --ph: 50px; --tab: 58px; --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px); font-size: 14px; }
+  .menubar, .statusbar, .grip, .bottombar .fullbtn, .applogo { display: none !important; }
+  input:not([type=checkbox]):not([type=radio]), select, textarea { font-size: 16px !important; } /* no zoom on focus (iOS) */
+
+  .phonebar { display: flex; position: fixed; top: 0; left: 0; right: 0; z-index: 30; height: calc(var(--ph) + var(--sat)); padding: var(--sat) max(8px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left)); align-items: center; gap: 10px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .phonebar b { flex: 1; font-size: 16px; letter-spacing: -.01em; }
+  .phlogo { width: 30px; height: 30px; border-radius: 7px; }
+  #moreBtn { display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 0; font-weight: 600; }
+  #moreBtn svg { width: 20px; height: 20px; }
+
+  .app { display: flex; flex-direction: column; top: calc(var(--ph) + var(--sat)); bottom: calc(var(--tab) + var(--sab)); }
+  .rightcol, .rcontent, .app.rcol .rcontent { display: contents; }
+  .search { order: 1; z-index: 8; padding: 8px 12px 6px; background: var(--panel); }
+  .searchrow input { height: 44px; }
+  .sqbtn, button.sqbtn, button.themebtn { width: 40px; height: 44px; min-width: 40px; font-size: 18px; }
+  .sqbtn svg { width: 19px; height: 19px; }
+  .search .results { top: 58px; max-height: calc(100dvh - 200px); resize: none; }
+  .results li { padding: 11px 10px; }
+  .sitehead { order: 2; padding: 0 12px 8px; background: var(--panel); }
+  .tiles { grid-template-columns: minmax(0, .8fr) minmax(0, 1.6fr) minmax(0, .8fr); }
+  .tile { padding: 6px 8px; flex-direction: column; gap: 0; }
+  .tile:nth-child(2) { grid-column: auto; order: 0; }
+  .tile b { white-space: nowrap; }
+  .mapstage { order: 3; position: relative; inset: auto; flex: 0 0 38%; min-height: 0; }
+  .map, .empty { border-radius: 0; border-width: 1px 0; }
+  #site, #botWin { order: 4; flex: 1; min-height: 0; background: var(--panel); }
+  .sechead { padding: 10px 12px 2px; }
+  .sechead b { font-size: 16px; }
+  .pbody { padding: 4px 12px 16px; -webkit-overflow-scrolling: touch; }
+  .pbody button, .panelfoot button, .dlg button, .fv-col button, .report-bar button, .mapitem button { min-height: 44px; }
+  .pbody select, .clockform select { min-height: 44px; }
+  .panelfoot { padding: 8px 12px; }
+  .ptable { font-size: 13px; }
+  .dsgt td:first-child { width: auto; }
+
+  /* Bottom tab bar (the section rail) */
+  .rail { order: 5; position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; width: auto; height: calc(var(--tab) + var(--sab)); padding: 0 4px var(--sab); flex-direction: row; gap: 0; overflow-x: auto; overflow-y: hidden; border: 0; border-top: 1px solid var(--line); background: var(--panel); scrollbar-width: none; overscroll-behavior-x: contain; }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail button { flex: 1 0 auto; width: auto; min-width: 66px; height: var(--tab); padding: 0 6px; border-radius: 0; }
+  .rail button.on { background: transparent; color: var(--accent); box-shadow: inset 0 2px 0 var(--accent); }
+  .rail button::after { font-size: 11px; white-space: nowrap; }
+  .rail button.on::after { font-weight: 700; }
+  .railgap { display: none; }
+
+  /* More sheet (the left tools column) */
+  .leftcol { position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; z-index: 40; gap: 0; padding: 22px 12px calc(14px + var(--sab)); background: var(--panel); border-radius: 18px 18px 0 0; box-shadow: 0 -6px 30px rgba(0,0,0,.3); transform: translateY(105%); visibility: hidden; transition: transform .2s ease, visibility 0s .2s; }
+  .leftcol::before { content: ""; position: absolute; top: 8px; left: 50%; width: 40px; height: 5px; margin-left: -20px; border-radius: 3px; background: var(--line); }
+  .app.moresheet .leftcol { transform: none; visibility: visible; transition: transform .2s ease; }
+  .app.moresheet::before { content: ""; position: fixed; inset: 0; z-index: 39; background: rgba(0,0,0,.4); }
+  .toolstack { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0; border: 0; overflow: visible; flex: none; }
+  .toolstack > button { height: 76px; gap: 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; }
+  .toolstack > button svg { width: 24px; height: 24px; }
+  .toolstack > button:not(.railonly)::after { font-size: 12.5px; }
+  .app.fullmap .railonly, .app.fullmap .toolstack > .railonly, .app.fullmap .railseg { display: none; }
+
+  /* Map: tools scroll sideways, size buttons top right, styles bottom left */
+  .maptools { left: 6px; right: 6px; top: 6px; transform: none; width: auto; max-width: none; flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .maptools::-webkit-scrollbar { display: none; }
+  .maptools button { flex: none; width: 42px; height: 42px; }
+  .mapsz { display: flex; position: absolute; right: 8px; top: 62px; z-index: 6; flex-direction: column; gap: 6px; }
+  .mapsz button { min-height: 36px; padding: 6px 10px; font-size: 12.5px; background: color-mix(in srgb, var(--panel) 92%, transparent); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 1px 4px rgba(0,0,0,.18); }
+  .bottombar { left: 8px; transform: none; bottom: 8px; padding: 4px; }
+  .bottombar .seg button { padding: 8px 12px; }
+  .measout { top: 58px; left: 8px; right: 92px; flex-wrap: wrap; }
+  .markbar { bottom: 8px; left: 8px; right: 8px; }
+  .markbar button { min-height: 36px; }
+  .legend { bottom: 60px; max-width: 60%; }
+  .setbacked { left: 8px; bottom: 60px; max-width: calc(100% - 16px); }
+  .app:has(#site[hidden]) .mapstage { flex: 1; }
+  .app:has(#site[hidden]) .mapsz { display: none; }
+
+  /* Bigger map / hidden map / full map */
+  .app.fullmap .rightcol { display: contents; }
+  .app.fullmap .mapstage { flex: 1; }
+  .app.fullmap .sitehead, .app.fullmap #site, .app.fullmap #botWin { display: none; }
+  .app.fullmap .bottombar { display: flex; }
+  .app.mapmin:not(.formsmode) .mapstage { flex: 0 0 auto; }
+  .app.mapmin:not(.formsmode) .mapstage > :not(.mapsz) { display: none !important; }
+  .app.mapmin:not(.formsmode) .mapsz { position: static; flex-direction: row; padding: 6px 12px; background: var(--bg); border-bottom: 1px solid var(--line); }
+  .app.mapmin .mapsz button { flex: 1; }
+  .app.mapmin #mapGrow { display: none; }
+  .app:has(.rightcol.chatopen) .mapstage { display: none; }
+
+  /* Forms page: one column that scrolls as a page */
+  .app.formsmode .rightcol { display: contents; }
+  .app.formsmode .search, .app.formsmode .sitehead, .app.formsmode #site, .app.formsmode #botWin, .app.formsmode .mapsz { display: none; }
+  .app.formsmode .mapstage { flex: 1; }
+  .formsview { display: flex; flex-direction: column; gap: 10px; padding: 10px; overflow-y: auto; }
+  .fv-col { flex: none; min-height: auto; }
+  .fv-form { order: -1; }
+  .fv-scroll { flex: none; overflow: visible; }
+  .fv-headrow { position: sticky; top: -10px; z-index: 2; background: var(--panel); border-radius: 12px 12px 0 0; }
+
+  /* Windows become near full-screen sheets */
+  dialog, dialog.wide, dialog.wide.cmpdlg { width: calc(100vw - 16px); max-width: none; max-height: calc(100dvh - 24px - var(--sat) - var(--sab)); }
+  .dlg, .cmpdlg .dlg { max-height: calc(100dvh - 24px - var(--sat) - var(--sab)); padding: 0 14px 14px; }
+  .x { min-width: 44px; min-height: 40px; }
+  .frow { grid-template-columns: 1fr; gap: 4px; }
+  .letter { padding: 20px 18px; }
+  .chat-log .msg { max-width: 92%; font-size: 14px; }
+  .botwin .report-bar input, .botwin .report-bar button { min-height: 44px; }
+}

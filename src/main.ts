@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
-import { invoke, Channel } from "@tauri-apps/api/core";
-import { open, save } from "@tauri-apps/plugin-dialog";
+import { invoke, invokeStream, isWeb, saveFile, openTextFile, pickPath } from "./backend";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { marked } from "marked";
@@ -15,6 +14,12 @@ import wasmUrl from "web-ifc/web-ifc.wasm?url";
 import { checkDesign, placeFn, placePolys, frontRotation, ringCentroid, ringArea, unionArea, type DesignModel, type Place, type CheckOut, type Poly } from "./design";
 import { siteLink, destLabel, resolveLotUrl, resolverFor, type Dest, type SiteRef } from "./sitelink";
 import "./style.css";
+
+if (isWeb) {
+  document.documentElement.classList.add("web");
+  document.getElementById("hint")!.textContent = "Search an address or lot/plan in the 7 councils covered.";
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => { /* offline shell is optional */ });
+}
 
 type Hit = { pid: number; address: string; lotplan: string; suburb: string; council?: string };
 // Council registry entry (src-tauri/knowledge/councils.json, shared with the data pack pipeline)
@@ -69,10 +74,12 @@ let map: maplibregl.Map | null = null;
 async function refreshStatus(): Promise<Status> {
   const s = await invoke<Status>("status");
   const p = s.datapack;
-  $("packInfo").textContent = p ? `Data: ${p.region} · ${p.built_at}` : "No data pack: open Settings";
+  const loading = "Planning data is loading on the server. Try again in a minute.";
+  $("packInfo").textContent = p ? `Data: ${p.region} · ${p.built_at}` : isWeb ? loading : "No data pack: open Settings";
   $("packDetail").textContent = p
     ? `${p.region} · built ${p.built_at} · ${Number(p.parcels).toLocaleString()} lots · ${p.layers} planning scheme and state layers. ${p.attribution}`
-    : "No data pack installed yet. Download the latest datapack .sqlite.gz from the GitHub Releases page, then import it here.";
+    : isWeb ? loading : "No data pack installed yet. Download the latest datapack .sqlite.gz from the GitHub Releases page, then import it here.";
+  if (isWeb && !p) setTimeout(refreshStatus, 15_000);
   $("disclaimer").textContent = s.disclaimer;
   status = s;
   renderModels(s);
@@ -179,12 +186,10 @@ $("models").addEventListener("click", async (ev) => {
     if (btn.dataset.act === "use") await invoke("set_model", { file });
     if (btn.dataset.act === "del") await invoke("delete_model", { file });
     if (btn.dataset.act === "dl") {
-      const ch = new Channel<{ done: number; total: number }>();
-      ch.onmessage = (p) => {
-        btn.textContent = p.total ? `${Math.floor((p.done / p.total) * 100)}%` : `${(p.done / 1e9).toFixed(2)} GB`;
-      };
       btn.disabled = true;
-      await invoke("download_model", { id, onProgress: ch });
+      await invokeStream<{ done: number; total: number }>("download_model", { id }, (p) => {
+        btn.textContent = p.total ? `${Math.floor((p.done / p.total) * 100)}%` : `${(p.done / 1e9).toFixed(2)} GB`;
+      }, "onProgress");
     }
   } catch (e) {
     alertMsg(e);
@@ -194,13 +199,11 @@ $("models").addEventListener("click", async (ev) => {
 
 $("downloadPack").addEventListener("click", async () => {
   const b = $("downloadPack") as HTMLButtonElement;
-  const ch = new Channel<{ done: number; total: number }>();
-  ch.onmessage = (p) => {
-    b.textContent = p.total ? `Downloading ${Math.floor((p.done / p.total) * 100)}%` : `${(p.done / 1e6).toFixed(0)} MB`;
-  };
   b.disabled = true;
   try {
-    await invoke("download_datapack", { onProgress: ch });
+    await invokeStream<{ done: number; total: number }>("download_datapack", {}, (p) => {
+      b.textContent = p.total ? `Downloading ${Math.floor((p.done / p.total) * 100)}%` : `${(p.done / 1e6).toFixed(0)} MB`;
+    }, "onProgress");
   } catch (e) {
     alertMsg(e);
   }
@@ -210,7 +213,7 @@ $("downloadPack").addEventListener("click", async () => {
 });
 
 $("importPack").addEventListener("click", async () => {
-  const path = await open({ multiple: false, filters: [{ name: "Data pack", extensions: ["sqlite", "gz"] }] });
+  const path = await pickPath({ name: "Data pack", extensions: ["sqlite", "gz"] });
   if (!path) return;
   const b = $("importPack") as HTMLButtonElement;
   b.disabled = true;
@@ -226,7 +229,7 @@ $("importPack").addEventListener("click", async () => {
 });
 
 $("importModel").addEventListener("click", async () => {
-  const path = await open({ multiple: false, filters: [{ name: "GGUF model", extensions: ["gguf"] }] });
+  const path = await pickPath({ name: "GGUF model", extensions: ["gguf"] });
   if (!path) return;
   try {
     await invoke("import_model", { path });
@@ -741,14 +744,12 @@ async function draft(letter: boolean, prelodge = false) {
   $("docTitle").textContent = prelodge ? "Pre-lodgement meeting request" : letter ? "Cover letter" : "DA Form 1 – Development application details";
   $("docBody").innerHTML = `<p class="meta">Drafting…</p>`;
   ($("docDlg") as HTMLDialogElement).showModal();
-  const ch = new Channel<string>();
-  ch.onmessage = (t) => {
-    docText += t;
-    $("docBody").innerHTML = letter ? renderLetter(docText) : renderForm(docText, false);
-  };
   try {
     const proposal = prelodge ? `Request a pre-lodgement meeting with council about: ${val("question") || "the proposal on this site"}` : val("question");
-    await invoke("draft_form", { pid: current.parcel.pid, useId: useId(), proposal, letter, onToken: ch });
+    await invokeStream<string>("draft_form", { pid: current.parcel.pid, useId: useId(), proposal, letter }, (t) => {
+      docText += t;
+      $("docBody").innerHTML = letter ? renderLetter(docText) : renderForm(docText, false);
+    });
     if (!letter) $("docBody").innerHTML = renderForm(docText, true);
   } catch (e) {
     $("docBody").innerHTML = `<p class="err">${esc(e)}</p>`;
@@ -1069,11 +1070,9 @@ $("markPng").addEventListener("click", async () => {
   try {
     const url = await markedMapUrl(true);
     const name = (current.parcel.address || current.parcel.lotplan).replace(/[^\w]+/g, "_").slice(0, 60);
-    const path = await save({ defaultPath: `Map_${name}.png`, filters: [{ name: "PNG image", extensions: ["png"] }] });
-    if (!path) return;
     const bin = atob(url.split(",")[1]);
-    const bytes = Array.from({ length: bin.length }, (_, i) => bin.charCodeAt(i));
-    await invoke("save_bytes", { path, bytes });
+    const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
+    if (!(await saveFile(`Map_${name}.png`, { name: "PNG image", extensions: ["png"] }, bytes))) return;
     $("hint").textContent = "Map image saved.";
   } catch (e) { alertMsg(e); }
 });
@@ -1107,8 +1106,7 @@ $("genBtn").addEventListener("click", async () => {
   sections = [];
   activeTab = "";
   renderReport();
-  const ch = new Channel<{ section: string; title: string; text: string }>();
-  ch.onmessage = (ev) => {
+  const onEvent = (ev: { section: string; title: string; text: string }) => {
     let sec = sections.find((x) => x.key === ev.section);
     if (!sec) {
       sec = { key: ev.section, title: ev.title, text: "" };
@@ -1120,7 +1118,7 @@ $("genBtn").addEventListener("click", async () => {
     renderReport();
   };
   try {
-    await invoke("generate_report", { pid: current.parcel.pid, question: val("question") + designBrief(), useId: useId(), onEvent: ch });
+    await invokeStream("generate_report", { pid: current.parcel.pid, question: val("question") + designBrief(), useId: useId() }, onEvent, "onEvent");
     if (sections.length) activeTab = sections[0].key;
     renderReport();
     $("saveBtn").hidden = !sections.length;
@@ -1156,13 +1154,11 @@ $("chatForm").addEventListener("submit", async (ev) => {
   const reply = { role: "assistant", content: "" };
   chatHistory.push(reply);
   renderChat();
-  const ch = new Channel<string>();
-  ch.onmessage = (t) => {
-    reply.content += t;
-    renderChat();
-  };
   try {
-    await invoke("assistant", { pid: current?.parcel.pid ?? null, history: chatHistory.slice(0, -1), onToken: ch });
+    await invokeStream<string>("assistant", { pid: current?.parcel.pid ?? null, history: chatHistory.slice(0, -1) }, (t) => {
+      reply.content += t;
+      renderChat();
+    });
   } catch (e) {
     reply.content = `**Error:** ${String(e)}`;
     renderChat();
@@ -1207,12 +1203,10 @@ $("saveBtn").addEventListener("click", async () => {
   if (!current) return;
   const name = (current.parcel.address || current.parcel.lotplan).replace(/[^\w]+/g, "_").slice(0, 60);
   markedPng = await markedMapUrl().catch(() => "");
-  const path = await save({ defaultPath: `Planning_report_${name}.html`, filters: [{ name: "HTML report", extensions: ["html"] }] });
-  if (!path) return;
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Planning report: ${esc(current.parcel.address)}</title>
 <style>body{${REPORT_CSS};max-width:820px;margin:40px auto;padding:0 20px}h1{font-size:24px}h2{font-size:18px;margin-top:28px;border-bottom:1px solid #ddd}small,.d{color:#6b7280;font-size:12px}</style></head>
 <body>${reportBody(current)}</body></html>`;
-  await invoke("save_text", { path, content: html });
+  await saveFile(`Planning_report_${name}.html`, { name: "HTML report", extensions: ["html"] }, html).catch(alertMsg);
 });
 
 // PDF: print only the report; choose "Save as PDF" / "Microsoft Print to PDF" in the print dialog.
@@ -1441,16 +1435,14 @@ $("siteNote").addEventListener("input", () => {
 });
 $("titleBtn").addEventListener("click", async () => {
   if (!current) return;
-  const path = await open({ multiple: false, filters: [{ name: "Title search PDF", extensions: ["pdf"] }] });
+  const path = await pickPath({ name: "Title search PDF", extensions: ["pdf"] });
   if (!path) return;
   const b = $("titleBtn") as HTMLButtonElement;
   b.disabled = true;
   b.textContent = "Reading title…";
   let text = "";
-  const ch = new Channel<string>();
-  ch.onmessage = (t) => { text += t; $("titleOut").innerHTML = marked.parse(text) as string; };
   try {
-    await invoke("summarise_title", { path, onToken: ch });
+    await invokeStream<string>("summarise_title", { path }, (t) => { text += t; $("titleOut").innerHTML = marked.parse(text) as string; });
     touchSite(current.parcel, { title: text });
   } catch (e) {
     $("titleOut").innerHTML = `<p class="err">${esc(e)}</p>`;
@@ -1776,12 +1768,12 @@ let batchCsv = "";
 const csvCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 $("batchBtn").addEventListener("click", () => ($("batchDlg") as HTMLDialogElement).showModal());
 $("batchPick").addEventListener("click", async () => {
-  const path = await open({ multiple: false, filters: [{ name: "Address list", extensions: ["csv", "txt"] }] });
-  if (typeof path !== "string") return;
   const out = $("batchOut");
   let lines: string[];
   try {
-    lines = (await invoke<string>("read_text_file", { path }))
+    const text = await openTextFile({ name: "Address list", extensions: ["csv", "txt"] });
+    if (text === null) return;
+    lines = text
       .split(/\r?\n/)
       .map((l) => l.trim().replace(/^"(.*)"$/, "$1").trim())
       .filter(Boolean);
@@ -1815,9 +1807,7 @@ $("batchPick").addEventListener("click", async () => {
 });
 $("batchSave").addEventListener("click", async () => {
   if (!batchCsv) return;
-  const path = await save({ defaultPath: "Batch_address_check.csv", filters: [{ name: "CSV", extensions: ["csv"] }] });
-  if (!path) return;
-  try { await invoke("save_text", { path, content: batchCsv }); } catch (e) { alertMsg(e); }
+  try { await saveFile("Batch_address_check.csv", { name: "CSV", extensions: ["csv"] }, batchCsv); } catch (e) { alertMsg(e); }
 });
 
 // ---- Setbacks: rows come from knowledge/setbacks.json, only for zones and lot sizes it covers ----
@@ -2128,19 +2118,23 @@ function drawDesign() {
       m.addLayer({ id: "dsgdim", type: "line", source: "dsgdim", paint: { "line-color": ["case", ["get", "fail"], "#dc2626", "#9ca3af"], "line-width": ["case", ["get", "fail"], 2.5, 1.5] } });
       m.on("mouseenter", "dsgf", () => { if (!measMode) m.getCanvas().style.cursor = "move"; });
       m.on("mouseleave", "dsgf", () => { m.getCanvas().style.cursor = ""; });
-      m.on("mousedown", "dsgf", (e) => {
+      // Move the design with the mouse or one finger
+      const dragDesign = (e: { lngLat: maplibregl.LngLat; preventDefault(): void }, touch: boolean) => {
         const fr = designFrame();
         if (measMode || !design || !fr) return;
         e.preventDefault(); // no map pan while moving the design
         const start = fr.lm.toM([e.lngLat.lng, e.lngLat.lat]), p0 = { ...design.place };
-        const move = (ev: maplibregl.MapMouseEvent) => {
+        const move = (ev: { lngLat: maplibregl.LngLat }) => {
           const q = fr.lm.toM([ev.lngLat.lng, ev.lngLat.lat]);
           if (design) design.place = { ...p0, x: p0.x + q[0] - start[0], y: p0.y + q[1] - start[1] };
           updateDesign(true);
         };
-        m.on("mousemove", move);
-        m.once("mouseup", () => { m.off("mousemove", move); updateDesign(); saveDesign(); });
-      });
+        const done = () => { updateDesign(); saveDesign(); };
+        if (touch) { m.on("touchmove", move); m.once("touchend", () => { m.off("touchmove", move); done(); }); }
+        else { m.on("mousemove", move); m.once("mouseup", () => { m.off("mousemove", move); done(); }); }
+      };
+      m.on("mousedown", "dsgf", (e) => dragDesign(e, false));
+      m.on("touchstart", "dsgf", (e) => { if (e.points.length === 1) dragDesign(e, true); });
     } else {
       (m.getSource("dsg") as maplibregl.GeoJSONSource).setData(fc(feats));
       (m.getSource("dsgdim") as maplibregl.GeoJSONSource).setData(fc(dims));
@@ -2245,6 +2239,7 @@ function resizeMap() {
 function setFull(on: boolean) {
   app.classList.toggle("fullmap", on);
   try { localStorage.setItem("fullmap", on ? "1" : "0"); } catch { /* storage unavailable */ }
+  syncMapSz();
   resizeMap();
 }
 $("fullBtn").addEventListener("click", () => setFull(true));
@@ -2410,9 +2405,7 @@ function mergeBackup(b: Backup) {
 $("backupBtn").addEventListener("click", async () => {
   try {
     const b = makeBackup();
-    const path = await save({ defaultPath: `planlens-backup-${new Date().toISOString().slice(0, 10)}.json`, filters: [{ name: "Backup", extensions: ["json"] }] });
-    if (!path) return;
-    await invoke("save_text", { path, content: JSON.stringify(b, null, 2) });
+    if (!(await saveFile(`planlens-backup-${new Date().toISOString().slice(0, 10)}.json`, { name: "Backup", extensions: ["json"] }, JSON.stringify(b, null, 2)))) return;
     backupMsg(`Backed up ${countText(backupCounts(b))}.`);
   } catch (e) { backupMsg(`Backup failed: ${e}`); }
 });
@@ -2420,9 +2413,9 @@ $("restoreBtn").addEventListener("click", async () => {
   $("restoreBox").hidden = true;
   pendingBackup = null;
   try {
-    const path = await open({ multiple: false, filters: [{ name: "Backup", extensions: ["json"] }] });
-    if (typeof path !== "string") return;
-    pendingBackup = parseBackup(await invoke<string>("read_backup", { path }));
+    const text = await openTextFile({ name: "Backup", extensions: ["json"] }, "read_backup");
+    if (text === null) return;
+    pendingBackup = parseBackup(text);
     $("restoreText").textContent = `This backup has ${countText(backupCounts(pendingBackup))}. Merge it into your data? Nothing is deleted.`;
     $("restoreBox").hidden = false;
     backupMsg("");
@@ -2661,13 +2654,11 @@ $("fvForm").addEventListener("submit", async (ev) => {
   const reply = { role: "assistant", content: "" };
   fvHistory.push(reply);
   fvRender();
-  const ch = new Channel<string>();
-  ch.onmessage = (t) => {
-    reply.content += t;
-    fvRender();
-  };
   try {
-    await invoke("chat", { pid: current.parcel.pid, report: formContext(), history: fvHistory.slice(0, -1), onToken: ch });
+    await invokeStream<string>("chat", { pid: current.parcel.pid, report: formContext(), history: fvHistory.slice(0, -1) }, (t) => {
+      reply.content += t;
+      fvRender();
+    });
   } catch (e) {
     reply.content = `**Error:** ${String(e)}`;
     fvRender();
@@ -2806,11 +2797,41 @@ function showSec(k: string) {
 $("rail").addEventListener("click", (ev) => {
   const b = (ev.target as HTMLElement).closest<HTMLElement>("button");
   if (!b) return;
-  if (b.classList.contains("on") && !app.classList.contains("rcol")) { setRcol(true); return; }
+  if (phone.matches) {
+    // Phone tab bar: a tab always shows its section (no collapse); leave the forms page and full map
+    if (app.classList.contains("formsmode")) closeFormView();
+    if (app.classList.contains("fullmap")) setFull(false);
+    b.scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (b.classList.contains("on")) return;
+  } else if (b.classList.contains("on") && !app.classList.contains("rcol")) { setRcol(true); return; }
   if (b.dataset.sec === "assistant") setChat(($("botWin") as HTMLElement).hidden || app.classList.contains("rcol"));
   else showSec(b.dataset.sec!);
 });
 showSec("zoning");
+
+// ---- Phone layout (<= 700 px): More sheet with the tools, map size buttons ----
+const phone = matchMedia("(max-width: 700px)");
+function setSheet(on: boolean) {
+  app.classList.toggle("moresheet", on);
+  $("moreBtn").setAttribute("aria-expanded", String(on));
+}
+$("moreBtn").addEventListener("click", () => setSheet(!app.classList.contains("moresheet")));
+app.addEventListener("click", (ev) => { if (ev.target === app) setSheet(false); }); // the dimmed backdrop
+document.querySelector(".leftcol")!.addEventListener("click", (ev) => { if ((ev.target as HTMLElement).closest("button")) setSheet(false); });
+function syncMapSz() {
+  const min = app.classList.contains("mapmin");
+  $("mapHide").textContent = min ? "Show map" : "Hide map";
+  $("mapGrow").textContent = app.classList.contains("fullmap") ? "Smaller" : "Expand";
+}
+$("mapGrow").addEventListener("click", () => setFull(!app.classList.contains("fullmap")));
+$("mapHide").addEventListener("click", () => {
+  app.classList.toggle("mapmin");
+  if (app.classList.contains("mapmin")) setFull(false);
+  syncMapSz();
+  resizeMap();
+});
+phone.addEventListener("change", () => { setSheet(false); resizeMap(); });
+syncMapSz();
 $("recentBtn").setAttribute("aria-haspopup", "listbox");
 $("recentBtn").setAttribute("aria-expanded", "false");
 $("recentBtn").addEventListener("click", () => { if ($("results").innerHTML) $("results").innerHTML = ""; else showRecents(); });
@@ -2847,12 +2868,14 @@ const MENUS: [string, MI[]][] = [
   ["Tools", [["Dimensions", clickId("dimBtn")], ["Subdivision sketch", clickId("subBtn")], ["Setbacks", clickId("setbackBtn")], ["Design check", () => openDesign()], ["Measure distance", clickId("measDBtn")], ["Measure area", clickId("measABtn")], ["Contours", clickId("contBtn")], ["Flood map", clickId("floodBtn")], ["Power", clickId("powerBtn")], ["3D envelope", clickId("envBtn")], ["Annotate map", clickId("markBtn")], "-", ["Compare", clickId("cmpBtn")], ["Maps", clickId("mapsBtn")], ["Open map", clickId("myMapBtn")]]],
   ["Window", [["Full map on/off", () => setFull(!app.classList.contains("fullmap"))], "-", ["Plain map", setBaseTo("plain")], ["Street map", setBaseTo("street")], ["Aerial photo", setBaseTo("sat")], "-", ["Light / dark", clickId("themeBtn")], ["Reset panel widths", () => { document.documentElement.style.removeProperty("--right"); try { localStorage.removeItem("colRight"); } catch { /* storage unavailable */ } resizeMap(); }], "-", ["Settings…", () => openSettings()]]],
 ];
+/** Menu items for desktop-only features, left out of the web app. */
+const WEB_SKIP = new Set(["Batch check…", "Data pack…", "Built-in models…", "Generate AI report"]);
 const mbar = $("menubar");
 MENUS.forEach(([name, items]) => {
   const w = document.createElement("div"); w.className = "mn";
   const b = document.createElement("button"); b.type = "button"; b.textContent = name;
   const dd = document.createElement("div"); dd.className = "mdrop";
-  items.forEach((it) => {
+  items.filter((it) => !(isWeb && it !== "-" && WEB_SKIP.has(it[0]))).forEach((it) => {
     if (it === "-") { dd.appendChild(document.createElement("hr")); return; }
     const x = document.createElement("button"); x.type = "button"; x.textContent = it[0];
     x.addEventListener("click", () => { closeMenus(); it[1](); });
