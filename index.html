@@ -281,9 +281,53 @@
       <div class="grip r" id="gripR" title="Drag to resize, double-click to expand"></div>
     </div>
 
+    <!-- Trade AI sign-in and licence (src/account.ts): covers the app until the account has a trial or seat -->
+    <div class="gate" id="gate" hidden>
+      <section class="gate-brand" aria-hidden="true">
+        <svg class="gate-logo" viewBox="48 48 928 928" aria-hidden="true">
+          
+          <defs><linearGradient id="gate-logo-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1f4e8c"/><stop offset="1" stop-color="#0f2a52"/></linearGradient></defs><rect x="48" y="48" width="928" height="928" rx="210" fill="url(#gate-logo-g)" />
+          <polygon points="512,440 852,610 512,780 172,610" fill="#2f6bb5" stroke="#fff" stroke-width="16" stroke-linejoin="round"/><polygon points="512,500 732,610 512,720 292,610" fill="none" stroke="#c4d8f2" stroke-width="10" stroke-dasharray="26 20"/><polygon points="368,610 512,682 512,462 368,390" fill="#dbe5f2"/><polygon points="512,682 656,610 656,390 512,462" fill="#aec3df"/><polygon points="512,318 656,390 512,462 368,390" fill="#fff"/><path d="M770 430C738 378 694 340 694 290A76 76 0 1 1 846 290C846 340 802 378 770 430Z" fill="#f2b45b"/><circle cx="770" cy="290" r="28" fill="#0f2a52"/>
+        </svg>
+        <p class="gate-name">AI Town Planner</p>
+        <p class="gate-tag">Zoning, overlays and development potential for Queensland sites.</p>
+        <ul class="gate-points"><li>15-day free trial</li><li>One Trade AI account for all your apps</li><li>On your PC and your phone</li></ul>
+      </section>
+      <section class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gTitle">
+        <form id="gSignIn" class="gate-view" novalidate>
+          <h1 id="gTitle">Sign in</h1>
+          <p class="gate-sub">Use your Trade AI account – the same one as ElectricalAI, PaintingAI and TilingAI.</p>
+          <label>E-mail<input type="email" id="gEmail" autocomplete="username" inputmode="email" required /></label>
+          <label>Password<input type="password" id="gPass" autocomplete="current-password" required /></label>
+          <button type="submit" class="gate-go">Sign in</button>
+          <p class="gate-msg" id="gMsg" role="status" aria-live="polite"></p>
+          <div class="gate-links"><button type="button" class="linkbtn" id="gForgot">Forgot password?</button><button type="button" class="linkbtn" id="gToNew">Create an account</button></div>
+        </form>
+        <form id="gSignUp" class="gate-view" novalidate hidden>
+          <h1>Create your account</h1>
+          <p class="gate-sub">One Trade AI account for all Trade AI apps. Your 15-day free trial starts when you first sign in.</p>
+          <label>Full name<input id="gName" autocomplete="name" required /></label>
+          <label>E-mail<input type="email" id="gNewEmail" autocomplete="username" inputmode="email" required /></label>
+          <label>Password<input type="password" id="gNewPass" autocomplete="new-password" minlength="8" required /></label>
+          <button type="submit" class="gate-go">Create account</button>
+          <p class="gate-msg" id="gNewMsg" role="status" aria-live="polite"></p>
+          <div class="gate-links"><button type="button" class="linkbtn" id="gToSignIn">I already have an account</button></div>
+        </form>
+        <div id="gLocked" class="gate-view" hidden>
+          <h1 id="gLockTitle">Licence needed</h1>
+          <p class="gate-lockmsg" id="gLockMsg"></p>
+          <p class="gate-sub" id="gWho"></p>
+          <button type="button" class="gate-go" id="gBuy">Buy a licence at trade-ai.com.au</button>
+          <div class="gate-row"><button type="button" class="ghost" id="gRetry">Check again</button><button type="button" class="ghost" id="gOut">Sign out</button></div>
+        </div>
+      </section>
+    </div>
     <dialog id="settings">
       <form method="dialog" class="dlg">
         <div class="dlg-top"><h2>Settings</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
+        <h3 id="sset-account">Account</h3>
+        <p class="meta" id="acctLine">Not signed in</p>
+        <div class="row"><button type="button" class="ghost" id="acctBuy">Buy or renew at trade-ai.com.au</button><button type="button" class="ghost" id="signOutBtn">Sign out</button></div>
         <h3 id="sset-data">Data pack</h3>
         <p id="packDetail" class="meta"></p>
         <button type="button" id="downloadPack" class="deskonly">Download data pack (about 400 MB)</button>
@@ -394,6 +438,6 @@
     </dialog>
     <div id="printArea"></div>
     <script type="module" src="/src/main.ts"></script>
-    <footer class="statusbar" id="statusbar"><span id="stSite">No site selected</span><span id="stPack"></span></footer>
+    <footer class="statusbar" id="statusbar"><span id="stSite">No site selected</span><span class="stright"><span id="stLicence"></span><span id="stPack"></span></span></footer>
   </body>
 </html>

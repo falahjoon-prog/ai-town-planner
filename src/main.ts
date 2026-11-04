@@ -13,6 +13,7 @@ import COUNCIL_RULES from "../src-tauri/knowledge/council_rules.json";
 import wasmUrl from "web-ifc/web-ifc.wasm?url";
 import { checkDesign, placeFn, placePolys, frontRotation, ringCentroid, ringArea, unionArea, type DesignModel, type Place, type CheckOut, type Poly } from "./design";
 import { siteLink, destLabel, resolveLotUrl, resolverFor, type Dest, type SiteRef } from "./sitelink";
+import { signedIn } from "./account";
 import "./style.css";
 
 if (isWeb) {
@@ -1390,7 +1391,8 @@ $("apprCopy").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText(apprCat.value); } catch (e) { alertMsg(e); }
 });
 
-refreshStatus().then((s) => {
+// Nothing loads until the Trade AI sign-in page has a trial or seat (src/account.ts).
+signedIn().then(refreshStatus).then((s) => {
   if (!s.datapack) return ($("settings") as HTMLDialogElement).showModal();
   // Remember on start: reopen the last site
   let last = 0;

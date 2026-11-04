@@ -560,3 +560,42 @@ button.ibtn:disabled { opacity: .35; }
   .chat-log .msg { max-width: 92%; font-size: 14px; }
   .botwin .report-bar input, .botwin .report-bar button { min-height: 44px; }
 }
+
+/* ---- Trade AI sign-in and licence screen (src/account.ts) ---- */
+html.gated .statusbar, html.gated .menubar { visibility: hidden; }
+.gate { position: fixed; inset: 0; z-index: 1000; display: grid; grid-template-columns: minmax(320px, 44%) 1fr; background: var(--bg); overflow-y: auto; font-size: 14px; color: var(--ink); }
+.gate-brand { background: linear-gradient(160deg, #1f4e8c 0%, #0f2a52 70%); color: #fff; padding: clamp(28px, 6vw, 72px); display: flex; flex-direction: column; justify-content: center; gap: 14px; }
+.gate-logo { width: 64px; height: 64px; border-radius: 15px; box-shadow: 0 0 0 1px rgba(255,255,255,.22), 0 8px 22px rgba(0,0,0,.3); }
+.gate-name { margin: 6px 0 0; font-size: clamp(26px, 3vw, 34px); font-weight: 700; letter-spacing: -.01em; }
+.gate-tag { margin: 0; font-size: 16px; line-height: 1.5; color: #c4d8f2; max-width: 30ch; }
+.gate-points { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; font-size: 14.5px; color: #e4edf9; }
+.gate-points li { display: flex; align-items: center; gap: 10px; }
+.gate-points li::before { content: ""; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #f2b45b; }
+.gate-card { display: flex; align-items: center; justify-content: center; padding: 32px 24px; }
+.gate-view { width: min(400px, 100%); display: flex; flex-direction: column; gap: 12px; }
+.gate-view h1 { margin: 0; font-size: 26px; letter-spacing: -.01em; }
+.gate-sub { margin: 0 0 6px; color: var(--muted); line-height: 1.5; }
+.gate-view label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 13px; }
+.gate-view input { font-size: 15px; padding: 11px 12px; font-weight: 400; }
+.gate-go { width: 100%; padding: 12px 14px; font-size: 15px; margin-top: 4px; }
+.gate-msg { margin: 0; min-height: 1.4em; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.gate-msg.bad { color: var(--warn); }
+.gate-lockmsg { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--chip); line-height: 1.5; font-size: 14.5px; }
+.gate-links { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.gate-row { display: flex; gap: 10px; }
+.gate-row > button { flex: 1; }
+button.linkbtn { background: none; color: var(--accent); padding: 4px 0; font-weight: 600; font-size: 13px; }
+button.linkbtn:hover { text-decoration: underline; text-underline-offset: 2px; }
+.stright { display: flex; gap: 10px; align-items: center; }
+.statusbar .pill { font-size: 11px; padding: 1px 8px; }
+.pill.warnpill { color: #b45309; background: #fef3c7; }
+@media (max-width: 760px) {
+  .gate { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .gate-brand { padding: 22px 20px 20px; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: 6px 14px; }
+  .gate-logo { width: 44px; height: 44px; border-radius: 10px; }
+  .gate-name { margin: 0; font-size: 21px; }
+  .gate-tag { flex-basis: 100%; font-size: 14px; }
+  .gate-points { display: none; }
+  .gate-card { align-items: flex-start; padding: 26px 20px 32px; }
+  .gate-view h1 { font-size: 23px; }
+}
