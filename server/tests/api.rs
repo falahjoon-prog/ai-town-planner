@@ -7,6 +7,7 @@ use http_body_util::BodyExt;
 use rusqlite::{params, Connection};
 use serde_json::{json, Value};
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use tower::ServiceExt;
 
@@ -54,6 +55,41 @@ fn make_pack(dir: &PathBuf) {
 struct T {
     app: Router,
     logs: Arc<Mutex<Vec<String>>>,
+    /// Calls the mock Supabase got for `product_access` (to see the cache work).
+    rpc_calls: Arc<AtomicUsize>,
+}
+
+/// The signed-in test user's token (trial running); every request carries it unless it sets its own.
+const TOKEN: &str = "good-token-1234";
+
+/// Mock Supabase: `product_access` answers by token (good = trial, expired = trial over, busy = all seats in
+/// use, anything else = 401 like PostgREST for a bad JWT); checks the anon key, product and device id.
+fn mock_supabase(calls: Arc<AtomicUsize>) -> String {
+    use axum::http::HeaderMap;
+    use axum::routing::post;
+    let l = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    l.set_nonblocking(true).unwrap();
+    let base = format!("http://{}", l.local_addr().unwrap());
+    let r = Router::new()
+        .route(
+            "/rest/v1/rpc/product_access",
+            post(move |h: HeaderMap, axum::Json(b): axum::Json<Value>| async move {
+                calls.fetch_add(1, Ordering::SeqCst);
+                assert_eq!(h["apikey"], "anon-test-key");
+                assert_eq!(b["p_product"], "townplanner");
+                assert!(b["p_device_id"].as_str().unwrap().starts_with("web-"));
+                let lic = match h.get("authorization").and_then(|v| v.to_str().ok()).unwrap_or("") {
+                    "Bearer good-token-1234" => json!({"ok": true, "state": "trial", "plan": "trial", "seats": 1, "expires_at": "2099-01-01T00:00:00+00:00"}),
+                    "Bearer expired-token" => json!({"ok": false, "state": "expired", "plan": "trial", "seats": 1, "expires_at": "2026-01-01T00:00:00+00:00"}),
+                    "Bearer busy-token" => json!({"ok": false, "state": "no_seat", "plan": "team", "seats": 2, "expires_at": "2099-01-01T00:00:00+00:00", "in_use": []}),
+                    _ => return (StatusCode::UNAUTHORIZED, axum::Json(json!({"code": "PGRST301", "message": "JWT expired"}))),
+                };
+                (StatusCode::OK, axum::Json(lic))
+            }),
+        )
+        .route("/rest/v1/rpc/release_product_seat", post(|| async { StatusCode::NO_CONTENT }));
+    tokio::spawn(async move { axum::serve(tokio::net::TcpListener::from_std(l).unwrap(), r).await.unwrap() });
+    base
 }
 
 fn setup(name: &str, with_pack: bool, ai_base: &str, rate: u32) -> T {
@@ -61,6 +97,12 @@ fn setup(name: &str, with_pack: bool, ai_base: &str, rate: u32) -> T {
 }
 
 fn setup_with(name: &str, with_pack: bool, ai_base: &str, rate: u32, releases: &str) -> T {
+    setup_full(name, with_pack, ai_base, rate, releases, true)
+}
+
+fn setup_full(name: &str, with_pack: bool, ai_base: &str, rate: u32, releases: &str, signin: bool) -> T {
+    let rpc_calls = Arc::new(AtomicUsize::new(0));
+    let supabase = if signin { mock_supabase(rpc_calls.clone()) } else { String::new() };
     let dir = std::env::temp_dir().join(format!("atp-server-test-{name}-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
     if with_pack {
@@ -83,14 +125,26 @@ fn setup_with(name: &str, with_pack: bool, ai_base: &str, rate: u32, releases: &
         rate_per_min: rate,
         ai_rate_per_min: rate,
         extra_origins: vec![],
+        supabase_url: supabase,
+        supabase_anon_key: "anon-test-key".into(),
+        supabase_jwt_secret: None,
+        product: "townplanner".into(),
     };
     let logs = Arc::new(Mutex::new(Vec::new()));
     let l2 = logs.clone();
     let st = AppState::new(cfg, Arc::new(move |s: &str| l2.lock().unwrap().push(s.to_string())));
-    T { app: app(st), logs }
+    T { app: app(st), logs, rpc_calls }
 }
 
-async fn call(t: &T, req: Request<Body>) -> (StatusCode, Vec<u8>, axum::http::HeaderMap) {
+/// Sends the request signed in as the test user (unless it carries its own Authorization).
+async fn call(t: &T, mut req: Request<Body>) -> (StatusCode, Vec<u8>, axum::http::HeaderMap) {
+    if req.uri().path().starts_with("/api/") && !req.headers().contains_key("authorization") {
+        req.headers_mut().insert("authorization", format!("Bearer {TOKEN}").parse().unwrap());
+    }
+    call_raw(t, req).await
+}
+
+async fn call_raw(t: &T, req: Request<Body>) -> (StatusCode, Vec<u8>, axum::http::HeaderMap) {
     let res = t.app.clone().oneshot(req).await.unwrap();
     let (s, h) = (res.status(), res.headers().clone());
     (s, res.into_body().collect().await.unwrap().to_bytes().to_vec(), h)
@@ -354,4 +408,79 @@ async fn pack_download_and_refresh() {
     assert_eq!(v["datapack"]["version"], "test");
     let (s, v) = json_call(&t, "search", json!({"q": "28 eden elm"})).await;
     assert_eq!((s, v[0]["pid"].clone()), (StatusCode::OK, json!(1)));
+}
+
+fn with_token(cmd: &str, token: Option<&str>) -> Request<Body> {
+    let mut b = Request::post(format!("/api/{cmd}")).header("host", "152-67-1-2.sslip.io").header("x-device-id", "phone-abc_123!");
+    if let Some(t) = token {
+        b = b.header("authorization", format!("Bearer {t}"));
+    }
+    b.body(Body::from("{\"q\":\"28 eden elm\"}")).unwrap()
+}
+
+async fn gate(t: &T, cmd: &str, token: Option<&str>) -> (StatusCode, Value) {
+    let (s, b, _) = call_raw(t, with_token(cmd, token)).await;
+    (s, serde_json::from_slice(&b).unwrap_or(Value::Null))
+}
+
+#[tokio::test]
+async fn licence_gate() {
+    let t = setup("licence", true, "http://127.0.0.1:9", 1000);
+
+    // no token -> 401 (sign in); the sign-in config is public
+    let (s, v) = gate(&t, "search", None).await;
+    assert_eq!(s, StatusCode::UNAUTHORIZED, "{v}");
+    assert!(v["error"].as_str().unwrap().contains("sign in"), "{v}");
+    let (s, _) = gate(&t, "status", None).await;
+    assert_eq!(s, StatusCode::UNAUTHORIZED);
+    let (s, v) = gate(&t, "auth_config", None).await;
+    assert_eq!(s, StatusCode::OK);
+    assert_eq!((v["configured"].clone(), v["anon_key"].clone(), v["product"].clone()), (json!(true), json!("anon-test-key"), json!("townplanner")));
+
+    // a token Supabase rejects -> 401
+    let (s, v) = gate(&t, "search", Some("forged.token.x")).await;
+    assert_eq!(s, StatusCode::UNAUTHORIZED, "{v}");
+
+    // trial over -> 402 with the words to show; licence_state still answers (200, ok false)
+    let (s, v) = gate(&t, "search", Some("expired-token")).await;
+    assert_eq!(s, StatusCode::PAYMENT_REQUIRED, "{v}");
+    assert!(v["error"].as_str().unwrap().contains("Licence needed") && v["error"].as_str().unwrap().contains("trade-ai.com.au"), "{v}");
+    assert_eq!(v["licence"]["state"], "expired");
+    let (s, v) = gate(&t, "licence_state", Some("expired-token")).await;
+    assert_eq!((s, v["ok"].clone(), v["state"].clone()), (StatusCode::OK, json!(false), json!("expired")));
+
+    // all seats in use -> 402
+    let (s, v) = gate(&t, "assess", Some("busy-token")).await;
+    assert_eq!(s, StatusCode::PAYMENT_REQUIRED);
+    assert!(v["error"].as_str().unwrap().contains("2 seats"), "{v}");
+
+    // trial running -> 200, and the answer is cached (one Supabase call for several requests)
+    let before = t.rpc_calls.load(Ordering::SeqCst);
+    let (s, v) = gate(&t, "search", Some(TOKEN)).await;
+    assert_eq!(s, StatusCode::OK, "{v}");
+    assert_eq!(v[0]["pid"], 1);
+    let (s, v) = gate(&t, "licence_state", Some(TOKEN)).await;
+    assert_eq!(s, StatusCode::OK);
+    assert!(v["message"].as_str().unwrap().starts_with("Trial: "), "{v}");
+    assert!(v["days_left"].as_i64().unwrap() > 15);
+    assert_eq!(t.rpc_calls.load(Ordering::SeqCst) - before, 1, "cached");
+
+    // sign out gives the seat back and drops the cache entry
+    let (s, _) = gate(&t, "auth_sign_out", Some(TOKEN)).await;
+    assert_eq!(s, StatusCode::OK);
+    gate(&t, "search", Some(TOKEN)).await;
+    assert_eq!(t.rpc_calls.load(Ordering::SeqCst) - before, 2, "asked again after sign-out");
+
+    let logs = t.logs.lock().unwrap().join("\n");
+    assert!(!logs.contains("good-token") && !logs.contains("expired-token"), "token in logs: {logs}");
+}
+
+#[tokio::test]
+async fn sign_in_not_set_up_is_503() {
+    let t = setup_full("nosignin", true, "http://127.0.0.1:9", 1000, "http://127.0.0.1:9/none", false);
+    let (s, v) = gate(&t, "search", Some(TOKEN)).await;
+    assert_eq!(s, StatusCode::SERVICE_UNAVAILABLE);
+    assert!(v["error"].as_str().unwrap().contains("not set up"), "{v}");
+    let (s, v) = gate(&t, "auth_config", None).await;
+    assert_eq!((s, v["configured"].clone()), (StatusCode::OK, json!(false)));
 }

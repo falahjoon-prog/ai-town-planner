@@ -14,7 +14,6 @@ on:
       - "src-tauri/src/**"
       - "src-tauri/knowledge/**"
       - "deploy/**"
-      - "deploy/**"
       - ".github/workflows/web.yml"
   workflow_dispatch:
 
@@ -58,7 +57,11 @@ jobs:
           workspaces: server
       - run: npm ci --no-audit --no-fund
       - run: npx vite build
-      - run: cd server && cargo build --release --locked
+      - name: Build (Trade AI sign-in address and public anon key written in from the repository variables)
+        env:
+          TRADEAI_SUPABASE_URL: ${{ vars.TRADEAI_SUPABASE_URL }}
+          TRADEAI_SUPABASE_ANON_KEY: ${{ vars.TRADEAI_SUPABASE_ANON_KEY }}
+        run: cd server && cargo build --release --locked
       - name: Publish the pre-built web app (the Oracle server downloads it)
         env:
           GH_TOKEN: ${{ github.token }}

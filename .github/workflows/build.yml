@@ -23,6 +23,10 @@ jobs:
           - os: macos-latest
           - os: ubuntu-22.04
     runs-on: ${{ matrix.os }}
+    env:
+      # Trade AI sign-in (licensing/README.md): public project URL and anon key, written into the app at build time
+      TRADEAI_SUPABASE_URL: ${{ vars.TRADEAI_SUPABASE_URL }}
+      TRADEAI_SUPABASE_ANON_KEY: ${{ vars.TRADEAI_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

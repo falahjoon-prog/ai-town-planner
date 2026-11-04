@@ -7,6 +7,14 @@ Wants=network-online.target
 DynamicUser=yes
 StateDirectory=atp
 Environment=DATA_DIR=/var/lib/atp DIST_DIR=/opt/atp-app/current/dist PORT=8080
+# Trade AI sign-in: the build already carries the project URL and anon key (repository variables
+# TRADEAI_SUPABASE_URL / TRADEAI_SUPABASE_ANON_KEY). Override or add the optional JWT secret in
+# /etc/atp/atp.env (root-only, chmod 600), e.g.:
+#   SUPABASE_URL=https://<project>.supabase.co
+#   SUPABASE_ANON_KEY=<anon / publishable key>
+#   SUPABASE_JWT_SECRET=<Project Settings > API > JWT secret (legacy HS256), optional>
+Environment=LICENCE_PRODUCT=townplanner
+EnvironmentFile=-/etc/atp/atp.env
 ExecStart=/opt/atp-app/current/atp-server
 Restart=always
 RestartSec=5

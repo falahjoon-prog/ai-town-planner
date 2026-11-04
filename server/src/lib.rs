@@ -17,6 +17,7 @@ mod rules;
 
 mod ai;
 mod api;
+mod auth;
 pub mod pack;
 
 use axum::extract::{ConnectInfo, DefaultBodyLimit, Request, State};
@@ -52,6 +53,13 @@ pub struct Config {
     pub ai_rate_per_min: u32,
     /// Extra allowed Origins (besides the site's own host), e.g. a dev server.
     pub extra_origins: Vec<String>,
+    /// Trade AI sign-in (Supabase project URL and public anon key; empty = not set up, every API call is refused).
+    pub supabase_url: String,
+    pub supabase_anon_key: String,
+    /// Optional legacy HS256 JWT secret: tokens are then also checked here before asking Supabase.
+    pub supabase_jwt_secret: Option<String>,
+    /// The product whose trial / licence opens this app.
+    pub product: String,
 }
 
 impl Config {
@@ -68,6 +76,12 @@ impl Config {
             rate_per_min: env("RATE_PER_MIN", "120").parse().unwrap_or(120),
             ai_rate_per_min: env("AI_RATE_PER_MIN", "20").parse().unwrap_or(20),
             extra_origins: env("EXTRA_ORIGINS", "").split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect(),
+            // Defaults are written in at build time from the repository variables (the same public values the
+            // desktop build uses); the environment overrides them.
+            supabase_url: env("SUPABASE_URL", option_env!("TRADEAI_SUPABASE_URL").unwrap_or("")).trim_end_matches('/').to_string(),
+            supabase_anon_key: env("SUPABASE_ANON_KEY", option_env!("TRADEAI_SUPABASE_ANON_KEY").unwrap_or("")),
+            supabase_jwt_secret: std::env::var("SUPABASE_JWT_SECRET").ok().filter(|s| s.len() >= 16),
+            product: env("LICENCE_PRODUCT", "townplanner"),
         }
     }
 }
@@ -78,6 +92,7 @@ pub struct AppState {
     pub pack: Arc<pack::Pack>,
     pub http: reqwest::Client,
     pub log: LogSink,
+    auth: Arc<auth::Cache>,
     limiter: Arc<Mutex<HashMap<String, (Instant, u32)>>>,
 }
 
@@ -90,7 +105,7 @@ impl AppState {
             .read_timeout(Duration::from_secs(90))
             .build()
             .expect("http client");
-        AppState { cfg: Arc::new(cfg), pack, http, log, limiter: Arc::new(Mutex::new(HashMap::new())) }
+        AppState { cfg: Arc::new(cfg), pack, http, log, auth: Arc::default(), limiter: Arc::new(Mutex::new(HashMap::new())) }
     }
 
     /// Fixed one-minute window per key. Returns false when the limit is exceeded.

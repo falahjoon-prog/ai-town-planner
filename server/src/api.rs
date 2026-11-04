@@ -124,6 +124,10 @@ pub async fn handle(State(st): State<AppState>, Path(cmd): Path<String>, headers
             Err(_) => return err(StatusCode::BAD_REQUEST, "Request body must be JSON."),
         }
     };
+    // Trade AI sign-in: every command needs a signed-in person with a trial or licence seat.
+    if let Some(r) = crate::auth::route(&st, &cmd, &headers).await {
+        return r;
+    }
     match cmd.as_str() {
         "status" => Json(status(&st).await).into_response(),
         "search" => ok(async {

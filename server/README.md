@@ -29,6 +29,33 @@ serves HTTPS. Own domain later: point an A record at the server IP, write the na
 - **Android (Chrome):** open the site, tap **⋮**, then **Install app** (or **Add to Home screen**).
 - In **Settings**, choose Claude or OpenAI and paste your own API key to use chat (it stays on your phone).
 
+## Sign-in and licence (Trade AI accounts)
+
+Every `/api/*` call needs a signed-in Trade AI account with a running trial or a paid seat for the product
+`townplanner` (licensing/README.md). The browser signs in to Supabase itself and sends
+`Authorization: Bearer <access token>` plus `X-Device-Id` (a random id kept by the phone; each phone is a
+device / seat). The server calls Supabase `rpc/product_access` with that token: Supabase checks the token
+(signature, expiry), the function checks the trial / licence and takes or refreshes the seat. Answers are
+cached 60 s per token and device (refusals 20 s; if Supabase is unreachable, a token that passed in the last
+15 minutes keeps working). Tokens are never logged.
+
+| Answer | When |
+|---|---|
+| 401 `{"error"}` | no token, bad or expired token – the app shows the sign-in page |
+| 402 `{"error", "licence"}` | trial over / licence ended ("Licence needed — buy at trade-ai.com.au"), all seats in use, account disabled |
+| 503 `{"error"}` | sign-in not set up on this server, or Supabase unreachable |
+
+Settings (environment; `deploy/oracle/atp.service` reads `/etc/atp/atp.env`):
+
+| Variable | Default | |
+|---|---|---|
+| `SUPABASE_URL` | built in from the repository variable `TRADEAI_SUPABASE_URL` | Trade AI Supabase project URL |
+| `SUPABASE_ANON_KEY` | built in from `TRADEAI_SUPABASE_ANON_KEY` | public anon key (never the service_role key) |
+| `SUPABASE_JWT_SECRET` | – | optional legacy HS256 secret: tokens are also checked locally |
+| `LICENCE_PRODUCT` | `townplanner` | |
+
+Without a URL and anon key every API call answers 503 "Sign-in is not set up on this server yet".
+
 ## API (for the frontend)
 
 `POST /api/<command>` with the same JSON arguments `invoke` sends (camelCase such as `useId`, `placeId`;
@@ -37,6 +64,9 @@ with `{"error": "message"}` (503 while the data pack is still loading).
 
 | Command | Arguments | Notes |
 |---|---|---|
+| auth_config | – | no token needed: `{configured, url, anon_key, product}` for the sign-in page |
+| licence_state | – | token needed, licence not: the `product_access` answer + `message`, `days_left` (200 even when refused) |
+| auth_sign_out | – | gives this phone's seat back |
 | status | – | Desktop shape plus `web: true`, `flags.web`, `pack` {state, tag, update, done, total, error}; `models` empty |
 | search | `q` | |
 | assess | `pid` | |
