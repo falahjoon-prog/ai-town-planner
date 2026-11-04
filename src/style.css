@@ -212,8 +212,22 @@ details summary { cursor: pointer; color: var(--muted); }
 .ptable th { text-align: left; padding: 5px 8px; background: var(--chip); }
 .ptable td { overflow-wrap: anywhere; padding: 5px 8px; border-top: 1px solid var(--line); vertical-align: top; }
 .pill.warn { color: #b45309; background: #fef3c7; }
+.pill.bad { color: #b91c1c; background: #fee2e2; }
+.pill.na { color: var(--muted); background: transparent; border: 1px solid var(--line); }
+.dsgt td { overflow-wrap: break-word; }
+.dsgt td:first-child { width: 46%; }
+.dsgt td:last-child { white-space: nowrap; }
+.dsgt td .meta { font-size: 11.5px; }
+.dsgt tr.fail td:first-child { box-shadow: inset 3px 0 0 #dc2626; }
+.dsghead { overflow-wrap: anywhere; }
+.dsgctl { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 8px 0 4px; }
+.dsgctl button { padding: 4px 9px; }
+.dsgctl .meta:first-child { margin-right: 2px; }
+#design .warnp { color: var(--warn); }
 .dim { font: 600 11px/1 "Segoe UI", system-ui, sans-serif; background: rgba(255,255,255,.9); color: #111827; border: 1px solid #9ca3af; border-radius: 4px; padding: 2px 4px; white-space: nowrap; }
 .dim.front { border-color: #1f4e8c; color: #1f4e8c; }
+.dim.dfail { border-color: #dc2626; color: #b91c1c; }
+.dim.dpass { color: #6b7280; }
 #forms .mapitem { margin-bottom: 6px; }
 .mapitem { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
 .mapitem button { padding: 5px 10px; font-size: 12.5px; }

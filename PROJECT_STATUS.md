@@ -23,6 +23,7 @@
 - v0.5 (T19): Logan City Council and City of Moreton Bay: search across councils, council name and scheme on header, cards, reports, forms and links; Logan/MB zones, precincts, overlays, local plans; sourced Logan (LPS 2015 v9.2) and MB (council info sheets, v7) rule rows, all flagged verify; discover/test modes in the data pack workflow.
 - v0.6 (T20): Ipswich, Redland, Gold Coast and Mackay added to the registry; Redland and Gold Coast zones/overlays from their open data; Ipswich and Mackay show "Zone not loaded for this council yet" with a link to the council map; sourced rule rows (all verify) and labelled third-party rows; Brisbane v37 additions in council_rules.json ("brisbane"); Maps dialog and no-match message list all 7 councils.
 - v0.6.1: navy colour scheme and new icon (site + building + pin), Windows installer artwork (src-tauri/installer), text labels on the left tools and right section rail, clickable Lot/Zone/Flags tiles, map fit keeps the lot clear of the toolbars.
+- v0.7.0 design check: import an IFC (web-ifc, offline wasm), storeys/height/footprint/GFA/car spaces from the model, placed on the lot (centred, front to the street; drag and rotate), checked per rule against the knowledge rows (setbacks by wall height, height, storeys, site cover, plot ratio, parking, private open space, overlays) with Pass/Fail/Cannot check/Verify and sources; red dimension lines for failing setbacks; saved per site; in the client PDF and the AI report prompt (src/design.ts, src/ifc.ts, tests/design.test.ts, tests/fixtures/design_house.ifc).
 
 ## Current issues
 - No package registry access in the cloud workspace: compile and test happen only in GitHub Actions; the app is not run by the developer – the user tests on Windows.
@@ -37,9 +38,9 @@
 - Ipswich, Redland, Gold Coast and Mackay rule rows are all verify=true (council summaries, checklists, consultant reports and third-party pages; the scheme PDFs could not be read). Logan/Moreton Bay rule rows are verify=true (read through a summarising fetch or council info sheets); MBRC scheme PDFs could not be opened from the workspace.
 
 ## Next steps
-1. User testing of v0.6.0 on Windows (T3–T24 merged to main 2026-11-04: PlanLens layout, DA Form 1, setbacks, batch check, checklist, charges, project folders, map markup, statutory clock, Logan/Moreton Bay/Ipswich/Redland/Gold Coast/Mackay, deep links, hang fix).
-2. Phone version: Tauri 2 Android + iOS (iOS needs a Mac runner and Apple developer account).
-3. Design check: import DesignAI model / IFC / plan, check rules per site, red marks on the drawing.
+1. User testing of v0.7.0 on Windows (T3–T24 merged to main 2026-11-04: PlanLens layout, DA Form 1, setbacks, batch check, checklist, charges, project folders, map markup, statutory clock, Logan/Moreton Bay/Ipswich/Redland/Gold Coast/Mackay, deep links, hang fix).
+2. Phone web app (iPhone + Android PWA on Fly.io, users bring their own AI key): server on branch web-server; go live needs the owner's FLY_API_TOKEN secret.
+3. Design check: test v0.7.0 with real DesignAI / Revit IFC exports on Windows; add DXF plans; encode site cover, GFA/plot ratio, parking and private open space numbers per zone so fewer rows say "Cannot check".
 4. City Plan code text library and full DA planning report (code-by-code table, Word/PDF).
 5. More uses and zones in the level-of-assessment tables; verified setbacks per zone.
 6. Full data pack rebuild with the easement layer (test pack first); Windows GPU (Vulkan).
