@@ -1,0 +1,4 @@
+# Web addresses this server answers on (one per line). Edit here and push to main: the server
+# picks it up within 15 minutes (atp-update.timer) and gets HTTPS certificates automatically.
+# The <public-ip>.sslip.io address is always added as a fallback.
+planner.trade-ai.com.au

@@ -20,8 +20,9 @@ Site: **https://<server-ip-with-dashes>.sslip.io** (written to `/opt/atp-url.txt
 The "Web server" workflow publishes a pre-built `town-planner-web-linux-amd64.tar.gz` to the `web-latest`
 release on every push to `main`; the server checks it every 15 minutes (`atp-update.timer`) and restarts the app
 when it changed. No Docker and no build on the server (it has 1 GB RAM; setup adds 2 GB swap). Caddy (apt)
-serves HTTPS. Own domain later: point an A record at the server IP, write the name into `/opt/atp-site` and run
-`sudo bash /opt/atp/deploy/oracle/setup.sh`.
+serves HTTPS for the names in `deploy/oracle/site.txt` (currently planner.trade-ai.com.au) plus the
+`<public-ip>.sslip.io` fallback: point the domain's A record at the server IP, edit site.txt and push; the server
+refreshes its scripts and Caddy config every 15 minutes.
 
 ## Install on a phone
 
