@@ -24,6 +24,13 @@
     ],
     "security": { "csp": null }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "PASTE_PUBLIC_KEY",
+      "endpoints": ["https://github.com/falahjoon-prog/ai-town-planner/releases/download/updates/latest.json"],
+      "windows": { "installMode": "passive" }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",

@@ -158,6 +158,12 @@ Common rules for every thread
 3) Tests: tsc + vite build OK; `npm test` (formatter for SP/RP/CP/BUP and multi-digit lots, invalid shapes, resolve flow with mocked lookups); headless Chromium (mocked invoke + fetch) for Brisbane/Redland/Ipswich/Logan lots: site-panel, Approvals and Logan map buttons open the expected URLs, lot/plan-empty retry with address, fallback copy+open when lookups fail, Moreton Bay unchanged, no page errors.
 4) Remaining: Rust not compiled here (CI only); live endpoints not reachable from this workspace so the mocks rely on the verified formats; Ipswich FilterDirect assumed same as Brisbane/Redland; Moreton Bay still copy + open.
 
+## App updates (this PR)
+1) Files: index.html (Settings > App updates), src/main.ts (checkUpdate), src-tauri/Cargo.toml, src-tauri/src/lib.rs, src-tauri/capabilities/default.json, src-tauri/tauri.conf.json (updater endpoint, pubkey set by the release script), package.json/lock, tools/release-local.ps1 (new).
+2) Work: Check for updates / Install and restart button plus a quiet check at start; signed updates read from the `updates` release (latest.json); built and published from the PC.
+3) Tests: tsc clean. Rust and the updater not compiled or run here.
+4) Remaining: first run of tools\release-local.ps1 on the PC creates the signing key and writes the public key into tauri.conf.json (commit it); the first version with the button must be installed by hand once.
+
 ## Send to DesignAI (this PR)
 1) Files changed: src/handoff.ts (new), src/main.ts (button + sendHandoff), src-tauri/src/lib.rs (new `save_handoff` command, writes Documents\RHC\handoff), tests/handoff.test.ts (new), package.json (test script), handoffs/site_handoff.md (format), handoffs/threads.md.
 2) Work completed: site file with lot ring, edges (front/side/rear), zone, raw setback rows, limits read with the design-check readers, overlays, scheme; DesignAI reads exactly this.
