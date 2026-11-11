@@ -198,6 +198,35 @@ $("models").addEventListener("click", async (ev) => {
   refreshStatus();
 });
 
+// ---- App updates (desktop): signed updates from the "updates" GitHub release; see tools/release-local.ps1 ----
+type Upd = { version: string; downloadAndInstall: (cb?: (e: { event: string; data?: { contentLength?: number; chunkLength?: number } }) => void) => Promise<void> };
+let pendingUpdate: Upd | null = null;
+async function checkUpdate(quiet = false) {
+  if (isWeb) return;
+  const btn = $("updBtn") as HTMLButtonElement, line = $("updLine");
+  btn.disabled = true;
+  try {
+    if (pendingUpdate) {
+      let got = 0, total = 0;
+      line.textContent = "Downloading the update…";
+      await pendingUpdate.downloadAndInstall((e) => {
+        if (e.event === "Started") total = e.data?.contentLength ?? 0;
+        else if (e.event === "Progress") { got += e.data?.chunkLength ?? 0; if (total) line.textContent = `Downloading the update… ${Math.round((got / total) * 100)}%`; }
+      });
+      line.textContent = "Update installed. Restarting…";
+      await (await import("@tauri-apps/plugin-process")).relaunch();
+      return;
+    }
+    line.textContent = "Checking…";
+    const u = (await (await import("@tauri-apps/plugin-updater")).check()) as unknown as Upd | null;
+    if (u) { pendingUpdate = u; line.textContent = `Version ${u.version} is available.`; btn.textContent = `Install version ${u.version} and restart`; }
+    else line.textContent = "You have the latest version.";
+  } catch (e) {
+    line.textContent = quiet ? "" : `Could not check for updates: ${e instanceof Error ? e.message : String(e)}`;
+  } finally { btn.disabled = false; }
+}
+$("updBtn").addEventListener("click", () => void checkUpdate());
+if (!isWeb) setTimeout(() => void checkUpdate(true), 5000); // quiet check at start: the button turns into "Install version X" when one is waiting
 $("downloadPack").addEventListener("click", async () => {
   const b = $("downloadPack") as HTMLButtonElement;
   b.disabled = true;
