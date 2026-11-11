@@ -951,6 +951,275 @@
       "verify": true
      }
     ]
+   },
+   {
+    "zone": [
+     "centre",
+     "specialised centre"
+    ],
+    "precinct": [],
+    "title": "Centre and Specialised centre zones",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "No minimum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "recreation and open space"
+    ],
+    "precinct": [],
+    "title": "Recreation and open space zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "No minimum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "community facilities"
+    ],
+    "precinct": [],
+    "title": "Community facilities zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "No minimum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "low impact industry",
+     "medium impact industry"
+    ],
+    "precinct": [],
+    "title": "Low impact industry and Medium impact industry zones",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "2,000 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 2000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "25 m / 20 m / 30 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "4 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Not created; the lot width must allow the specified heavy vehicle to turn around on the lot",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "mixed use"
+    ],
+    "precinct": [],
+    "title": "Mixed use zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "2,000 m²",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 2000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "25 m / 20 m / 30 m",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "4 to 1",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed (Table 9.4.6.3.4); the lot width must allow the specified heavy vehicle to turn around on the lot",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "environmental management and conservation"
+    ],
+    "precinct": [],
+    "title": "Environmental management and conservation zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "100 hectares",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 1000000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
+   },
+   {
+    "zone": [
+     "rural"
+    ],
+    "precinct": [],
+    "title": "Rural zone",
+    "items": [
+     {
+      "label": "Minimum lot size",
+      "value": "100 hectares",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true,
+      "key": "min_front",
+      "n": 1000000
+     },
+     {
+      "label": "Minimum frontage (normal / cul-de-sac / corner)",
+      "value": "No minimum frontage",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Maximum depth to width",
+      "value": "No maximum",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     },
+     {
+      "label": "Rear lots",
+      "value": "Allowed (Table 9.4.6.3.4)",
+      "source": "Logan Planning Scheme 2015 v9.2, 9.4.6 Reconfiguring a lot code, Table 9.4.6.3.2",
+      "url": "https://s3-ap-southeast-2.amazonaws.com/lcc-docs-planning/root/Logan%20Planning%20Scheme%202015/LPS%202015%20V9.2%20(July%202025)/Documents%20(LPS%20V9.2)/Part%209-4-6%20Dev%20code%20-%20Reconfiguring%20a%20lot%20(LPS%20v9_2).pdf",
+      "verify": true
+     }
+    ]
    }
   ],
   "uses": {
