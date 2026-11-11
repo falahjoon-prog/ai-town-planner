@@ -157,3 +157,9 @@ Common rules for every thread
 2) Done: Brisbane/Redland/Ipswich DA buttons resolve the Development.i land number at click time (new Rust command `devi_land_number`, reqwest already in use, host allow-list of the three developmenti hosts; lot/plan first, then address) and open `Home/FilterDirect?filters=LandNumber=<id>`. Logan DA and council-map buttons look up Property_Key from the council ArcGIS layer (`Lot 9 RP 148066` format, Address_Type P preferred) and open the PD Hub property report. Any failure falls back to the T22 copy + open. Labels now read "(opens at this lot)"; DA note text updated. Other T22 fallbacks unchanged.
 3) Tests: tsc + vite build OK; `npm test` (formatter for SP/RP/CP/BUP and multi-digit lots, invalid shapes, resolve flow with mocked lookups); headless Chromium (mocked invoke + fetch) for Brisbane/Redland/Ipswich/Logan lots: site-panel, Approvals and Logan map buttons open the expected URLs, lot/plan-empty retry with address, fallback copy+open when lookups fail, Moreton Bay unchanged, no page errors.
 4) Remaining: Rust not compiled here (CI only); live endpoints not reachable from this workspace so the mocks rely on the verified formats; Ipswich FilterDirect assumed same as Brisbane/Redland; Moreton Bay still copy + open.
+
+## Send to DesignAI (this PR)
+1) Files changed: src/handoff.ts (new), src/main.ts (button + sendHandoff), src-tauri/src/lib.rs (new `save_handoff` command, writes Documents\RHC\handoff), tests/handoff.test.ts (new), package.json (test script), handoffs/site_handoff.md (format), handoffs/threads.md.
+2) Work completed: site file with lot ring, edges (front/side/rear), zone, raw setback rows, limits read with the design-check readers, overlays, scheme; DesignAI reads exactly this.
+3) Tests: npm test (sitelink, design, handoff) pass; tsc --noEmit clean. Rust not compiled here (CI only).
+4) Remaining: not run on a real site in the app; DesignAI reader updated separately.
