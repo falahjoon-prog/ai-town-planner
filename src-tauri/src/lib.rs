@@ -618,6 +618,20 @@ fn save_text(path: String, content: String) -> Result<(), String> {
     fs::write(path, content).map_err(e)
 }
 
+/// Writes a site hand-off file for DesignAI into Documents\RHC\handoff (created if missing). Returns the full path.
+#[tauri::command]
+fn save_handoff(app: AppHandle, name: String, content: String) -> Result<String, String> {
+    let ok = !name.is_empty() && name.ends_with(".json") && name.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+    if !ok || name.contains("..") {
+        return Err("Invalid file name".into());
+    }
+    let d = app.path().document_dir().map_err(e)?.join("RHC").join("handoff");
+    fs::create_dir_all(&d).map_err(e)?;
+    let p = d.join(name);
+    fs::write(&p, content).map_err(e)?;
+    Ok(p.to_string_lossy().into_owned())
+}
+
 /// Reads a backup file (.json only, max 20 MB).
 #[tauri::command]
 fn read_backup(path: String) -> Result<String, String> {
@@ -763,6 +777,7 @@ pub fn run() {
             set_model,
             delete_model,
             save_text,
+            save_handoff,
             read_backup,
             read_text_file,
             licence_state,

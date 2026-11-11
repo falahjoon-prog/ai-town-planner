@@ -163,3 +163,9 @@ Common rules for every thread
 2) Work: Check for updates / Install and restart button plus a quiet check at start; signed updates read from the `updates` release (latest.json); built and published from the PC.
 3) Tests: tsc clean. Rust and the updater not compiled or run here.
 4) Remaining: first run of tools\release-local.ps1 on the PC creates the signing key and writes the public key into tauri.conf.json (commit it); the first version with the button must be installed by hand once.
+
+## Send to DesignAI (this PR)
+1) Files changed: src/handoff.ts (new), src/main.ts (button + sendHandoff), src-tauri/src/lib.rs (new `save_handoff` command, writes Documents\RHC\handoff), tests/handoff.test.ts (new), package.json (test script), handoffs/site_handoff.md (format), handoffs/threads.md.
+2) Work completed: site file with lot ring, edges (front/side/rear), zone, raw setback rows, limits read with the design-check readers, overlays, scheme; DesignAI reads exactly this.
+3) Tests: npm test (sitelink, design, handoff) pass; tsc --noEmit clean. Rust not compiled here (CI only).
+4) Remaining: not run on a real site in the app; DesignAI reader updated separately.

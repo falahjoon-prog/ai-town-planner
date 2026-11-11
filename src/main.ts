@@ -11,6 +11,7 @@ import REFERRALS_DATA from "../src-tauri/knowledge/referrals.json";
 import COUNCILS_DATA from "../src-tauri/knowledge/councils.json";
 import COUNCIL_RULES from "../src-tauri/knowledge/council_rules.json";
 import wasmUrl from "web-ifc/web-ifc.wasm?url";
+import { buildHandoff, handoffName } from "./handoff";
 import { checkDesign, placeFn, placePolys, frontRotation, ringCentroid, ringArea, unionArea, type DesignModel, type Place, type CheckOut, type Poly } from "./design";
 import { siteLink, destLabel, resolveLotUrl, resolverFor, type Dest, type SiteRef } from "./sitelink";
 import { signedIn } from "./account";
@@ -2198,7 +2199,7 @@ function renderDesign(err = "") {
   const e = err ? `<p class="err" role="alert">${esc(err)}</p>` : "";
   if (!design) {
     el.innerHTML = `<div class="card">${e}<p>Import a building design (IFC from DesignAI, Revit, ArchiCAD and others) to place it on this lot and check it against the site's planning rules.</p>
-      <button type="button" class="primary" data-dsg="import">Import IFC…</button><p class="meta">${DESIGN_NOTE}</p></div>`;
+      <button type="button" class="primary" data-dsg="import">Import IFC…</button> ${HANDOFF_BTN}<p class="meta">${DESIGN_NOTE}</p></div>`;
     return;
   }
   const d = design, out = designOut;
@@ -2211,7 +2212,7 @@ function renderDesign(err = "") {
     <table class="ptable dsgt"><thead><tr><th>Rule</th><th>Design</th><th>Limit</th><th>Result</th></tr></thead><tbody>${designRows(out)}</tbody></table>
     <p class="meta">Checked against ${esc(siteCouncil().scheme)} rows in the app. Height is measured from the lowest floor level (natural ground isn't in the model); the footprint is walls, floor slabs and columns (eaves not included).</p>` : `<p class="meta">Checking…</p>`}
     <p class="meta warnp">${DESIGN_NOTE}</p>
-    <button type="button" class="ghost" data-dsg="import">Replace IFC…</button> <button type="button" class="ghost" data-dsg="remove">Remove design</button></div>`;
+    <button type="button" class="ghost" data-dsg="import">Replace IFC…</button> <button type="button" class="ghost" data-dsg="remove">Remove design</button> ${HANDOFF_BTN}</div>`;
 }
 async function importIfc(file: File) {
   if (!current) return;
@@ -2245,9 +2246,33 @@ $("design").addEventListener("click", (ev) => {
   if (t.dataset.rot && design) { design.place = { ...design.place, rot: Math.round((design.place.rot + Number(t.dataset.rot)) * 10) / 10 }; updateDesign(); saveDesign(); return; }
   const act = t.dataset.dsg;
   if (act === "import") $("ifcFile").click();
+  else if (act === "handoff") void sendHandoff();
   else if (act === "remove") { design = null; designOut = null; saveDesign(); drawDesign(); renderDesign(); }
   else if (act === "centre" && design) { const f = designFrame(); if (f) { design.place = defaultPlace(f); updateDesign(); saveDesign(); } }
 });
+/** Send to DesignAI: the lot, setbacks, limits and overlays as a site file in Documents\\RHC\\handoff (web: a download). */
+const HANDOFF_BTN = `<button type="button" class="ghost" data-dsg="handoff">Send to DesignAI</button>`;
+async function sendHandoff() {
+  const f = designFrame();
+  if (!current || !f) { $("hint").textContent = "Load a site with a lot outline first."; return; }
+  const set = setbackSet(current);
+  const createdAt = new Date().toISOString();
+  const h = buildHandoff({
+    createdAt, scheme: siteCouncil().scheme, councilId: siteCouncil().id,
+    parcel: { lotplan: current.parcel.lotplan, address: current.parcel.address, suburb: current.parcel.suburb, council: current.parcel.council ?? null, area_m2: current.parcel.area_m2 },
+    frontageM: pot?.frontage_m ?? null, depthM: pot?.depth_m ?? null, origin: f.lm.toLL([0, 0]), ring: f.ring,
+    edges: f.frame ? f.frame.sides.map((sd, i) => ({ a: sd[0], b: sd[1], kind: f.frame!.kindOf(i) })) : null, edgesWhy: f.why,
+    zones: current.zones.map((z) => ({ name: z.zone.name, precinct: z.precinct ?? null, authority: z.authority, source: z.zone.source ?? "", url: z.zone.url ?? "", verify: !!z.zone.verify })),
+    setbacks: set ? { title: set.title, source: set.source, rows: set.rows } : null, setbacksWhy: "Setback distances for this zone and lot size aren't in the app.",
+    items: [...(pot?.use_fit?.rule?.items ?? []), ...(pot?.provisions?.items ?? [])],
+    overlays: current.overlays.filter((o) => o.geom).map((o) => ({ title: o.title, authority: authLabel(o.authority), distance_m: o.distance_m, coverage_pct: o.coverage_pct, ...geomToM(o.geom, f.lm.toM) })),
+  });
+  const name = handoffName(h.site.lotplan, createdAt), json = JSON.stringify(h, null, 2);
+  try {
+    if (isWeb) { await saveFile(name, { name: "Site file", extensions: ["json"] }, json); $("hint").textContent = `Saved ${name}. Put it in Documents\\RHC\\handoff for DesignAI.`; }
+    else $("hint").textContent = `Sent to DesignAI: ${await invoke<string>("save_handoff", { name, content: json })}`;
+  } catch (e) { alertMsg(e); }
+}
 /** Design check table for the client PDF. */
 function designReport(): string {
   if (!design || !designOut) return "";
