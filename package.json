@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "tauri": "tauri",
-    "test": "esbuild tests/sitelink.test.ts tests/design.test.ts --bundle --platform=node --external:web-ifc --outdir=node_modules/.cache/tests --out-extension:.js=.cjs --log-level=warning && node node_modules/.cache/tests/sitelink.test.cjs && node node_modules/.cache/tests/design.test.cjs"
+    "test": "esbuild tests/sitelink.test.ts tests/design.test.ts tests/handoff.test.ts --bundle --platform=node --external:web-ifc --outdir=node_modules/.cache/tests --out-extension:.js=.cjs --log-level=warning && node node_modules/.cache/tests/sitelink.test.cjs && node node_modules/.cache/tests/design.test.cjs && node node_modules/.cache/tests/handoff.test.cjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
