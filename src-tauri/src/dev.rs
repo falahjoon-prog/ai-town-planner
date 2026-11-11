@@ -132,6 +132,9 @@ fn forms_kb() -> &'static Vec<FormDef> {
     kb(&C, include_str!("../knowledge/forms.json"))
 }
 
+/// Logan Table 9.4.6.3.3 local-plan precincts are not in the zone data, so the base zone above is used; these override it.
+const LOGAN_LOCAL_PLAN_NOTE: &str = "Local plans can set a different minimum lot size (Table 9.4.6.3.3, Logan Planning Scheme 2015 v9.2; the app cannot match local-plan precincts, so the zone figures above are used). Loganholme: Large lot residential 1,000 m²; Residential choice 600 m²; Residential core 1,200 m²; Residential frame 800 m²; Suburban residential 400 m². Loganlea: Residential edge 600 m²; Residential frame or core 800 m²; Low medium or Mixed use 1,200 m². Verify against the scheme.";
+
 fn norm(s: &str) -> String {
     s.to_lowercase().replace(['-', '_', '—'], " ")
 }
@@ -152,12 +155,21 @@ fn rule_hit(r: &UseRule, text: &str) -> bool {
 }
 
 fn match_provisions(text: &str, cid: &str) -> Option<ProvSet> {
-    let zone_hit = |p: &ProvSet| p.zone.iter().any(|z| text.contains(&norm(z)));
     let kb: &[ProvSet] = if cid == council::DEFAULT { provisions_kb() } else { council::kb(cid).map(|k| k.provisions.as_slice()).unwrap_or(&[]) };
+    // Length of the longest zone keyword found in the text (0 = no hit).
+    let hit_len = |p: &ProvSet| p.zone.iter().filter(|z| text.contains(&norm(z))).map(|z| z.len()).max().unwrap_or(0);
+    // Other councils: only the most specific zone keyword counts ("rural residential" beats "rural", "low medium density residential" beats "medium density residential").
+    let best = if cid == council::DEFAULT { 0 } else { kb.iter().map(&hit_len).max().unwrap_or(0) };
+    let zone_hit = |p: &ProvSet| hit_len(p) > 0 && hit_len(p) >= best;
     kb.iter()
         .find(|p| zone_hit(p) && !p.precinct.is_empty() && p.precinct.iter().any(|x| text.contains(&norm(x))))
         .or_else(|| kb.iter().find(|p| zone_hit(p) && p.precinct.is_empty()))
         .cloned()
+}
+
+/// Value and sourced text of a provision item, by label.
+fn item_of<'a>(p: &'a Option<ProvSet>, label: &str) -> Option<&'a ProvItem> {
+    p.as_ref()?.items.iter().find(|i| i.label == label)
 }
 
 fn num(p: &Option<ProvSet>, key: &str) -> Option<f64> {
@@ -435,8 +447,20 @@ pub fn potential(c: &Connection, a: &Assessment, use_id: &str) -> Result<Potenti
         None if !pda && brisbane => subdivision.push("No minimum lot size recorded for this zone in the app yet. Refer to the Subdivision code (Table of minimum lot sizes) in City Plan.".into()),
         None if !pda && !council::zones_loaded(cid) => subdivision.push(format!(
             "Minimum lot size: the zone is not loaded for this council yet. See the zone-by-zone sizes under the proposed use (Reconfiguring a lot) and the {}.", council::field(cid, "scheme"))),
+        None if !pda && item_of(&provisions, "Minimum lot size").is_some() => {
+            let i = item_of(&provisions, "Minimum lot size").unwrap();
+            subdivision.push(format!("Minimum lot size for this zone: {} ({}; verify against the scheme).", i.value, i.source));
+        }
         None if !pda => subdivision.push(format!("Minimum lot size for this zone: {}.", council::not_loaded(cid))),
         None => {}
+    }
+    if !pda && !brisbane {
+        if let Some(i) = item_of(&provisions, "Minimum frontage (normal / cul-de-sac / corner)") {
+            subdivision.push(format!("Minimum frontage (normal / cul-de-sac / corner): {} ({}, {}; verify against the scheme).", i.value, i.source, i.url));
+        }
+        if cid == "logan" && provisions.is_some() {
+            subdivision.push(LOGAN_LOCAL_PLAN_NOTE.into());
+        }
     }
     if let Some(d) = num(&provisions, "min_dual_occ") {
         subdivision.push(if area >= d { format!("Meets the {d:.0} m² minimum lot size for a dual occupancy (subject to criteria).") } else { format!("Below the {d:.0} m² minimum for a dual occupancy.") });
@@ -721,6 +745,29 @@ mod tests {
         let pot = potential(&c, &a, use_id).unwrap();
         assert!(t.elapsed() < Duration::from_secs(5), "potential took {:?}", t.elapsed());
         pot
+    }
+
+    #[test]
+    fn logan_lot_size_rows() {
+        let lot = |t: &str| { let p = match_provisions(&norm(t), "logan").expect(t); (num(&Some(p.clone()), "min_front"), p.title) };
+        assert_eq!(lot("Low density residential Suburban precinct").0, Some(400.0));
+        assert_eq!(lot("Low density residential Small lot").0, Some(300.0));
+        assert_eq!(lot("Low-medium density residential Apartment").0, Some(800.0));
+        // Most specific zone wins when the precinct is unknown: no wrong fallback to the Medium density row.
+        assert!(match_provisions(&norm("Low-medium density residential"), "logan").is_none());
+        assert!(match_provisions(&norm("Rural residential Park residential"), "logan").unwrap().title.contains("Park residential"));
+        assert!(match_provisions(&norm("Rural residential"), "logan").is_none(), "must not fall back to the Rural 100 ha row");
+        assert_eq!(lot("Rural").0, Some(1_000_000.0));
+        assert_eq!(lot("Mixed use").0, Some(2000.0));
+        assert_eq!(lot("Low impact industry").0, Some(2000.0));
+        assert_eq!(lot("Medium impact industry").0, Some(2000.0));
+        assert_eq!(lot("Environmental management and conservation").0, Some(1_000_000.0));
+        for z in ["Centre", "Specialised centre", "Recreation and open space", "Community facilities"] {
+            let p = match_provisions(&norm(z), "logan").expect(z);
+            assert_eq!(num(&Some(p.clone()), "min_front"), None);
+            assert_eq!(item_of(&Some(p), "Minimum lot size").unwrap().value, "No minimum");
+        }
+        assert!(match_provisions(&norm("Industry investigation"), "logan").is_none());
     }
 
     #[test]
