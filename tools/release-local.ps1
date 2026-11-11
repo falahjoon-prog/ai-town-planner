@@ -8,6 +8,8 @@ Set-Location (Split-Path -Parent $PSScriptRoot)
 $repo = "falahjoon-prog/ai-town-planner"
 $conf = "src-tauri\tauri.conf.json"
 $keyDir = Join-Path $env:USERPROFILE ".tauri"; $key = Join-Path $keyDir "townplanner_updater.key"
+# 0) Dependencies first (the key tool comes from npm)
+npm install; if ($LASTEXITCODE) { throw "npm install failed" }
 # 1) Signing key: created once and kept on this PC only. KEEP A BACKUP: without it users can never receive an update again.
 if (-not (Test-Path $key)) {
   New-Item -ItemType Directory -Force $keyDir | Out-Null
@@ -25,7 +27,6 @@ if ($c -notmatch [regex]::Escape($pub)) {
 $V = (Get-Content $conf -Raw | ConvertFrom-Json).version
 gh auth status | Out-Null; if ($LASTEXITCODE) { throw "Run 'gh auth login' first" }
 # 2) Check and build
-npm install; if ($LASTEXITCODE) { throw "npm install failed" }
 npx tauri icon app-icon.png | Out-Null
 npm test; if ($LASTEXITCODE) { throw "Tests failed: not releasing" }
 $env:TAURI_SIGNING_PRIVATE_KEY = (Get-Content $key -Raw)
