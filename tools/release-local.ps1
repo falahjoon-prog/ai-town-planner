@@ -20,7 +20,7 @@ $c = Get-Content $conf -Raw
 if ($c -notmatch [regex]::Escape($pub)) {
   $c = [regex]::Replace($c, '"pubkey":\s*"[^"]*"', '"pubkey": "' + $pub + '"')
   Set-Content $conf $c -NoNewline -Encoding utf8
-  Write-Host "Public key written into $conf: commit that change." -ForegroundColor Yellow
+  Write-Host "Public key written into ${conf}: commit that change." -ForegroundColor Yellow
 }
 $V = (Get-Content $conf -Raw | ConvertFrom-Json).version
 gh auth status | Out-Null; if ($LASTEXITCODE) { throw "Run 'gh auth login' first" }
