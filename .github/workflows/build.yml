@@ -1,9 +1,7 @@
 name: Build app
 
 on:
-  push:
-    branches: [main]
-    paths-ignore: ["**.md", "pipeline/**", ".github/workflows/datapack.yml"]
+  # Automatic runs off (paid minutes): build on the PC with tools/release-local.ps1, or start this by hand.
   workflow_dispatch:
 
 permissions:
