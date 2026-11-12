@@ -186,6 +186,14 @@ async fn list_datapacks() -> Result<Vec<packs::Pack>, String> {
     if p.is_empty() { Err("No data packs are published yet. Import a pack file instead.".into()) } else { Ok(p) }
 }
 
+/// Is a newer app version published? Returns {version, url} or null.
+#[tauri::command]
+async fn check_update(app: AppHandle) -> Result<Option<serde_json::Value>, String> {
+    let (_, list) = fetch_releases(Some(std::time::Duration::from_secs(10))).await?;
+    let cur = app.package_info().version.to_string();
+    Ok(packs::newer_app(&list, &cur).map(|(v, u)| serde_json::json!({ "version": v, "url": u })))
+}
+
 /// `tag` = the chosen pack (datapack-* or branchpack-*); None = latest datapack-* (Brisbane).
 #[tauri::command]
 async fn download_datapack(app: AppHandle, state: State<'_, AppState>, on_progress: Channel<Progress>, tag: Option<String>) -> Result<BTreeMap<String, String>, String> {
@@ -764,6 +772,7 @@ pub fn run() {
             devi_land_number,
             import_datapack,
             list_datapacks,
+            check_update,
             download_datapack,
             search,
             suburb_stats,

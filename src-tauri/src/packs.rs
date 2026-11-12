@@ -73,6 +73,28 @@ pub fn parse_releases(v: &Value) -> Vec<Pack> {
     out.into_iter().filter(|(_, k)| seen.insert(k.clone())).map(|(p, _)| p).collect()
 }
 
+/// "0.8.1" -> [0,8,1]; None if not numeric.
+fn ver(v: &str) -> Option<Vec<u64>> {
+    let p: Option<Vec<u64>> = v.trim_start_matches('v').split('.').map(|x| x.parse().ok()).collect();
+    p.filter(|x| !x.is_empty())
+}
+
+/// Newest app-vX.Y.Z release that is newer than `current`: (version, page url).
+pub fn newer_app(v: &Value, current: &str) -> Option<(String, String)> {
+    let cur = ver(current)?;
+    let mut best: Option<(Vec<u64>, String, String)> = None;
+    for r in v.as_array().map(|a| a.as_slice()).unwrap_or(&[]) {
+        let tag = r["tag_name"].as_str().unwrap_or("");
+        let Some(vs) = tag.strip_prefix("app-v") else { continue };
+        if r["draft"].as_bool() == Some(true) { continue; }
+        let Some(n) = ver(vs) else { continue };
+        if n > cur && best.as_ref().map_or(true, |b| n > b.0) {
+            best = Some((n, vs.to_string(), r["html_url"].as_str().unwrap_or("").to_string()));
+        }
+    }
+    best.map(|b| (b.1, b.2))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -117,5 +139,17 @@ mod tests {
         let v = json!([rel("datapack-1", "2026-10-10T00:00:00Z", 1, "Notes\nCouncils: Brisbane, Logan\n", "datapack.sqlite.gz")]);
         assert_eq!(parse_releases(&v)[0].councils, ["Brisbane", "Logan"]);
         assert!(parse_releases(&json!({"message": "rate limited"})).is_empty());
+    }
+
+    #[test]
+    fn finds_newer_app() {
+        let v = serde_json::json!([
+            {"tag_name":"datapack-1","html_url":"x"},
+            {"tag_name":"app-v0.8.1","html_url":"a"},
+            {"tag_name":"app-v0.9.0","html_url":"b"},
+            {"tag_name":"app-v0.10.0","html_url":"c"},
+            {"tag_name":"app-v0.11.0","html_url":"d","draft":true}]);
+        assert_eq!(newer_app(&v, "0.8.1"), Some(("0.10.0".into(), "c".into())));
+        assert_eq!(newer_app(&v, "0.10.0"), None);
     }
 }

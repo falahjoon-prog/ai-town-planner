@@ -1336,6 +1336,26 @@ document.addEventListener("click", (ev) => {
   void go(el.dataset.dest!);
 });
 
+async function checkUpdate(manual: boolean) {
+  const line = $("updateLine");
+  try {
+    const u = await invoke<{ version: string; url: string } | null>("check_update");
+    if (u) {
+      line.hidden = false;
+      line.innerHTML = `New version ${esc(u.version)} is available. <a href="#" id="updateGo">Download it</a> and run the installer.`;
+      $("updateGo").addEventListener("click", (ev) => { ev.preventDefault(); openExternal(u.url); });
+      toast(`New version ${u.version} is available. See Settings > Account.`);
+    } else if (manual) {
+      line.hidden = false;
+      line.textContent = "You have the latest version.";
+    }
+  } catch (e) {
+    if (manual) { line.hidden = false; line.textContent = String(e); }
+  }
+}
+$("checkUpdate").addEventListener("click", () => void checkUpdate(true));
+setTimeout(() => void checkUpdate(false), 4000);
+
 function openExternal(url: string) {
   invoke("open_external", { url }).catch(alertMsg);
 }
