@@ -5,6 +5,7 @@ mod dev;
 mod licence;
 mod licwords;
 mod llm;
+mod modules;
 mod packs;
 mod rules;
 
@@ -211,9 +212,16 @@ async fn download_datapack(app: AppHandle, state: State<'_, AppState>, on_progre
         }
     };
     let part = datapack_path(&app)?.with_extension("download.gz");
-    let resp = client.get(&url).send().await.map_err(e)?.error_for_status().map_err(e)?;
+    download_file(&client, &url, &part, &on_progress).await?;
+    let r = install_pack(&app, state.db.clone(), part.to_string_lossy().to_string()).await;
+    let _ = fs::remove_file(&part);
+    r
+}
+
+async fn download_file(client: &reqwest::Client, url: &str, part: &std::path::Path, on_progress: &Channel<Progress>) -> Result<(), String> {
+    let resp = client.get(url).send().await.map_err(e)?.error_for_status().map_err(e)?;
     let total = resp.content_length().unwrap_or(0);
-    let mut file = tokio::fs::File::create(&part).await.map_err(e)?;
+    let mut file = tokio::fs::File::create(part).await.map_err(e)?;
     let mut stream = resp.bytes_stream();
     let (mut done, mut last) = (0u64, 0u64);
     while let Some(chunk) = stream.next().await {
@@ -226,9 +234,58 @@ async fn download_datapack(app: AppHandle, state: State<'_, AppState>, on_progre
         }
     }
     tokio::io::AsyncWriteExt::flush(&mut file).await.map_err(e)?;
-    drop(file);
     let _ = on_progress.send(Progress { done, total });
-    let r = install_pack(&app, state.db.clone(), part.to_string_lossy().to_string()).await;
+    Ok(())
+}
+
+/// Newest modular release: the catalogue of Base packs and add-on topics (with the release tag).
+#[tauri::command]
+async fn list_modules() -> Result<serde_json::Value, String> {
+    let (client, list) = fetch_releases(Some(std::time::Duration::from_secs(15))).await?;
+    let (tag, url) = modules::find_modpack(&list).ok_or("No council packs are published yet. Use Download or Import.")?;
+    let mut v: serde_json::Value = client.get(&url).send().await.map_err(e)?.error_for_status().map_err(e)?.json().await.map_err(e)?;
+    v["tag"] = tag.into();
+    Ok(v)
+}
+
+/// Downloads one module and adds it to the installed pack (a Base or Standard of another build replaces the pack).
+#[tauri::command]
+async fn add_module(app: AppHandle, state: State<'_, AppState>, on_progress: Channel<Progress>, tag: String, id: String) -> Result<BTreeMap<String, String>, String> {
+    if !modules::valid_tag(&tag) || !modules::valid_id(&id) { return Err("Invalid pack name".into()); }
+    let client = reqwest::Client::builder().user_agent("ai-town-planner").build().map_err(e)?;
+    let part = datapack_path(&app)?.with_extension("module.gz");
+    download_file(&client, &format!("{}{tag}/{id}.sqlite.gz", packs::REPO_DOWNLOAD), &part, &on_progress).await?;
+    let (dest, db) = (datapack_path(&app)?, state.db.clone());
+    let tmp = dest.with_extension("module");
+    let src = part.clone();
+    let r = tauri::async_runtime::spawn_blocking(move || -> Result<BTreeMap<String, String>, String> {
+        let mut out = fs::File::create(&tmp).map_err(e)?;
+        std::io::copy(&mut flate2::read::GzDecoder::new(BufReader::new(fs::File::open(&src).map_err(e)?)), &mut out).map_err(e)?;
+        out.flush().map_err(e)?;
+        drop(out);
+        let mm = data::manifest(&data::open(&tmp)?)?;
+        let mut g = db.lock().map_err(e)?;
+        let same = g.as_ref().and_then(|c| data::manifest(c).ok()).is_some_and(|m| m.get("build").is_some() && m.get("build") == mm.get("build"));
+        if same {
+            *g = None;
+            let r = rusqlite::Connection::open(&dest).map_err(e).and_then(|rw| modules::merge(&rw, &tmp, &id));
+            let _ = fs::remove_file(&tmp);
+            *g = Some(data::open(&dest)?);
+            data::reset_vocab();
+            r?;
+        } else if mm.get("kind").map(String::as_str) != Some("addon") {
+            *g = None;
+            fs::rename(&tmp, &dest).map_err(e)?;
+            *g = Some(data::open(&dest)?);
+            data::reset_vocab();
+        } else {
+            let _ = fs::remove_file(&tmp);
+            return Err("Install a Base or Standard pack for a council first. Your current pack is from a different build.".into());
+        }
+        data::manifest(g.as_ref().ok_or("No data pack")?)
+    })
+    .await
+    .map_err(e)?;
     let _ = fs::remove_file(&part);
     r
 }
@@ -773,6 +830,8 @@ pub fn run() {
             import_datapack,
             list_datapacks,
             check_update,
+            list_modules,
+            add_module,
             download_datapack,
             search,
             suburb_stats,

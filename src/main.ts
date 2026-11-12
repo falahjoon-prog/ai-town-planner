@@ -252,6 +252,68 @@ $("listPacks").addEventListener("click", async () => {
   b.textContent = "Choose a data pack";
 });
 
+type Mod = { id: string; kind: string; council: string; council_name: string; topic: string; title: string; size: number; disk: number; layers: number; parcels: number };
+type ModCat = { tag: string; build: string; modules: Mod[] };
+const MODS_LABEL = "Build your own pack (choose councils and topics)";
+function installedMods(): Set<string> {
+  const d = status?.datapack;
+  return new Set(`${d?.modules ?? d?.module ?? ""}`.split(",").filter(Boolean));
+}
+function renderMods(box: HTMLElement, cat: ModCat) {
+  const have = installedMods();
+  const row = (m: Mod, on: boolean) => `<label class="modrow"><input type="checkbox" data-id="${esc(m.id)}" ${have.has(m.id) ? "checked disabled" : on ? "checked" : ""}> <span>${esc(m.title)}${have.has(m.id) ? " (installed)" : ""}</span><span class="meta">${mbgb(m.size)}</span></label>`;
+  const groups: { name: string; mods: Mod[] }[] = [];
+  for (const m of cat.modules) {
+    if (m.kind === "standard") continue;
+    const name = m.council ? m.council_name : "Statewide layers";
+    let g = groups.find((x) => x.name === name);
+    if (!g) groups.push((g = { name, mods: [] }));
+    g.mods.push(m);
+  }
+  const std = cat.modules.find((m) => m.kind === "standard");
+  const sorted = (g: { mods: Mod[] }) => [...g.mods].sort((a, b) => (a.kind === "addon" ? 1 : 0) - (b.kind === "addon" ? 1 : 0));
+  box.innerHTML = (std ? `<div class="modgrp" data-grp="std"><b>Standard: all councils, key layers</b><div class="meta">Lots, addresses, zoning, heritage and smaller overlays for every council. Big flood, bushfire and noise layers are left out; add them below.</div>${row(std, false)}<button type="button" class="modgo">Install Standard</button></div>` : "")
+    + groups.map((g, i) => `<div class="modgrp" data-grp="${i}"><b>${esc(g.name)}</b>${sorted(g).map((m) => row(m, m.kind === "base")).join("")}<button type="button" class="outline modgo">Install selected</button></div>`).join("")
+    + `<p class="meta modstat"></p>`;
+  box.hidden = false;
+  box.querySelectorAll<HTMLButtonElement>("button.modgo").forEach((btn) => btn.addEventListener("click", async () => {
+    const ids = [...btn.parentElement!.querySelectorAll<HTMLInputElement>("input[type=checkbox]:checked:not(:disabled)")].map((x) => x.dataset.id!);
+    if (!ids.length) return;
+    const all = cat.modules, kindOf = (id: string) => all.find((m) => m.id === id)?.kind;
+    ids.sort((a, b) => Number(kindOf(a) === "addon") - Number(kindOf(b) === "addon"));
+    const needsBase = ids.some((id) => kindOf(id) !== "addon");
+    if (needsBase && status?.datapack && status.datapack.build !== cat.build && !confirm("This replaces the data pack you have now. Continue?")) return;
+    const stat = box.querySelector<HTMLElement>(".modstat")!;
+    box.querySelectorAll<HTMLButtonElement>("button.modgo").forEach((x) => (x.disabled = true));
+    try {
+      for (let i = 0; i < ids.length; i++) {
+        const t = all.find((m) => m.id === ids[i])!;
+        await invokeStream<{ done: number; total: number }>("add_module", { tag: cat.tag, id: ids[i] }, (p) => {
+          stat.textContent = `${i + 1} of ${ids.length}: ${t.council_name ? t.council_name + " – " : ""}${t.title} ${p.total ? Math.floor((p.done / p.total) * 100) + "%" : ""}`;
+        }, "onProgress");
+        await refreshStatus();
+      }
+      stat.textContent = "Done. Your data pack now includes your selection.";
+    } catch (e) {
+      alertMsg(e);
+    }
+    renderMods(box, cat);
+  }));
+}
+$("listMods").addEventListener("click", async () => {
+  const b = $("listMods") as HTMLButtonElement, box = $("modList");
+  b.disabled = true;
+  b.textContent = "Loading…";
+  try {
+    renderMods(box, await invoke<ModCat>("list_modules"));
+  } catch (e) {
+    box.hidden = false;
+    box.innerHTML = `<p class="meta">${esc(String(e))}</p>`;
+  }
+  b.disabled = false;
+  b.textContent = MODS_LABEL;
+});
+
 $("importPack").addEventListener("click", async () => {
   const path = await pickPath({ name: "Data pack", extensions: ["sqlite", "gz"] });
   if (!path) return;

@@ -81,7 +81,7 @@ pub fn kb(id: &str) -> Option<&'static CouncilKb> {
     kbs().get(id)
 }
 
-/// "Not loaded yet" text that points to the council's planning scheme.
+/// "Not in your data pack" text that points to the council's planning scheme.
 pub fn not_loaded(id: &str) -> String {
-    format!("Not loaded yet – see {} ({})", field(id, "scheme"), field(id, "scheme_url"))
+    format!("Not in your data pack – add it in Settings > Data pack, or see {} ({})", field(id, "scheme"), field(id, "scheme_url"))
 }
