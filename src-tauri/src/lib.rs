@@ -5,6 +5,7 @@ mod dev;
 mod licence;
 mod licwords;
 mod llm;
+mod packs;
 mod rules;
 
 use data::e;
@@ -165,18 +166,42 @@ async fn import_datapack(app: AppHandle, state: State<'_, AppState>, path: Strin
     install_pack(&app, state.db.clone(), path).await
 }
 
-const RELEASES: &str = "https://api.github.com/repos/falahjoon-prog/ai-town-planner/releases?per_page=30";
+const RELEASES: &str = "https://api.github.com/repos/falahjoon-prog/ai-town-planner/releases?per_page=50";
+
+async fn fetch_releases(timeout: Option<std::time::Duration>) -> Result<(reqwest::Client, serde_json::Value), String> {
+    let mut cb = reqwest::Client::builder().user_agent("ai-town-planner");
+    if let Some(t) = timeout { cb = cb.timeout(t); }
+    let client = cb.build().map_err(e)?;
+    let list = client.get(RELEASES).send().await
+        .map_err(|_| "Could not reach the internet to list data packs. Check your connection, or use Import.".to_string())?
+        .error_for_status().map_err(|_| "Data pack list not available online right now. Import the file instead.".to_string())?
+        .json().await.map_err(e)?;
+    Ok((client, list))
+}
 
 #[tauri::command]
-async fn download_datapack(app: AppHandle, state: State<'_, AppState>, on_progress: Channel<Progress>) -> Result<BTreeMap<String, String>, String> {
-    let client = reqwest::Client::builder().user_agent("ai-town-planner").build().map_err(e)?;
-    let list: serde_json::Value = client.get(RELEASES).send().await.map_err(e)?.error_for_status()
-        .map_err(|_| "Data pack not available online yet. Import the file instead.".to_string())?
-        .json().await.map_err(e)?;
-    let url = list.as_array().and_then(|r| {
-        r.iter().find(|x| x["tag_name"].as_str().is_some_and(|t| t.starts_with("datapack-")))
-    }).and_then(|x| x["assets"].as_array()?.iter().find(|a| a["name"] == "datapack.sqlite.gz")?["browser_download_url"].as_str().map(String::from))
-        .ok_or("No data pack release found")?;
+async fn list_datapacks() -> Result<Vec<packs::Pack>, String> {
+    let (_, list) = fetch_releases(Some(std::time::Duration::from_secs(15))).await?;
+    let p = packs::parse_releases(&list);
+    if p.is_empty() { Err("No data packs are published yet. Import a pack file instead.".into()) } else { Ok(p) }
+}
+
+/// `tag` = the chosen pack (datapack-* or branchpack-*); None = latest datapack-* (Brisbane).
+#[tauri::command]
+async fn download_datapack(app: AppHandle, state: State<'_, AppState>, on_progress: Channel<Progress>, tag: Option<String>) -> Result<BTreeMap<String, String>, String> {
+    let (client, url) = match tag {
+        Some(t) if packs::valid_tag(&t) => (reqwest::Client::builder().user_agent("ai-town-planner").build().map_err(e)?,
+            format!("{}{t}/datapack.sqlite.gz", packs::REPO_DOWNLOAD)),
+        Some(_) => return Err("Invalid data pack tag".into()),
+        None => {
+            let (client, list) = fetch_releases(None).await?;
+            let url = list.as_array().and_then(|r| {
+                r.iter().find(|x| x["tag_name"].as_str().is_some_and(|t| t.starts_with("datapack-")))
+            }).and_then(|x| x["assets"].as_array()?.iter().find(|a| a["name"] == "datapack.sqlite.gz")?["browser_download_url"].as_str().map(String::from))
+                .ok_or("No data pack release found")?;
+            (client, url)
+        }
+    };
     let part = datapack_path(&app)?.with_extension("download.gz");
     let resp = client.get(&url).send().await.map_err(e)?.error_for_status().map_err(e)?;
     let total = resp.content_length().unwrap_or(0);
@@ -738,6 +763,7 @@ pub fn run() {
             open_external,
             devi_land_number,
             import_datapack,
+            list_datapacks,
             download_datapack,
             search,
             suburb_stats,

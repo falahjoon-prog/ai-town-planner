@@ -213,8 +213,43 @@ $("downloadPack").addEventListener("click", async () => {
     alertMsg(e);
   }
   b.disabled = false;
-  b.textContent = "Download data pack (about 400 MB)";
+  b.textContent = "Download latest Brisbane pack (about 400 MB)";
   refreshStatus();
+});
+
+type PackInfo = { tag: string; published: string; size: number; title: string; councils: string[]; disk_gb: number | null };
+const mbgb = (n: number) => (n >= 1e9 ? `${(n / 1e9).toFixed(2)} GB` : `${Math.round(n / 1e6)} MB`);
+
+$("listPacks").addEventListener("click", async () => {
+  const b = $("listPacks") as HTMLButtonElement;
+  const box = $("packList");
+  b.disabled = true;
+  b.textContent = "Loading packs…";
+  try {
+    const packs = await invoke<PackInfo[]>("list_datapacks");
+    box.innerHTML = packs.map((p, i) => `<div class="packopt">
+      <div><b>${esc(p.title)}</b><div class="packcov">${esc(p.councils.join(", "))}</div>
+      <div class="meta">${mbgb(p.size)} download${p.disk_gb ? ` · about ${p.disk_gb} GB on disk` : ""} · ${esc(p.published.slice(0, 10))} · ${esc(p.tag)}</div></div>
+      <button type="button" class="${i ? "outline " : ""}dlpick" data-tag="${esc(p.tag)}">Download</button></div>`).join("");
+    box.hidden = false;
+    box.querySelectorAll<HTMLButtonElement>("button.dlpick").forEach((btn) => btn.addEventListener("click", async () => {
+      box.querySelectorAll<HTMLButtonElement>("button.dlpick").forEach((x) => (x.disabled = true));
+      try {
+        await invokeStream<{ done: number; total: number }>("download_datapack", { tag: btn.dataset.tag }, (p) => {
+          btn.textContent = p.total ? `Downloading ${Math.floor((p.done / p.total) * 100)}%` : `${(p.done / 1e6).toFixed(0)} MB`;
+        }, "onProgress");
+      } catch (e) {
+        alertMsg(e);
+      }
+      box.querySelectorAll<HTMLButtonElement>("button.dlpick").forEach((x) => { x.disabled = false; x.textContent = "Download"; });
+      refreshStatus();
+    }));
+  } catch (e) {
+    box.hidden = false;
+    box.innerHTML = `<p class="meta">${esc(String(e))} You can still use the Download latest Brisbane pack button or Import.</p>`;
+  }
+  b.disabled = false;
+  b.textContent = "Choose a data pack";
 });
 
 $("importPack").addEventListener("click", async () => {
