@@ -80,6 +80,10 @@ async function refreshStatus(): Promise<Status> {
   $("packDetail").textContent = p
     ? `${p.region} · built ${p.built_at} · ${Number(p.parcels).toLocaleString()} lots · ${p.layers} planning scheme and state layers. ${p.attribution}`
     : isWeb ? loading : "No data pack installed yet. Download the latest datapack .sqlite.gz from the GitHub Releases page, then import it here.";
+  const cov = $("packCouncils");
+  cov.hidden = !p;
+  cov.textContent = p ? `Covers: ${packCouncils().join(", ")}` : "";
+  $("packNote").hidden = !p || isWeb || packCouncils().length !== 1;
   if (isWeb && !p) setTimeout(refreshStatus, 15_000);
   $("disclaimer").textContent = s.disclaimer;
   status = s;
@@ -2861,7 +2865,9 @@ function openSettings(sec?: string) {
   refreshStatus();
   const d = $("settings") as HTMLDialogElement;
   if (!d.open) d.showModal();
-  if (sec) requestAnimationFrame(() => document.getElementById(sec)?.scrollIntoView({ block: "start" }));
+  const el = sec ? document.getElementById(sec) : null;
+  if (el instanceof HTMLDetailsElement) el.open = true;
+  if (el) requestAnimationFrame(() => el.scrollIntoView({ block: "start" }));
 }
 const clickId = (id: string) => () => $(id).click();
 const setBaseTo = (k: string) => () => { ($("baseSel") as HTMLSelectElement).value = k; $("baseSel").dispatchEvent(new Event("change")); syncBase(); };

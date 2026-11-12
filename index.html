@@ -322,62 +322,98 @@
         </div>
       </section>
     </div>
-    <dialog id="settings">
+    <dialog id="settings" class="settingsdlg">
       <form method="dialog" class="dlg">
         <div class="dlg-top"><h2>Settings</h2><button class="x" aria-label="Close" title="Close">✕</button></div>
-        <h3 id="sset-account">Account</h3>
-        <p class="meta" id="acctLine">Not signed in</p>
-        <div class="row"><button type="button" class="ghost" id="acctBuy">Buy or renew at trade-ai.com.au</button><button type="button" class="ghost" id="signOutBtn">Sign out</button></div>
-        <h3 id="sset-data">Data pack</h3>
-        <p id="packDetail" class="meta"></p>
-        <button type="button" id="downloadPack" class="deskonly">Download data pack (about 400 MB)</button>
-        <button type="button" id="importPack" class="deskonly">Import data pack (.sqlite or .sqlite.gz)</button>
-        <h3 id="sset-brand">Report branding</h3>
-        <input id="brandCompany" placeholder="Company name (shown on the PDF report)" />
-        <input id="brandBy" placeholder="Prepared by (your name)" />
-        <div class="report-bar"><label class="ghost-file">Logo image <input id="brandLogo" type="file" accept="image/png,image/jpeg,image/svg+xml" /></label>
-          <img id="brandLogoPrev" class="logo-prev" alt="" hidden /><button type="button" class="ghost" id="brandClear">Remove logo</button></div>
-        <h3 id="sset-map">Map</h3>
-        <select id="mapPick"></select>
-        <p class="meta">Opens in your browser. With an address loaded, the map opens for that address; otherwise it opens the general map.</p>
-        <h3 id="sset-search">Address search</h3>
-        <input id="googleKey" type="password" placeholder="Google Places API key (optional – better address search)" autocomplete="off" />
-        <p class="meta" id="googleHint"></p>
-        <h3 id="sset-ai">AI engine</h3>
-        <div class="engine">
-          <label class="deskonly"><input type="radio" name="provider" value="builtin" /> Built-in model (offline)</label>
-          <label class="deskonly"><input type="radio" name="provider" value="ollama" /> Ollama on this PC (offline)</label>
-          <label><input type="radio" name="provider" value="anthropic" /> Claude API (online, most accurate)</label>
-          <label><input type="radio" name="provider" value="openai" /> Other OpenAI-compatible API (online)</label>
-        </div>
-        <div class="pcfg" data-for="ollama">
-          <input id="ollamaUrl" placeholder="http://localhost:11434" />
-          <div class="row"><select id="ollamaModel"></select><button type="button" class="ghost" id="ollamaRefresh">Refresh models</button></div>
-        </div>
-        <div class="pcfg" data-for="anthropic">
-          <input id="anthropicKey" type="password" placeholder="Claude API key (sk-ant-…)" autocomplete="off" />
-          <input id="anthropicModel" placeholder="Model, e.g. claude-sonnet-5-5" />
-          <p class="meta">Site details are sent to Anthropic when using this option.<span class="deskonly"> Keys are stored in the system credential store.</span></p>
-        </div>
-        <div class="pcfg" data-for="openai">
-          <input id="openaiBase" class="deskonly" placeholder="https://api.openai.com/v1" />
-          <input id="openaiKey" type="password" placeholder="API key" autocomplete="off" />
-          <input id="openaiModel" placeholder="Model name" />
-        </div>
-        <p class="meta webonly keynote"><b>Your key stays on this phone.</b> It is kept only in this browser and sent with each AI request; the server never stores it. Use a key with a spending limit.</p>
-        <button type="button" id="saveAi">Save AI settings</button>
-        <p class="meta" id="aiMsg"></p>
-        <h3 id="sset-backup">Backup</h3>
-        <div class="row"><button type="button" class="ghost" id="backupBtn">Back up saved addresses</button><button type="button" class="ghost" id="restoreBtn">Restore from backup</button></div>
-        <div id="restoreBox" class="row" hidden><span id="restoreText" class="meta"></span><button type="button" id="restoreGo">Merge</button><button type="button" class="ghost" id="restoreCancel">Cancel</button></div>
-        <p class="meta" id="backupMsg">Saves your saved and recent addresses, notes, checklist ticks, forms and settings to one file. API keys are never included.</p>
-        <label class="mapitem"><span><input type="checkbox" id="openLast" checked> Open the last address on start</span></label>
-        <div class="deskonly dgroup">
-          <h3 id="sset-models">Built-in models</h3>
-          <div id="models"></div>
-          <button type="button" class="ghost" id="importModel">Import a .gguf model file</button>
-          <p class="meta">Models are downloaded once, then everything runs offline.</p>
-        </div>
+        <details class="sset" id="sset-account" open>
+          <summary>Account</summary>
+          <div class="sset-body">
+            <div class="acctcard"><span class="acctdot" aria-hidden="true"></span><p class="meta" id="acctLine">Not signed in</p></div>
+            <div class="row"><button type="button" class="ghost" id="acctBuy">Buy or renew at trade-ai.com.au</button><button type="button" class="ghost" id="signOutBtn">Sign out</button></div>
+          </div>
+        </details>
+        <details class="sset" id="sset-data" open>
+          <summary>Data pack</summary>
+          <div class="sset-body">
+            <div class="packcard">
+              <p id="packDetail" class="meta"></p>
+              <p id="packCouncils" class="packcov" hidden></p>
+              <p id="packNote" class="meta" hidden>This pack covers Brisbane only. Other councils need a multi-council data pack: get one, then use Import.</p>
+            </div>
+            <div class="packacts deskonly">
+              <div><button type="button" id="downloadPack">Download data pack (about 400 MB)</button><p class="meta">Downloads the latest pack from the internet.</p></div>
+              <div><button type="button" id="importPack" class="outline">Import data pack (.sqlite or .sqlite.gz)</button><p class="meta">Already have a pack file? Choose it from this computer.</p></div>
+            </div>
+          </div>
+        </details>
+        <details class="sset" id="sset-brand">
+          <summary>Report branding</summary>
+          <div class="sset-body">
+            <input id="brandCompany" placeholder="Company name (shown on the PDF report)" />
+            <input id="brandBy" placeholder="Prepared by (your name)" />
+            <div class="report-bar"><label class="ghost-file">Logo image <input id="brandLogo" type="file" accept="image/png,image/jpeg,image/svg+xml" /></label>
+              <img id="brandLogoPrev" class="logo-prev" alt="" hidden /><button type="button" class="ghost" id="brandClear">Remove logo</button></div>
+          </div>
+        </details>
+        <details class="sset" id="sset-map">
+          <summary>Map</summary>
+          <div class="sset-body">
+            <select id="mapPick"></select>
+            <p class="meta">Opens in your browser. With an address loaded, the map opens for that address; otherwise it opens the general map.</p>
+          </div>
+        </details>
+        <details class="sset" id="sset-search">
+          <summary>Address search</summary>
+          <div class="sset-body">
+            <input id="googleKey" type="password" placeholder="Google Places API key (optional – better address search)" autocomplete="off" />
+            <p class="meta" id="googleHint"></p>
+          </div>
+        </details>
+        <details class="sset" id="sset-ai">
+          <summary>AI engine</summary>
+          <div class="sset-body">
+            <div class="engine">
+              <label class="deskonly"><input type="radio" name="provider" value="builtin" /> Built-in model (offline)</label>
+              <label class="deskonly"><input type="radio" name="provider" value="ollama" /> Ollama on this PC (offline)</label>
+              <label><input type="radio" name="provider" value="anthropic" /> Claude API (online, most accurate)</label>
+              <label><input type="radio" name="provider" value="openai" /> Other OpenAI-compatible API (online)</label>
+            </div>
+            <div class="pcfg" data-for="ollama">
+              <input id="ollamaUrl" placeholder="http://localhost:11434" />
+              <div class="row"><select id="ollamaModel"></select><button type="button" class="ghost" id="ollamaRefresh">Refresh models</button></div>
+            </div>
+            <div class="pcfg" data-for="anthropic">
+              <input id="anthropicKey" type="password" placeholder="Claude API key (sk-ant-…)" autocomplete="off" />
+              <input id="anthropicModel" placeholder="Model, e.g. claude-sonnet-5-5" />
+              <p class="meta">Site details are sent to Anthropic when using this option.<span class="deskonly"> Keys are stored in the system credential store.</span></p>
+            </div>
+            <div class="pcfg" data-for="openai">
+              <input id="openaiBase" class="deskonly" placeholder="https://api.openai.com/v1" />
+              <input id="openaiKey" type="password" placeholder="API key" autocomplete="off" />
+              <input id="openaiModel" placeholder="Model name" />
+            </div>
+            <p class="meta webonly keynote"><b>Your key stays on this phone.</b> It is kept only in this browser and sent with each AI request; the server never stores it. Use a key with a spending limit.</p>
+            <div class="row"><button type="button" id="saveAi">Save AI settings</button></div>
+            <p class="meta" id="aiMsg"></p>
+          </div>
+        </details>
+        <details class="sset" id="sset-backup">
+          <summary>Backup</summary>
+          <div class="sset-body">
+            <div class="row"><button type="button" class="ghost" id="backupBtn">Back up saved addresses</button><button type="button" class="ghost" id="restoreBtn">Restore from backup</button></div>
+            <div id="restoreBox" class="row" hidden><span id="restoreText" class="meta"></span><button type="button" id="restoreGo">Merge</button><button type="button" class="ghost" id="restoreCancel">Cancel</button></div>
+            <p class="meta" id="backupMsg">Saves your saved and recent addresses, notes, checklist ticks, forms and settings to one file. API keys are never included.</p>
+            <label class="mapitem"><span><input type="checkbox" id="openLast" checked> Open the last address on start</span></label>
+          </div>
+        </details>
+        <details class="sset deskonly" id="sset-models">
+          <summary>Built-in models</summary>
+          <div class="sset-body">
+            <div id="models"></div>
+            <div class="row"><button type="button" class="ghost" id="importModel">Import a .gguf model file</button></div>
+            <p class="meta">Models are downloaded once, then everything runs offline.</p>
+          </div>
+        </details>
       </form>
     </dialog>
     <dialog id="docDlg" class="wide">
