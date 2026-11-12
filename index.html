@@ -340,8 +340,13 @@
               <p id="packCouncils" class="packcov" hidden></p>
               <p id="packNote" class="meta" hidden>This pack covers Brisbane only. Other councils need a multi-council data pack: get one, then use Import.</p>
             </div>
+            <div class="deskonly packchoose">
+              <button type="button" id="listPacks">Choose a data pack</button>
+              <p class="meta">Pick which pack to download. A new pack replaces the one you have now and needs free disk space for the unpacked file.</p>
+              <div id="packList" class="packlist" hidden></div>
+            </div>
             <div class="packacts deskonly">
-              <div><button type="button" id="downloadPack">Download data pack (about 400 MB)</button><p class="meta">Downloads the latest pack from the internet.</p></div>
+              <div><button type="button" id="downloadPack" class="outline">Download latest Brisbane pack (about 400 MB)</button><p class="meta">Quick option if the list above will not load.</p></div>
               <div><button type="button" id="importPack" class="outline">Import data pack (.sqlite or .sqlite.gz)</button><p class="meta">Already have a pack file? Choose it from this computer.</p></div>
             </div>
           </div>

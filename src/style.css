@@ -592,6 +592,10 @@ dialog.settingsdlg { width: min(680px, 94vw); }
 .acctcard .meta { color: var(--ink); font-size: 13.5px; overflow-wrap: anywhere; }
 .packcard { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); }
 .packcov { font-weight: 600; font-size: 13.5px; }
+.packchoose { display: flex; flex-direction: column; gap: 6px; }
+.packlist { display: flex; flex-direction: column; gap: 8px; }
+.packopt { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r); }
+.packopt button { flex: none; min-width: 120px; }
 .packacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; align-items: start; }
 .packacts > div { display: flex; flex-direction: column; gap: 6px; }
 .packacts button { width: 100%; }
